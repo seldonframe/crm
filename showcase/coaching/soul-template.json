@@ -1,0 +1,49 @@
+{
+  "businessName": "Summit Coaching",
+  "businessDescription": "Executive coaching for founders",
+  "industry": "coaching",
+  "offerType": "programs",
+  "entityLabels": {
+    "contact": { "singular": "Client", "plural": "Clients" },
+    "deal": { "singular": "Engagement", "plural": "Engagements" },
+    "activity": { "singular": "Session", "plural": "Sessions" },
+    "pipeline": { "singular": "Journey", "plural": "Journeys" },
+    "intakeForm": { "singular": "Application", "plural": "Applications" }
+  },
+  "pipeline": {
+    "name": "Client Journey",
+    "stages": [
+      { "name": "Inquiry", "color": "#6366f1", "probability": 10 },
+      { "name": "Discovery", "color": "#8b5cf6", "probability": 30 },
+      { "name": "Proposal", "color": "#a855f7", "probability": 55 },
+      { "name": "Active Program", "color": "#22c55e", "probability": 90 },
+      { "name": "Completed", "color": "#16a34a", "probability": 100 }
+    ]
+  },
+  "suggestedFields": {
+    "contact": [{ "key": "goal", "label": "Goal", "type": "textarea" }],
+    "deal": [{ "key": "program", "label": "Program", "type": "select", "options": ["1:1", "Group", "VIP"] }]
+  },
+  "contactStatuses": [
+    { "value": "inquiry", "label": "Inquiry", "color": "#6366f1" },
+    { "value": "active_client", "label": "Active Client", "color": "#22c55e" }
+  ],
+  "voice": {
+    "style": "friendly-professional",
+    "vocabulary": ["clarity", "momentum"],
+    "avoidWords": ["cheap"],
+    "samplePhrases": ["Let’s map out your next milestone."]
+  },
+  "priorities": ["client retention", "task management", "pipeline visibility"],
+  "aiContext": "Summit Coaching is an executive coaching business focused on structured accountability and transformational outcomes.",
+  "suggestedIntakeForm": {
+    "name": "Coaching Application",
+    "fields": [
+      { "key": "name", "label": "Full Name", "type": "text", "required": true },
+      { "key": "email", "label": "Email", "type": "email", "required": true },
+      { "key": "goal", "label": "Primary Goal", "type": "textarea", "required": false }
+    ]
+  },
+  "branding": { "primaryColor": "265 84% 64%", "accentColor": "231 89% 72%", "mood": "warm" },
+  "rawInput": { "processDescription": "Discovery to execution coaching", "painPoint": "Lack of accountability", "clientDescription": "Founders and executives" }
+}
