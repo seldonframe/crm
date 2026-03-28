@@ -18,7 +18,6 @@ export default async function DashboardLayout({
   const session = await requireAuth();
   const soul = await getSoul();
   const user = session.user;
-  const businessName = soul?.businessName || "CRM Framework";
   const avatarFallback = user?.name?.trim()?.charAt(0)?.toUpperCase() || user?.email?.charAt(0)?.toUpperCase() || "U";
 
   const bodyStyle = soul?.branding
@@ -38,7 +37,7 @@ export default async function DashboardLayout({
           <Sidebar />
           <div className="flex-1 space-y-4">
             <DemoBanner />
-            <DashboardTopbar userName={user?.name || "Account"} avatarFallback={avatarFallback} businessName={businessName} />
+            <DashboardTopbar userName={user?.name || "Account"} avatarFallback={avatarFallback} />
             {children}
           </div>
         </div>

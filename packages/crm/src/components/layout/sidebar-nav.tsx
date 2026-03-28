@@ -2,20 +2,23 @@
 
 import Link from "next/link";
 import { usePathname } from "next/navigation";
-import { Briefcase, Calendar, LayoutDashboard, Settings, Users, Video } from "lucide-react";
+import { Briefcase, Calendar, FileText, Layout, LayoutDashboard, Mail, Settings, Users, Zap } from "lucide-react";
 
 type NavItem = {
   href: string;
   label: string;
-  icon: "dashboard" | "contacts" | "deals" | "activities" | "meetings" | "settings";
+  icon: "dashboard" | "contacts" | "deals" | "booking" | "pages" | "email" | "forms" | "automations" | "settings";
 };
 
 const iconMap = {
   dashboard: LayoutDashboard,
   contacts: Users,
   deals: Briefcase,
-  activities: Calendar,
-  meetings: Video,
+  booking: Calendar,
+  pages: Layout,
+  email: Mail,
+  forms: FileText,
+  automations: Zap,
   settings: Settings,
 } as const;
 

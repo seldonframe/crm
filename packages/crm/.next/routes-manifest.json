@@ -31,6 +31,14 @@
       "namedRegex": "^/api/auth/(?<nxtPnextauth>.+?)(?:/)?$"
     },
     {
+      "page": "/api/email/open/[emailId]",
+      "regex": "^/api/email/open/([^/]+?)(?:/)?$",
+      "routeKeys": {
+        "nxtPemailId": "nxtPemailId"
+      },
+      "namedRegex": "^/api/email/open/(?<nxtPemailId>[^/]+?)(?:/)?$"
+    },
+    {
       "page": "/api/v1/contacts/[id]",
       "regex": "^/api/v1/contacts/([^/]+?)(?:/)?$",
       "routeKeys": {
@@ -114,6 +122,15 @@
       "namedRegex": "^/landing/(?<nxtPid>[^/]+?)(?:/)?$"
     },
     {
+      "page": "/p/[orgSlug]/[slug]",
+      "regex": "^/p/([^/]+?)/([^/]+?)(?:/)?$",
+      "routeKeys": {
+        "nxtPorgSlug": "nxtPorgSlug",
+        "nxtPslug": "nxtPslug"
+      },
+      "namedRegex": "^/p/(?<nxtPorgSlug>[^/]+?)/(?<nxtPslug>[^/]+?)(?:/)?$"
+    },
+    {
       "page": "/portal/[orgSlug]",
       "regex": "^/portal/([^/]+?)(?:/)?$",
       "routeKeys": {
@@ -184,6 +201,12 @@
       "namedRegex": "^/api/cron/usage\\-reset(?:/)?$"
     },
     {
+      "page": "/api/stripe/connect/callback",
+      "regex": "^/api/stripe/connect/callback(?:/)?$",
+      "routeKeys": {},
+      "namedRegex": "^/api/stripe/connect/callback(?:/)?$"
+    },
+    {
       "page": "/api/v1/activities",
       "regex": "^/api/v1/activities(?:/)?$",
       "routeKeys": {},
@@ -206,6 +229,12 @@
       "regex": "^/api/v1/webhooks(?:/)?$",
       "routeKeys": {},
       "namedRegex": "^/api/v1/webhooks(?:/)?$"
+    },
+    {
+      "page": "/api/webhooks/stripe",
+      "regex": "^/api/webhooks/stripe(?:/)?$",
+      "routeKeys": {},
+      "namedRegex": "^/api/webhooks/stripe(?:/)?$"
     },
     {
       "page": "/automations",
@@ -296,6 +325,12 @@
       "regex": "^/settings/fields(?:/)?$",
       "routeKeys": {},
       "namedRegex": "^/settings/fields(?:/)?$"
+    },
+    {
+      "page": "/settings/payments",
+      "regex": "^/settings/payments(?:/)?$",
+      "routeKeys": {},
+      "namedRegex": "^/settings/payments(?:/)?$"
     },
     {
       "page": "/settings/pipeline",

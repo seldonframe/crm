@@ -3,50 +3,110 @@
 import { Bell, Command, Search } from "lucide-react";
 import { usePathname } from "next/navigation";
 import { DensityToggle } from "@/components/shared/density-toggle";
+import { useLabels } from "@/lib/hooks/use-labels";
 
-const titleMap: Record<string, string> = {
+const staticTitleMap: Record<string, string> = {
   "/dashboard": "Dashboard",
-  "/contacts": "CRM",
-  "/deals": "Deals",
-  "/activities": "Booking",
-  "/forms": "Meetings",
+  "/bookings": "Booking",
+  "/landing": "Landing Pages",
+  "/emails": "Email",
+  "/automations": "Automations",
+  "/hub": "Hub",
   "/settings": "Settings",
   "/setup": "Soul Setup",
 };
 
-function getTitle(pathname: string) {
+function getTitle(pathname: string, labels: ReturnType<typeof useLabels>) {
+  if (pathname === "/contacts") {
+    return labels.contact.plural;
+  }
+
+  if (pathname === "/deals") {
+    return labels.deal.plural;
+  }
+
+  if (pathname === "/bookings") {
+    return `${labels.activity.plural} · Booking`;
+  }
+
+  if (pathname === "/forms") {
+    return labels.intakeForm.plural;
+  }
+
+  if (pathname === "/activities") {
+    return labels.activity.plural;
+  }
+
+  if (pathname === "/settings/profile") {
+    return "Business Profile";
+  }
+
+  if (pathname === "/settings/pipeline") {
+    return "Pipeline Settings";
+  }
+
+  if (pathname === "/settings/fields") {
+    return "Custom Fields";
+  }
+
+  if (pathname === "/settings/team") {
+    return "Team";
+  }
+
+  if (pathname === "/settings/webhooks") {
+    return "Webhook Endpoints";
+  }
+
+  if (pathname === "/settings/api") {
+    return "API Keys";
+  }
+
+  if (pathname === "/settings/payments") {
+    return "Payments";
+  }
+
+  if (pathname === "/settings/soul-transfer") {
+    return "Soul Export / Import";
+  }
+
   if (pathname.startsWith("/contacts/")) {
-    return "Contact Detail";
+    return labels.contact.singular;
   }
 
   if (pathname.startsWith("/deals/")) {
-    return "Deal Detail";
+    return labels.deal.singular;
+  }
+
+  if (pathname.startsWith("/forms/")) {
+    return labels.intakeForm.singular;
+  }
+
+  if (pathname.startsWith("/landing/")) {
+    return "Landing Page";
   }
 
   if (pathname.startsWith("/settings/")) {
     return "Settings";
   }
 
-  return titleMap[pathname] ?? "Dashboard";
+  return staticTitleMap[pathname] ?? "Dashboard";
 }
 
 export function DashboardTopbar({
   userName,
   avatarFallback,
-  businessName,
 }: {
   userName: string;
   avatarFallback: string;
-  businessName: string;
 }) {
   const pathname = usePathname();
-  const title = getTitle(pathname);
+  const labels = useLabels();
+  const title = getTitle(pathname, labels);
 
   return (
     <header className="crm-card flex flex-wrap items-center gap-3 lg:flex-nowrap">
       <div className="min-w-[140px]">
         <p className="text-card-title text-foreground">{title}</p>
-        <p className="text-xs text-[hsl(var(--color-text-secondary))]">{businessName}</p>
       </div>
 
       <button

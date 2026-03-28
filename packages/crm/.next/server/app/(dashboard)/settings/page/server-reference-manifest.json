@@ -1,4 +1,209 @@
 {
-  "node": {},
+  "node": {
+    "00957b8d817942ae796c9815e2ccd3fdcf9d526471": {
+      "workers": {
+        "app/(dashboard)/settings/page": {
+          "moduleId": 820,
+          "async": false,
+          "exportedName": "listEmails",
+          "filename": "CascadeProjects/Seldon Frame/packages/crm/src/lib/emails/actions.ts"
+        }
+      },
+      "exportedName": "listEmails",
+      "filename": "CascadeProjects/Seldon Frame/packages/crm/src/lib/emails/actions.ts"
+    },
+    "00c792505b1900a92049c340ab076fc6fb9acb100a": {
+      "workers": {
+        "app/(dashboard)/settings/page": {
+          "moduleId": 820,
+          "async": false,
+          "exportedName": "listEmailTemplates",
+          "filename": "CascadeProjects/Seldon Frame/packages/crm/src/lib/emails/actions.ts"
+        }
+      },
+      "exportedName": "listEmailTemplates",
+      "filename": "CascadeProjects/Seldon Frame/packages/crm/src/lib/emails/actions.ts"
+    },
+    "4023ff637a53f39decbe0d04ce2ee9ca5ad876d97f": {
+      "workers": {
+        "app/(dashboard)/settings/page": {
+          "moduleId": 820,
+          "async": false,
+          "exportedName": "markEmailOpenedByPixelAction",
+          "filename": "CascadeProjects/Seldon Frame/packages/crm/src/lib/emails/actions.ts"
+        }
+      },
+      "exportedName": "markEmailOpenedByPixelAction",
+      "filename": "CascadeProjects/Seldon Frame/packages/crm/src/lib/emails/actions.ts"
+    },
+    "402e94ccaed6c261326e9d4708c5ef72bd624790be": {
+      "workers": {
+        "app/(dashboard)/settings/page": {
+          "moduleId": 820,
+          "async": false,
+          "exportedName": "markEmailOpenedAction",
+          "filename": "CascadeProjects/Seldon Frame/packages/crm/src/lib/emails/actions.ts"
+        }
+      },
+      "exportedName": "markEmailOpenedAction",
+      "filename": "CascadeProjects/Seldon Frame/packages/crm/src/lib/emails/actions.ts"
+    },
+    "403eb78ff4d18846b83fc7384a8c361067a259fd6a": {
+      "workers": {
+        "app/(dashboard)/settings/page": {
+          "moduleId": 820,
+          "async": false,
+          "exportedName": "sendEmailTemplateToContactFormAction",
+          "filename": "CascadeProjects/Seldon Frame/packages/crm/src/lib/emails/actions.ts"
+        }
+      },
+      "exportedName": "sendEmailTemplateToContactFormAction",
+      "filename": "CascadeProjects/Seldon Frame/packages/crm/src/lib/emails/actions.ts"
+    },
+    "40792df548d6bb4435232b0c908efe65e9c863a533": {
+      "workers": {
+        "app/(dashboard)/settings/page": {
+          "moduleId": 820,
+          "async": false,
+          "exportedName": "sendWelcomeEmailForContact",
+          "filename": "CascadeProjects/Seldon Frame/packages/crm/src/lib/emails/actions.ts"
+        }
+      },
+      "exportedName": "sendWelcomeEmailForContact",
+      "filename": "CascadeProjects/Seldon Frame/packages/crm/src/lib/emails/actions.ts"
+    },
+    "4083eef36b2f097edca606558d24859ecc4291773c": {
+      "workers": {
+        "app/(dashboard)/settings/page": {
+          "moduleId": 820,
+          "async": false,
+          "exportedName": "sendEmailAction",
+          "filename": "CascadeProjects/Seldon Frame/packages/crm/src/lib/emails/actions.ts"
+        }
+      },
+      "exportedName": "sendEmailAction",
+      "filename": "CascadeProjects/Seldon Frame/packages/crm/src/lib/emails/actions.ts"
+    },
+    "409b8370596c133ba25b2ea949384e47d465e8e2cf": {
+      "workers": {
+        "app/(dashboard)/settings/page": {
+          "moduleId": 820,
+          "async": false,
+          "exportedName": "createEmailTemplateAction",
+          "filename": "CascadeProjects/Seldon Frame/packages/crm/src/lib/emails/actions.ts"
+        }
+      },
+      "exportedName": "createEmailTemplateAction",
+      "filename": "CascadeProjects/Seldon Frame/packages/crm/src/lib/emails/actions.ts"
+    },
+    "40a3c55d591485f2d1b1b79ef6a40fe08a47b672b9": {
+      "workers": {
+        "app/(dashboard)/settings/page": {
+          "moduleId": 820,
+          "async": false,
+          "exportedName": "sendEmailTemplateToContactAction",
+          "filename": "CascadeProjects/Seldon Frame/packages/crm/src/lib/emails/actions.ts"
+        }
+      },
+      "exportedName": "sendEmailTemplateToContactAction",
+      "filename": "CascadeProjects/Seldon Frame/packages/crm/src/lib/emails/actions.ts"
+    },
+    "60bf001840f59f3c8b6d5a6ec677fd637b9d391268": {
+      "workers": {
+        "app/(dashboard)/settings/page": {
+          "moduleId": 820,
+          "async": false,
+          "exportedName": "markEmailClickedAction",
+          "filename": "CascadeProjects/Seldon Frame/packages/crm/src/lib/emails/actions.ts"
+        }
+      },
+      "exportedName": "markEmailClickedAction",
+      "filename": "CascadeProjects/Seldon Frame/packages/crm/src/lib/emails/actions.ts"
+    },
+    "0040e94539ced875618589dfe30d1aa27fa72ded8e": {
+      "workers": {
+        "app/(dashboard)/settings/page": {
+          "moduleId": 820,
+          "async": false,
+          "exportedName": "getStripeConnectionStatus",
+          "filename": "CascadeProjects/Seldon Frame/packages/crm/src/lib/payments/actions.ts"
+        }
+      },
+      "exportedName": "getStripeConnectionStatus",
+      "filename": "CascadeProjects/Seldon Frame/packages/crm/src/lib/payments/actions.ts"
+    },
+    "00b609dba7cf3da626a24eb76ff69895c44491c403": {
+      "workers": {
+        "app/(dashboard)/settings/page": {
+          "moduleId": 820,
+          "async": false,
+          "exportedName": "startStripeConnectAction",
+          "filename": "CascadeProjects/Seldon Frame/packages/crm/src/lib/payments/actions.ts"
+        }
+      },
+      "exportedName": "startStripeConnectAction",
+      "filename": "CascadeProjects/Seldon Frame/packages/crm/src/lib/payments/actions.ts"
+    },
+    "401a600ca23b148ea9e7878b200b119f7d0d9c370f": {
+      "workers": {
+        "app/(dashboard)/settings/page": {
+          "moduleId": 820,
+          "async": false,
+          "exportedName": "completeStripeConnectFromCode",
+          "filename": "CascadeProjects/Seldon Frame/packages/crm/src/lib/payments/actions.ts"
+        }
+      },
+      "exportedName": "completeStripeConnectFromCode",
+      "filename": "CascadeProjects/Seldon Frame/packages/crm/src/lib/payments/actions.ts"
+    },
+    "403b20155cd18aef82389877c3582352ef9b5269ae": {
+      "workers": {
+        "app/(dashboard)/settings/page": {
+          "moduleId": 820,
+          "async": false,
+          "exportedName": "createBookingCheckoutSession",
+          "filename": "CascadeProjects/Seldon Frame/packages/crm/src/lib/payments/actions.ts"
+        }
+      },
+      "exportedName": "createBookingCheckoutSession",
+      "filename": "CascadeProjects/Seldon Frame/packages/crm/src/lib/payments/actions.ts"
+    },
+    "40e2ce653241b232925785b7051f7f8d680e460472": {
+      "workers": {
+        "app/(dashboard)/settings/page": {
+          "moduleId": 820,
+          "async": false,
+          "exportedName": "getContactRevenue",
+          "filename": "CascadeProjects/Seldon Frame/packages/crm/src/lib/payments/actions.ts"
+        }
+      },
+      "exportedName": "getContactRevenue",
+      "filename": "CascadeProjects/Seldon Frame/packages/crm/src/lib/payments/actions.ts"
+    },
+    "40e5c959fabb0c13a4fcb9c7f35630d357b00a922b": {
+      "workers": {
+        "app/(dashboard)/settings/page": {
+          "moduleId": 820,
+          "async": false,
+          "exportedName": "handleStripeCheckoutCompleted",
+          "filename": "CascadeProjects/Seldon Frame/packages/crm/src/lib/payments/actions.ts"
+        }
+      },
+      "exportedName": "handleStripeCheckoutCompleted",
+      "filename": "CascadeProjects/Seldon Frame/packages/crm/src/lib/payments/actions.ts"
+    },
+    "60d53c31c41b96edfe7f8d792641a79010ec6eb687": {
+      "workers": {
+        "app/(dashboard)/settings/page": {
+          "moduleId": 820,
+          "async": false,
+          "exportedName": "getRevenueByContactId",
+          "filename": "CascadeProjects/Seldon Frame/packages/crm/src/lib/payments/actions.ts"
+        }
+      },
+      "exportedName": "getRevenueByContactId",
+      "filename": "CascadeProjects/Seldon Frame/packages/crm/src/lib/payments/actions.ts"
+    }
+  },
   "edge": {}
 }

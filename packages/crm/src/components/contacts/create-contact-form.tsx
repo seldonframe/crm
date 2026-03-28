@@ -11,7 +11,7 @@ export function CreateContactForm() {
 
   return (
     <form
-      className="crm-card grid gap-3 p-4 md:grid-cols-5"
+      className="crm-card grid gap-3 p-4 md:grid-cols-5 md:items-end"
       action={(formData) => {
         startTransition(async () => {
           try {
@@ -33,10 +33,26 @@ export function CreateContactForm() {
         });
       }}
     >
-      <input className="crm-input h-10 px-3" name="firstName" placeholder="First name" required />
-      <input className="crm-input h-10 px-3" name="lastName" placeholder="Last name" />
-      <input className="crm-input h-10 px-3" name="email" type="email" placeholder="Email" />
-      <input className="crm-input h-10 px-3" name="status" placeholder="Status" defaultValue="lead" />
+      <div>
+        <label htmlFor="cf-first" className="mb-1 block text-sm text-white/75">First name</label>
+        <input id="cf-first" className="crm-input h-10 w-full px-3" name="firstName" placeholder="Jane" required />
+      </div>
+      <div>
+        <label htmlFor="cf-last" className="mb-1 block text-sm text-white/75">Last name</label>
+        <input id="cf-last" className="crm-input h-10 w-full px-3" name="lastName" placeholder="Doe" />
+      </div>
+      <div>
+        <label htmlFor="cf-email" className="mb-1 block text-sm text-white/75">Email</label>
+        <input id="cf-email" className="crm-input h-10 w-full px-3" name="email" type="email" placeholder="jane@example.com" />
+      </div>
+      <div>
+        <label htmlFor="cf-status" className="mb-1 block text-sm text-white/75">Status</label>
+        <select id="cf-status" className="crm-input h-10 w-full px-3" name="status" defaultValue="lead">
+          <option value="lead">Lead</option>
+          <option value="customer">Customer</option>
+          <option value="inactive">Inactive</option>
+        </select>
+      </div>
       <button type="submit" className="crm-button-primary h-10 px-4" disabled={pending}>
         {pending ? "Adding..." : "Add"}
       </button>

@@ -52,7 +52,12 @@ export default async function ContactsPage({
           <label htmlFor="contact-status" className="text-label text-[hsl(var(--color-text-secondary))]">
             Status
           </label>
-          <input id="contact-status" name="status" defaultValue={status} className="crm-input mt-1 h-10 w-full px-3" placeholder="all or lead/customer" />
+          <select id="contact-status" name="status" defaultValue={status} className="crm-input mt-1 h-10 w-full px-3">
+            <option value="all">All</option>
+            <option value="lead">Lead</option>
+            <option value="customer">Customer</option>
+            <option value="inactive">Inactive</option>
+          </select>
         </div>
 
         <div>

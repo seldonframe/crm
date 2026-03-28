@@ -59,8 +59,8 @@ export default async function DealsPage({
           <p className="mt-1 text-data text-[18px]">{compactCurrency(totalValue)}</p>
         </div>
         <div className="crm-card">
-          <p className="text-tiny text-[hsl(var(--color-text-muted))]">Deals by stage</p>
-          <p className="mt-1 text-section-title">{pipeline?.stages?.length ?? 0}</p>
+          <p className="text-tiny text-[hsl(var(--color-text-muted))]">Active {labels.deal.plural.toLowerCase()}</p>
+          <p className="mt-1 text-section-title">{dealRows.length}</p>
         </div>
         <div className="crm-card">
           <p className="text-tiny text-[hsl(var(--color-text-muted))]">Win rate</p>

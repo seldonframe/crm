@@ -11,7 +11,7 @@ export function CreateDealForm({ contacts }: { contacts: Array<{ id: string; fir
 
   return (
     <form
-      className="crm-card grid gap-3 p-4 md:grid-cols-4"
+      className="crm-card grid gap-3 p-4 md:grid-cols-4 md:items-end"
       action={(formData) => {
         startTransition(async () => {
           try {
@@ -33,16 +33,25 @@ export function CreateDealForm({ contacts }: { contacts: Array<{ id: string; fir
         });
       }}
     >
-      <input className="crm-input h-10 px-3" name="title" placeholder="Deal title" required />
-      <input className="crm-input h-10 px-3" name="value" type="number" placeholder="Value" defaultValue="0" />
-      <select name="contactId" className="crm-input h-10 px-3" required>
-        <option value="">Select contact</option>
-        {contacts.map((contact) => (
-          <option key={contact.id} value={contact.id}>
-            {contact.firstName} {contact.lastName}
-          </option>
-        ))}
-      </select>
+      <div>
+        <label htmlFor="df-title" className="mb-1 block text-sm text-white/75">Title</label>
+        <input id="df-title" className="crm-input h-10 w-full px-3" name="title" placeholder="Deal title" required />
+      </div>
+      <div>
+        <label htmlFor="df-value" className="mb-1 block text-sm text-white/75">Value</label>
+        <input id="df-value" className="crm-input h-10 w-full px-3" name="value" type="number" placeholder="0" defaultValue="0" />
+      </div>
+      <div className="min-w-0">
+        <label htmlFor="df-contact" className="mb-1 block text-sm text-white/75">Contact</label>
+        <select id="df-contact" name="contactId" className="crm-input h-10 w-full truncate px-3" required>
+          <option value="">Select contact</option>
+          {contacts.map((contact) => (
+            <option key={contact.id} value={contact.id}>
+              {contact.firstName} {contact.lastName}
+            </option>
+          ))}
+        </select>
+      </div>
       <button type="submit" className="crm-button-primary h-10 px-4" disabled={pending}>
         {pending ? "Adding..." : "Add"}
       </button>

@@ -2,7 +2,7 @@ import { and, asc, desc, eq } from "drizzle-orm";
 import Link from "next/link";
 import { ArrowRight, CheckCircle2, Circle, Clock3, DollarSign, Users, Zap } from "lucide-react";
 import { db } from "@/db";
-import { activities, bookings, emails, landingPages, metricsSnapshots, paymentRecords } from "@/db/schema";
+import { activities, bookings, emails, landingPages, metricsSnapshots, organizations, paymentRecords } from "@/db/schema";
 import { getCurrentUser } from "@/lib/auth/helpers";
 import { listBookings } from "@/lib/bookings/actions";
 import { listContacts } from "@/lib/contacts/actions";
@@ -16,14 +16,6 @@ function toUtcDate(value: string | Date) {
   }
 
   return new Date(`${value}T00:00:00.000Z`);
-}
-
-function percentChange(current: number, previous: number) {
-  if (!previous) {
-    return null;
-  }
-
-  return ((current - previous) / Math.abs(previous)) * 100;
 }
 
 function timeOfDay() {
@@ -42,6 +34,10 @@ function timeOfDay() {
 
 function formatCurrency(value: number) {
   return `$${Math.round(value).toLocaleString()}`;
+}
+
+function formatLongDate(value: Date) {
+  return new Intl.DateTimeFormat("en-US", { weekday: "long", month: "long", day: "numeric", year: "numeric" }).format(value);
 }
 
 function Sparkline({ points }: { points: number[] }) {
@@ -93,7 +89,7 @@ export default async function DashboardPage() {
     return null;
   }
 
-  const [snapshotRowsRaw, taskRows, appointmentTypeRows, landingRows, sentEmailRows, paymentRows] = await Promise.all([
+  const [snapshotRowsRaw, activityRows, appointmentTypeRows, landingRows, sentEmailRows, paymentRows, orgRow] = await Promise.all([
     db.select().from(metricsSnapshots).where(eq(metricsSnapshots.orgId, orgId)).orderBy(asc(metricsSnapshots.date)).limit(180),
     db.select().from(activities).where(eq(activities.orgId, orgId)).orderBy(desc(activities.createdAt)).limit(20),
     db
@@ -117,6 +113,12 @@ export default async function DashboardPage() {
       .select({ amount: paymentRecords.amount })
       .from(paymentRecords)
       .where(eq(paymentRecords.orgId, orgId)),
+    db
+      .select({ createdAt: organizations.createdAt })
+      .from(organizations)
+      .where(eq(organizations.id, orgId))
+      .limit(1)
+      .then((rows) => rows[0] ?? null),
   ]);
 
   const contactById = new Map(contactRows.map((contact) => [contact.id, contact]));
@@ -125,7 +127,9 @@ export default async function DashboardPage() {
   const contactLabelPlural = soul?.entityLabels?.contact?.plural || "Contacts";
   const dealLabelSingular = soul?.entityLabels?.deal?.singular || "Deal";
 
-  const isNewUser = contactRows.length < 5 && dealRows.length < 3;
+  const sevenDaysAgo = new Date();
+  sevenDaysAgo.setDate(sevenDaysAgo.getDate() - 7);
+  const isNewUser = (orgRow ? new Date(orgRow.createdAt) >= sevenDaysAgo : false) || contactRows.length < 5;
   const completedChecklistCount = [
     contactRows.length > 0,
     dealRows.length > 0,
@@ -147,7 +151,7 @@ export default async function DashboardPage() {
     return startsAt >= startOfToday && startsAt < startOfTomorrow;
   }).length;
 
-  const followUpsDue = taskRows.filter((task) => {
+  const followUpsDue = activityRows.filter((task) => {
     if (task.type !== "task" || task.completedAt) {
       return false;
     }
@@ -164,11 +168,6 @@ export default async function DashboardPage() {
   const newClientsThisWeek = contactRows.filter((row) => new Date(row.createdAt) >= weekThreshold).length;
 
   const firstName = user?.name?.split(" ").filter(Boolean)[0] || "there";
-
-  const trendRows = snapshotRows.slice(-30).map((row) => ({
-    label: new Intl.DateTimeFormat("en-US", { month: "short", day: "numeric" }).format(row.dateObj),
-    revenueTotal: Number(row.revenueTotal),
-  }));
 
   const weeklyRevenueRows = snapshotRows.slice(-12).map((row) => {
     return {
@@ -188,12 +187,6 @@ export default async function DashboardPage() {
   });
   const winRate = closedDeals.length > 0 ? (wonDeals.length / closedDeals.length) * 100 : 0;
   const revenueTotal = paymentRows.reduce((sum, row) => sum + Number(row.amount), 0);
-
-  const latestSnapshot = snapshotRows.at(-1);
-  const previousSnapshot = snapshotRows.length > 1 ? snapshotRows[snapshotRows.length - 2] : null;
-  const pipelineDelta = latestSnapshot && previousSnapshot ? percentChange(Number(latestSnapshot.pipelineValue), Number(previousSnapshot.pipelineValue)) : null;
-  const winRateDelta = latestSnapshot && previousSnapshot ? percentChange(Number(latestSnapshot.winRate) * 100, Number(previousSnapshot.winRate) * 100) : null;
-  const revenueDelta = latestSnapshot && previousSnapshot ? percentChange(Number(latestSnapshot.revenueTotal), Number(previousSnapshot.revenueTotal)) : null;
 
   const pipelineTrend = snapshotRows.slice(-7).map((row) => Number(row.pipelineValue));
   const winRateTrend = snapshotRows.slice(-7).map((row) => Number(row.winRate) * 100);
@@ -226,6 +219,7 @@ export default async function DashboardPage() {
         <h1 className="text-3xl font-light tracking-tight text-white">
           Good {timeOfDay()}, <span className="font-semibold">{firstName}</span>
         </h1>
+        <p className="text-sm text-white/55">{formatLongDate(today)}</p>
         <p className="text-sm text-white/40">
           <span className="text-primary">{sessionsToday}</span> sessions today · <span className="text-primary">{followUpsDue}</span> follow-ups due · <span className="text-primary">{newClientsThisWeek}</span> new {contactLabelPlural.toLowerCase()} this week
         </p>
@@ -233,7 +227,7 @@ export default async function DashboardPage() {
 
       {isNewUser ? (
         <div className="grid gap-4 lg:grid-cols-12">
-          <article className="glass-card rounded-2xl p-6 lg:col-span-7">
+          <article className="glass-card rounded-2xl border-l-2 border-l-primary p-6 lg:col-span-7">
             <div className="mb-4 flex items-center justify-between">
               <div>
                 <p className="text-xs font-medium uppercase tracking-widest text-white/50">Getting Started</p>
@@ -275,21 +269,40 @@ export default async function DashboardPage() {
           <div className="space-y-4 lg:col-span-5">
             <article className="glass-card rounded-2xl p-6">
               <p className="text-xs font-medium uppercase tracking-widest text-white/50">Quick Actions</p>
-              <div className="mt-4 grid gap-3">
-                <Link href="/contacts" className="inline-flex h-11 items-center justify-center rounded-lg bg-primary px-6 text-sm font-medium text-[hsl(var(--primary-foreground))] shadow-glass-teal">
+              <div className="mt-4 grid gap-3 sm:grid-cols-3">
+                <Link href="/contacts" className="glass-card rounded-xl p-4 text-sm text-white/90 hover:text-white">
                   Add {contactLabelSingular}
                 </Link>
-                <Link href="/deals" className="inline-flex h-11 items-center justify-center rounded-lg border border-white/10 bg-transparent px-6 text-sm font-medium text-primary hover:bg-white/5">
+                <Link href="/deals" className="glass-card rounded-xl p-4 text-sm text-white/90 hover:text-white">
                   Create {dealLabelSingular}
                 </Link>
-                <Link href="/bookings" className="inline-flex h-11 items-center justify-center rounded-lg border border-white/10 bg-transparent px-6 text-sm font-medium text-primary hover:bg-white/5">
-                  Share Booking Link
+                <Link href="/bookings" className="glass-card rounded-xl p-4 text-sm text-white/90 hover:text-white">
+                  Share Booking Page
                 </Link>
               </div>
             </article>
 
-            <article className="flex min-h-40 items-center justify-center rounded-2xl border-2 border-dashed border-white/10 p-6 text-center">
-              <p className="text-sm text-white/30">Your activity timeline will come alive as you work</p>
+            <article className="glass-card rounded-2xl p-6">
+              <p className="mb-3 text-xs font-medium uppercase tracking-widest text-white/50">Recent Activity</p>
+              {activityRows.length === 0 ? (
+                <p className="text-sm text-white/35">Activities will appear here as you work</p>
+              ) : (
+                <ul className="space-y-2">
+                  {activityRows.slice(0, 5).map((item) => {
+                    const linkedContact = item.contactId ? contactById.get(item.contactId) : null;
+                    const name = linkedContact ? `${linkedContact.firstName} ${linkedContact.lastName ?? ""}`.trim() : contactLabelSingular;
+                    return (
+                      <li key={item.id} className="flex items-center justify-between gap-3 rounded-lg border border-white/10 px-3 py-2">
+                        <div className="min-w-0">
+                          <p className="truncate text-sm text-white/85">{item.subject ?? `${item.type} activity`}</p>
+                          <p className="truncate text-xs text-white/45">{name}</p>
+                        </div>
+                        <span className="text-xs text-white/45">{new Date(item.createdAt).toLocaleTimeString([], { hour: "numeric", minute: "2-digit" })}</span>
+                      </li>
+                    );
+                  })}
+                </ul>
+              )}
             </article>
           </div>
         </div>
@@ -398,12 +411,6 @@ export default async function DashboardPage() {
         </>
       )}
 
-      <div className="hidden">
-        {pipelineDelta}
-        {winRateDelta}
-        {revenueDelta}
-        {trendRows.length}
-      </div>
     </section>
   );
 }
