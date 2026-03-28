@@ -1,7 +1,7 @@
-import { eq } from "drizzle-orm";
+import { and, eq } from "drizzle-orm";
 import { notFound } from "next/navigation";
 import { db } from "@/db";
-import { intakeForms } from "@/db/schema";
+import { intakeForms, organizations } from "@/db/schema";
 import { PublicForm } from "@/components/forms/public-form";
 import { PoweredByBadge } from "@seldonframe/core/virality";
 
@@ -12,7 +12,21 @@ export default async function PublicIntakePage({
 }) {
   const { id: orgSlug, formSlug } = await params;
 
-  const [form] = await db.select().from(intakeForms).where(eq(intakeForms.slug, formSlug)).limit(1);
+  const [org] = await db
+    .select({ id: organizations.id })
+    .from(organizations)
+    .where(eq(organizations.slug, orgSlug))
+    .limit(1);
+
+  if (!org) {
+    notFound();
+  }
+
+  const [form] = await db
+    .select()
+    .from(intakeForms)
+    .where(and(eq(intakeForms.orgId, org.id), eq(intakeForms.slug, formSlug)))
+    .limit(1);
 
   if (!form) {
     notFound();

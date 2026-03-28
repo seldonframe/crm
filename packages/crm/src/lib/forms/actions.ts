@@ -2,7 +2,7 @@
 
 import { and, eq } from "drizzle-orm";
 import { db } from "@/db";
-import { contacts, intakeForms, intakeSubmissions, users } from "@/db/schema";
+import { contacts, intakeForms, intakeSubmissions, organizations } from "@/db/schema";
 import { getOrgId } from "@/lib/auth/helpers";
 import { getSoul } from "@/lib/soul/server";
 import { emitSeldonEvent } from "@/lib/events/bus";
@@ -53,13 +53,20 @@ export async function submitPublicIntakeAction({
 }) {
   assertWritable();
 
-  const [org] = await db.select().from(users).limit(1);
-  void org;
+  const [org] = await db
+    .select({ id: organizations.id })
+    .from(organizations)
+    .where(eq(organizations.slug, orgSlug))
+    .limit(1);
+
+  if (!org) {
+    throw new Error("Organization not found");
+  }
 
   const [form] = await db
     .select({ id: intakeForms.id, orgId: intakeForms.orgId })
     .from(intakeForms)
-    .where(eq(intakeForms.slug, formSlug))
+    .where(and(eq(intakeForms.orgId, org.id), eq(intakeForms.slug, formSlug)))
     .limit(1);
 
   if (!form) {

@@ -4,7 +4,7 @@
 
 Build once, fork endlessly, and ship niche-specific CRM systems with your own voice, pipeline, and workflows.
 
-[![Deploy with Vercel](https://vercel.com/button)](https://vercel.com/new/clone?repository-url=https://github.com/seldonframe/crm&env=DATABASE_URL,NEXTAUTH_SECRET,NEXTAUTH_URL,NEXT_PUBLIC_APP_URL,ANTHROPIC_API_KEY,NEXT_PUBLIC_DEMO_READONLY)
+[![Deploy with Vercel](https://vercel.com/button)](https://vercel.com/new/clone?repository-url=https://github.com/seldonframe/crm&env=DATABASE_URL,AUTH_SECRET,NEXTAUTH_SECRET,NEXTAUTH_URL,NEXT_PUBLIC_APP_URL,ANTHROPIC_API_KEY,NEXT_PUBLIC_DEMO_READONLY)
 ![Next.js](https://img.shields.io/badge/Next.js-16-black)
 ![License](https://img.shields.io/badge/license-MIT-green)
 ![TypeScript](https://img.shields.io/badge/TypeScript-Strict-blue)
@@ -39,7 +39,7 @@ Most OSS CRMs are finished products. Seldon Frame is a framework-first base you 
 | --- | --- | --- |
 | Hub | Yes | Unified command center and module entrypoint |
 | Soul Wizard | Yes | `/setup` onboarding that writes `organizations.soul` |
-| AI Customization | Yes | Claude/OpenAI adapters when configured; safe fallback otherwise |
+| AI Customization | Yes | Claude-backed generation when configured; safe fallback otherwise |
 | Dashboard | Yes | KPI cards and pipeline snapshots |
 | Contacts | Yes | Tenant-scoped records, status, scoring, tags |
 | Deals | Yes | List + stage movement with probability updates |
@@ -47,7 +47,7 @@ Most OSS CRMs are finished products. Seldon Frame is a framework-first base you 
 | Bookings | Yes | Scheduling, status updates, provider resolution |
 | Emails | Yes | Send + open/click tracking across providers |
 | Landing Pages | Yes | Builder, publish flow, conversion events |
-| Intake Forms | Yes | Builder + public submissions + webhook-ready workflow |
+| Intake Forms | Yes | Public submissions + webhook-ready workflow |
 | Portal | Yes | Access code auth, messaging, resources |
 | API/Webhooks | Yes | `/api/v1` with key guard, org scoping, rate limiting |
 | Demo Mode | Yes | UI and API write guards via `NEXT_PUBLIC_DEMO_READONLY=true` |
@@ -133,9 +133,10 @@ For builders shipping fast with AI coding tools:
 
 ```bash
 pnpm install
-cp .env.example .env.local
+cp .env.example packages/crm/.env.local
 pnpm db:generate
-pnpm dev
+pnpm db:migrate
+pnpm dev:crm
 ```
 
 Visit `http://localhost:3000`.
@@ -145,6 +146,7 @@ Visit `http://localhost:3000`.
 | Variable | Required | Purpose |
 | --- | --- | --- |
 | `DATABASE_URL` | Yes | Neon PostgreSQL connection string |
+| `AUTH_SECRET` | Yes | Auth.js secret used by CRM auth layer |
 | `NEXTAUTH_URL` | Yes | Auth callback base URL |
 | `NEXTAUTH_SECRET` | Yes | Session/JWT encryption secret |
 | `NEXT_PUBLIC_APP_URL` | Yes | Public app origin |
@@ -158,21 +160,21 @@ Visit `http://localhost:3000`.
 Start here when building a niche edition:
 
 1. Edit `framework.config.ts` for global defaults.
-2. Update Soul templates in `src/lib/soul/templates`.
-3. Adjust schema-level fields in `src/db/schema` and generate migrations.
-4. Tune labels and stage logic in `src/lib/soul` and dashboard pages.
+2. Update Soul templates in `packages/crm/src/lib/soul/templates`.
+3. Adjust schema-level fields in `packages/crm/src/db/schema` and generate migrations.
+4. Tune labels and stage logic in `packages/crm/src/lib/soul` and dashboard pages.
 5. Add your preset under `showcase/<niche>` with config + seed data.
 
 Detailed notes: `CUSTOMIZATION.md`.
 
 ## Architecture
 
-- App routes: `src/app/(dashboard)` and `src/app/(auth)`
-- API layer: `src/app/api/v1`
-- Domain actions: `src/lib/*/actions.ts`
-- Tenant-aware schema: `src/db/schema`
-- Runtime personalization: `src/lib/soul` + `src/components/soul`
-- Demo protections: `src/lib/demo` + `src/components/shared/demo-toast-provider.tsx`
+- App routes: `packages/crm/src/app/(dashboard)` and `packages/crm/src/app/(auth)`
+- API layer: `packages/crm/src/app/api/v1`
+- Domain actions: `packages/crm/src/lib/*/actions.ts`
+- Tenant-aware schema: `packages/crm/src/db/schema`
+- Runtime personalization: `packages/crm/src/lib/soul` + `packages/crm/src/components/soul`
+- Demo protections: `packages/crm/src/lib/demo` + `packages/crm/src/components/shared/demo-toast-provider.tsx`
 
 ## Contributing
 

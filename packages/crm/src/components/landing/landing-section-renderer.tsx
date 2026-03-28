@@ -63,7 +63,7 @@ export function LandingSectionRenderer({ sections, orgSlug, pageSlug }: Props) {
             );
           case "form":
             return (
-              <section key={section.id} className="space-y-3">
+              <section key={section.id} id="lead-form" className="space-y-3">
                 {section.title ? <h2 className="text-section-title">{section.title}</h2> : null}
                 {section.subtitle ? <p className="text-[hsl(var(--color-text-secondary))]">{section.subtitle}</p> : null}
                 <LandingLeadForm orgSlug={orgSlug} pageSlug={pageSlug} />

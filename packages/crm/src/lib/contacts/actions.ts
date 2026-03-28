@@ -1,6 +1,6 @@
 "use server";
 
-import { and, eq, ilike } from "drizzle-orm";
+import { and, asc, desc, eq, ilike, or } from "drizzle-orm";
 import { db } from "@/db";
 import { contacts } from "@/db/schema";
 import { getOrgId } from "@/lib/auth/helpers";
@@ -8,21 +8,60 @@ import { assertWritable } from "@/lib/demo/server";
 import { emitSeldonEvent } from "@/lib/events/bus";
 import { inferClientLifecycleFromStatus } from "@/lib/soul/learning";
 
-export async function listContacts(search?: string) {
+type ContactListSort = "recent" | "name_asc" | "name_desc" | "score_desc" | "score_asc";
+
+type ContactListOptions = {
+  search?: string;
+  status?: string;
+  sort?: ContactListSort;
+};
+
+export async function listContacts(options?: ContactListOptions) {
   const orgId = await getOrgId();
 
   if (!orgId) {
     return [];
   }
 
+  const search = options?.search?.trim();
+  const status = options?.status?.trim();
+  const sort = options?.sort ?? "recent";
+
+  const conditions = [eq(contacts.orgId, orgId)];
+
   if (search) {
-    return db
-      .select()
-      .from(contacts)
-      .where(and(eq(contacts.orgId, orgId), ilike(contacts.firstName, `%${search}%`)));
+    const searchCondition = or(
+      ilike(contacts.firstName, `%${search}%`),
+      ilike(contacts.lastName, `%${search}%`),
+      ilike(contacts.email, `%${search}%`),
+      ilike(contacts.company, `%${search}%`)
+    );
+
+    if (searchCondition) {
+      conditions.push(searchCondition);
+    }
   }
 
-  return db.select().from(contacts).where(eq(contacts.orgId, orgId));
+  if (status && status !== "all") {
+    conditions.push(eq(contacts.status, status));
+  }
+
+  const whereClause = conditions.length > 1 ? and(...conditions) : conditions[0];
+
+  const base = db.select().from(contacts).where(whereClause);
+
+  switch (sort) {
+    case "name_asc":
+      return base.orderBy(asc(contacts.firstName), asc(contacts.lastName), desc(contacts.createdAt));
+    case "name_desc":
+      return base.orderBy(desc(contacts.firstName), desc(contacts.lastName), desc(contacts.createdAt));
+    case "score_desc":
+      return base.orderBy(desc(contacts.score), desc(contacts.createdAt));
+    case "score_asc":
+      return base.orderBy(asc(contacts.score), desc(contacts.createdAt));
+    default:
+      return base.orderBy(desc(contacts.createdAt));
+  }
 }
 
 export async function createContactAction(formData: FormData) {

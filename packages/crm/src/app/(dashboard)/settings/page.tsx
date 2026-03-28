@@ -7,6 +7,7 @@ const sections = [
   { href: "/settings/team", title: "Team" },
   { href: "/settings/webhooks", title: "Webhooks" },
   { href: "/settings/api", title: "API Keys" },
+  { href: "/settings/payments", title: "Payments" },
   { href: "/settings/soul-transfer", title: "Soul Export / Import" },
 ];
 

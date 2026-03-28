@@ -1,14 +1,17 @@
 import Link from "next/link";
 import { createLandingPageAction, listLandingPages } from "@/lib/landing/actions";
+import { getLabels } from "@/lib/soul/labels";
 
 export default async function LandingPagesDashboard() {
-  const pages = await listLandingPages();
+  const [labels, pages] = await Promise.all([getLabels(), listLandingPages()]);
 
   return (
     <section className="animate-page-enter space-y-4">
       <div>
         <h1 className="text-page-title">Landing Pages</h1>
-        <p className="text-label text-[hsl(var(--color-text-secondary))]">Build and publish modular landing pages with integrated form and booking sections.</p>
+        <p className="text-label text-[hsl(var(--color-text-secondary))]">
+          Build and publish modular pages with integrated {labels.intakeForm.singular.toLowerCase()} and booking sections.
+        </p>
       </div>
 
       <form action={createLandingPageAction} className="crm-card grid gap-3 p-4 md:grid-cols-[1fr_1fr_auto]">

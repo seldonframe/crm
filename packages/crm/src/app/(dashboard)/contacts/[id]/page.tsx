@@ -4,6 +4,8 @@ import { notFound } from "next/navigation";
 import { db } from "@/db";
 import { activities, contacts } from "@/db/schema";
 import { getOrgId } from "@/lib/auth/helpers";
+import { listEmailTemplates, sendEmailTemplateToContactFormAction } from "@/lib/emails/actions";
+import { getContactRevenue } from "@/lib/payments/actions";
 import { getLabels } from "@/lib/soul/labels";
 
 export default async function ContactDetailPage({ params }: { params: Promise<{ id: string }> }) {
@@ -25,6 +27,9 @@ export default async function ContactDetailPage({ params }: { params: Promise<{ 
     db.select().from(activities).where(and(eq(activities.orgId, orgId), eq(activities.contactId, id))),
   ]);
 
+  const templates = await listEmailTemplates();
+  const revenue = await getContactRevenue(id);
+
   if (!row) {
     notFound();
   }
@@ -39,7 +44,28 @@ export default async function ContactDetailPage({ params }: { params: Promise<{ 
         <p className="text-[11px] uppercase tracking-[0.08em] text-[hsl(var(--color-text-muted))]">Contact profile</p>
         <p className="mt-2 text-label">Email: {row.email ?? "—"}</p>
         <p className="mt-2 text-label">Status: <span className="crm-badge">{row.status}</span></p>
+        <p className="mt-2 text-label">Revenue: <span className="font-medium text-foreground">${Number(revenue).toFixed(2)}</span></p>
       </div>
+
+      <form action={sendEmailTemplateToContactFormAction} className="crm-card grid gap-3 p-4 md:grid-cols-[1fr_auto] md:items-end">
+        <input type="hidden" name="contactId" value={row.id} />
+        <div>
+          <label htmlFor="templateId" className="text-label text-[hsl(var(--color-text-secondary))]">Send Email Template</label>
+          <select id="templateId" name="templateId" className="crm-input mt-1 h-10 w-full px-3" defaultValue="" required>
+            <option value="" disabled>
+              Select template
+            </option>
+            {templates.map((template) => (
+              <option key={template.id} value={template.id}>
+                {template.name} {template.tag ? `(${template.tag})` : ""}
+              </option>
+            ))}
+          </select>
+        </div>
+        <button type="submit" className="crm-button-primary h-10 px-4" disabled={!row.email || templates.length === 0}>
+          Send Email
+        </button>
+      </form>
 
       <div className="crm-card">
         <h2 className="mb-2 text-card-title">Activity Timeline</h2>

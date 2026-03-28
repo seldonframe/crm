@@ -1,16 +1,268 @@
 "use server";
 
-import { and, asc, eq } from "drizzle-orm";
+import { and, asc, eq, gte, inArray, lt, ne } from "drizzle-orm";
 import { db } from "@/db";
-import { bookings, contacts, organizations } from "@/db/schema";
+import { activities, bookings, contacts, organizations, users } from "@/db/schema";
 import { getCurrentUser, getOrgId } from "@/lib/auth/helpers";
 import { assertWritable } from "@/lib/demo/server";
 import { emitSeldonEvent } from "@/lib/events/bus";
+import { createBookingCheckoutSession } from "@/lib/payments/actions";
 import { recordBookingOutcomeLearning } from "@/lib/soul/learning";
 import { buildMeetingUrl, resolveBookingProvider } from "./providers";
 
 function deriveEndsAt(startsAt: Date, durationMinutes: number) {
   return new Date(startsAt.getTime() + durationMinutes * 60_000);
+}
+
+function toBookingSlug(value: string) {
+  return value
+    .toLowerCase()
+    .trim()
+    .replace(/[^a-z0-9\s-]/g, "")
+    .replace(/\s+/g, "-")
+    .replace(/-+/g, "-");
+}
+
+type AppointmentTypeMeta = {
+  kind?: string;
+  durationMinutes?: number;
+  description?: string;
+  confirmationMessage?: string;
+  price?: number;
+};
+
+type PublicBookingContext = {
+  orgId: string;
+  bookingSlug: string;
+  appointmentName: string;
+  appointmentDescription: string;
+  durationMinutes: number;
+  confirmationMessage: string;
+  price: number;
+};
+
+function resolveDuration(duration: number | undefined) {
+  if (duration == null || !Number.isFinite(duration)) {
+    return 30;
+  }
+
+  return duration >= 60 ? 60 : 30;
+}
+
+function toDateTimeLocalValue(date: Date) {
+  const year = date.getFullYear();
+  const month = `${date.getMonth() + 1}`.padStart(2, "0");
+  const day = `${date.getDate()}`.padStart(2, "0");
+  const hours = `${date.getHours()}`.padStart(2, "0");
+  const minutes = `${date.getMinutes()}`.padStart(2, "0");
+  return `${year}-${month}-${day}T${hours}:${minutes}`;
+}
+
+function normalizeVoiceConfirmation(rawSoul: unknown) {
+  const soul = (rawSoul as { voice?: { samplePhrases?: string[] } } | null) ?? null;
+  return soul?.voice?.samplePhrases?.[0] || "Booking confirmed. We will contact you shortly.";
+}
+
+async function resolvePublicBookingContext(orgSlug: string, bookingSlug: string): Promise<PublicBookingContext | null> {
+  const [org] = await db
+    .select({ id: organizations.id, soul: organizations.soul })
+    .from(organizations)
+    .where(eq(organizations.slug, orgSlug))
+    .limit(1);
+
+  if (!org) {
+    return null;
+  }
+
+  const [template] = await db
+    .select({
+      title: bookings.title,
+      metadata: bookings.metadata,
+    })
+    .from(bookings)
+    .where(and(eq(bookings.orgId, org.id), eq(bookings.bookingSlug, bookingSlug), eq(bookings.status, "template")))
+    .limit(1);
+
+  if (!template && bookingSlug !== "default") {
+    return null;
+  }
+
+  const metadata = (template?.metadata as AppointmentTypeMeta | null) ?? null;
+  const confirmationMessage = metadata?.confirmationMessage || normalizeVoiceConfirmation(org.soul);
+  const durationMinutes = resolveDuration(metadata?.durationMinutes);
+
+  return {
+    orgId: org.id,
+    bookingSlug,
+    appointmentName: template?.title || "Consultation",
+    appointmentDescription: metadata?.description || "Choose a time that works for you and we will confirm with meeting details.",
+    durationMinutes,
+    confirmationMessage,
+    price: Number.isFinite(metadata?.price) ? Number(metadata?.price) : 0,
+  };
+}
+
+export async function getPublicBookingContext(orgSlug: string, bookingSlug: string) {
+  const context = await resolvePublicBookingContext(orgSlug, bookingSlug);
+
+  if (!context) {
+    return null;
+  }
+
+  return {
+    orgId: context.orgId,
+    bookingSlug: context.bookingSlug,
+    appointmentName: context.appointmentName,
+    appointmentDescription: context.appointmentDescription,
+    durationMinutes: context.durationMinutes,
+    confirmationMessage: context.confirmationMessage,
+    price: context.price,
+  };
+}
+
+export async function listPublicBookingSlotsAction({
+  orgSlug,
+  bookingSlug,
+  date,
+}: {
+  orgSlug: string;
+  bookingSlug: string;
+  date: string;
+}) {
+  const context = await resolvePublicBookingContext(orgSlug, bookingSlug);
+
+  if (!context) {
+    return { slots: [] as string[], durationMinutes: 30 };
+  }
+
+  const requestedDay = new Date(`${date}T00:00:00`);
+
+  if (Number.isNaN(requestedDay.getTime())) {
+    return { slots: [] as string[], durationMinutes: context.durationMinutes };
+  }
+
+  const today = new Date();
+  const startWindow = new Date(today.getFullYear(), today.getMonth(), today.getDate());
+  const endWindow = new Date(startWindow);
+  endWindow.setDate(endWindow.getDate() + 14);
+
+  if (requestedDay < startWindow || requestedDay > endWindow) {
+    return { slots: [] as string[], durationMinutes: context.durationMinutes };
+  }
+
+  const dayStart = new Date(requestedDay);
+  dayStart.setHours(0, 0, 0, 0);
+  const dayEnd = new Date(dayStart);
+  dayEnd.setDate(dayEnd.getDate() + 1);
+
+  const bookedRows = await db
+    .select({ startsAt: bookings.startsAt, endsAt: bookings.endsAt })
+    .from(bookings)
+    .where(
+      and(
+        eq(bookings.orgId, context.orgId),
+        eq(bookings.bookingSlug, context.bookingSlug),
+        ne(bookings.status, "template"),
+        inArray(bookings.status, ["scheduled", "completed", "no_show"]),
+        gte(bookings.startsAt, dayStart),
+        lt(bookings.startsAt, dayEnd)
+      )
+    );
+
+  const slots: string[] = [];
+  const slotStepMinutes = context.durationMinutes >= 60 ? 60 : 30;
+
+  for (let hour = 9; hour < 17; hour += 1) {
+    for (let minute = 0; minute < 60; minute += slotStepMinutes) {
+      const slotStart = new Date(requestedDay);
+      slotStart.setHours(hour, minute, 0, 0);
+
+      const slotEnd = deriveEndsAt(slotStart, context.durationMinutes);
+
+      if (slotEnd.getHours() > 17 || (slotEnd.getHours() === 17 && slotEnd.getMinutes() > 0)) {
+        continue;
+      }
+
+      if (slotStart < today) {
+        continue;
+      }
+
+      const overlaps = bookedRows.some((row) => {
+        const bookedStart = new Date(row.startsAt);
+        const bookedEnd = new Date(row.endsAt);
+        return slotStart < bookedEnd && slotEnd > bookedStart;
+      });
+
+      if (!overlaps) {
+        slots.push(toDateTimeLocalValue(slotStart));
+      }
+    }
+  }
+
+  return {
+    slots,
+    durationMinutes: context.durationMinutes,
+  };
+}
+
+export async function createAppointmentTypeAction(formData: FormData) {
+  assertWritable();
+
+  const orgId = await getOrgId();
+  const user = await getCurrentUser();
+
+  if (!orgId || !user?.id) {
+    throw new Error("Unauthorized");
+  }
+
+  const name = String(formData.get("name") ?? "Consultation").trim() || "Consultation";
+  const duration = resolveDuration(Number(formData.get("durationMinutes") ?? 30));
+  const description = String(formData.get("description") ?? "").trim();
+  const price = Math.max(0, Number(formData.get("price") ?? 0));
+  const slugInput = String(formData.get("slug") ?? name);
+  const bookingSlug = toBookingSlug(slugInput || "consultation") || "consultation";
+
+  const now = new Date();
+
+  await db.insert(bookings).values({
+    orgId,
+    userId: user.id,
+    title: name,
+    bookingSlug,
+    fullName: null,
+    email: null,
+    notes: null,
+    provider: "manual",
+    status: "template",
+    startsAt: now,
+    endsAt: deriveEndsAt(now, duration),
+    metadata: {
+      kind: "appointment_type",
+      durationMinutes: duration,
+      description,
+      price,
+    },
+  });
+}
+
+export async function listAppointmentTypes() {
+  const orgId = await getOrgId();
+
+  if (!orgId) {
+    return [];
+  }
+
+  return db
+    .select({
+      id: bookings.id,
+      title: bookings.title,
+      bookingSlug: bookings.bookingSlug,
+      metadata: bookings.metadata,
+      createdAt: bookings.createdAt,
+    })
+    .from(bookings)
+    .where(and(eq(bookings.orgId, orgId), eq(bookings.status, "template")))
+    .orderBy(asc(bookings.createdAt));
 }
 
 export async function listBookings() {
@@ -20,7 +272,11 @@ export async function listBookings() {
     return [];
   }
 
-  return db.select().from(bookings).where(eq(bookings.orgId, orgId)).orderBy(asc(bookings.startsAt));
+  return db
+    .select()
+    .from(bookings)
+    .where(and(eq(bookings.orgId, orgId), ne(bookings.status, "template")))
+    .orderBy(asc(bookings.startsAt));
 }
 
 export async function createBookingAction(formData: FormData) {
@@ -203,16 +459,16 @@ export async function submitPublicBookingAction({
 }) {
   assertWritable();
 
-  const [org] = await db.select({ id: organizations.id }).from(organizations).where(eq(organizations.slug, orgSlug)).limit(1);
+  const bookingContext = await resolvePublicBookingContext(orgSlug, bookingSlug);
 
-  if (!org) {
-    throw new Error("Organization not found");
+  if (!bookingContext) {
+    throw new Error("Booking page not found");
   }
 
   const [existing] = await db
     .select({ id: contacts.id })
     .from(contacts)
-    .where(and(eq(contacts.orgId, org.id), eq(contacts.email, email)))
+    .where(and(eq(contacts.orgId, bookingContext.orgId), eq(contacts.email, email)))
     .limit(1);
 
   let contactId = existing?.id ?? null;
@@ -221,7 +477,7 @@ export async function submitPublicBookingAction({
     const [createdContact] = await db
       .insert(contacts)
       .values({
-        orgId: org.id,
+        orgId: bookingContext.orgId,
         firstName: fullName,
         email,
         status: "lead",
@@ -247,7 +503,7 @@ export async function submitPublicBookingAction({
   const [createdBooking] = await db
     .insert(bookings)
     .values({
-      orgId: org.id,
+      orgId: bookingContext.orgId,
       contactId,
       title: "Booked consultation",
       bookingSlug,
@@ -255,22 +511,43 @@ export async function submitPublicBookingAction({
       email,
       notes: notes ?? null,
       provider,
-      status: "scheduled",
+      status: bookingContext.price > 0 ? "pending_payment" : "scheduled",
       startsAt: bookingStart,
-      endsAt: deriveEndsAt(bookingStart, 30),
+      endsAt: deriveEndsAt(bookingStart, bookingContext.durationMinutes),
       metadata: {
         source: "public",
+        appointmentType: bookingContext.appointmentName,
+        durationMinutes: bookingContext.durationMinutes,
+        price: bookingContext.price,
       },
     })
     .returning({ id: bookings.id });
 
   if (createdBooking?.id) {
+    if (bookingContext.price > 0) {
+      const checkout = await createBookingCheckoutSession({
+        orgId: bookingContext.orgId,
+        bookingId: createdBooking.id,
+        contactId,
+        customerEmail: email,
+        amount: bookingContext.price,
+        successPath: `/book/${orgSlug}/${bookingSlug}?success=1`,
+        cancelPath: `/book/${orgSlug}/${bookingSlug}?canceled=1`,
+      });
+
+      return {
+        success: true,
+        confirmationMessage: bookingContext.confirmationMessage,
+        checkoutUrl: checkout.checkoutUrl,
+      };
+    }
+
     const meetingUrl = buildMeetingUrl(provider, createdBooking.id);
     if (meetingUrl) {
       await db
         .update(bookings)
         .set({ meetingUrl, externalEventId: createdBooking.id, updatedAt: new Date() })
-        .where(and(eq(bookings.orgId, org.id), eq(bookings.id, createdBooking.id)));
+        .where(and(eq(bookings.orgId, bookingContext.orgId), eq(bookings.id, createdBooking.id)));
     }
 
     if (contactId) {
@@ -278,8 +555,30 @@ export async function submitPublicBookingAction({
         appointmentId: createdBooking.id,
         contactId,
       });
+
+      const [owner] = await db
+        .select({ id: users.id })
+        .from(users)
+        .where(eq(users.orgId, bookingContext.orgId))
+        .limit(1);
+
+      if (owner?.id) {
+        await db.insert(activities).values({
+          orgId: bookingContext.orgId,
+          userId: owner.id,
+          contactId,
+          type: "meeting",
+          subject: `Booked ${bookingContext.appointmentName}`,
+          body: notes ?? null,
+          metadata: {
+            bookingId: createdBooking.id,
+            source: "public-booking",
+          },
+          scheduledAt: bookingStart,
+        });
+      }
     }
   }
 
-  return { success: true };
+  return { success: true, confirmationMessage: bookingContext.confirmationMessage, checkoutUrl: null as string | null };
 }

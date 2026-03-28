@@ -2,19 +2,22 @@
 
 import Image from "next/image";
 import { SidebarNav } from "@/components/layout/sidebar-nav";
+import { useLabels } from "@/lib/hooks/use-labels";
 
 export function Sidebar() {
+  const labels = useLabels();
+
   const nav = [
     { href: "/hub", label: "Hub", icon: "dashboard" as const },
     { href: "/dashboard", label: "Dashboard", icon: "dashboard" as const },
-    { href: "/contacts", label: "Contacts", icon: "contacts" as const },
-    { href: "/deals", label: "Deals", icon: "deals" as const },
+    { href: "/contacts", label: labels.contact.plural, icon: "contacts" as const },
+    { href: "/deals", label: labels.deal.plural, icon: "deals" as const },
     { href: "/bookings", label: "Booking", icon: "activities" as const },
     { href: "/landing", label: "Landing", icon: "meetings" as const },
     { href: "/emails", label: "Email", icon: "meetings" as const },
-    { href: "/forms", label: "Forms", icon: "meetings" as const },
+    { href: "/forms", label: labels.intakeForm.plural, icon: "meetings" as const },
     { href: "/automations", label: "Automations", icon: "activities" as const },
-    { href: "/activities", label: "Activities", icon: "activities" as const },
+    { href: "/activities", label: labels.activity.plural, icon: "activities" as const },
     { href: "/settings", label: "Settings", icon: "settings" as const },
   ];
 

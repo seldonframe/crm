@@ -1,6 +1,7 @@
 import { getSeldonEventBus } from "@seldonframe/core/events";
 import { getCoreRuntimeConfig } from "@seldonframe/core/config";
 import { configureTelemetry, trackTelemetryEvent } from "@seldonframe/core/telemetry";
+import { sendWelcomeEmailForContact } from "@/lib/emails/actions";
 
 let listenersRegistered = false;
 
@@ -15,6 +16,8 @@ export function registerCrmEventListeners() {
 
   bus.on("contact.created", async (event) => {
     console.log(JSON.stringify({ action: "event.contact.created", ...event }));
+
+    await sendWelcomeEmailForContact(event.data.contactId);
 
     trackTelemetryEvent("churn_signal", {
       industry: "unknown",

@@ -1,12 +1,13 @@
 import Link from "next/link";
 import { listForms } from "@/lib/forms/actions";
+import { getLabels } from "@/lib/soul/labels";
 
 export default async function FormsPage() {
-  const forms = await listForms();
+  const [labels, forms] = await Promise.all([getLabels(), listForms()]);
 
   return (
     <section className="space-y-4">
-      <h1 className="text-2xl font-semibold">Intake Forms</h1>
+      <h1 className="text-2xl font-semibold">{labels.intakeForm.plural}</h1>
 
       <div className="crm-card overflow-hidden">
         <table className="w-full text-sm">

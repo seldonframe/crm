@@ -3,7 +3,7 @@
 import { eq } from "drizzle-orm";
 import { auth } from "@/auth";
 import { db } from "@/db";
-import { organizations, users } from "@/db/schema";
+import { organizations, pipelines, users } from "@/db/schema";
 import { generateSoul } from "@/lib/soul/generate";
 import type { OrgSoul, SoulWizardInput } from "@/lib/soul/types";
 import { assertWritable } from "@/lib/demo/server";
@@ -32,6 +32,40 @@ export async function saveSoulAction(soul: OrgSoul) {
 
   if (!orgId) {
     throw new Error("Unauthorized");
+  }
+
+  const normalizedStages =
+    Array.isArray(soul.pipeline?.stages) && soul.pipeline.stages.length > 0
+      ? soul.pipeline.stages.map((stage, index) => ({
+          name: String(stage.name || `Stage ${index + 1}`),
+          color: String(stage.color || ["#6366f1", "#8b5cf6", "#22c55e", "#ef4444"][index % 4]),
+          probability: Number.isFinite(stage.probability) ? Math.max(0, Math.min(100, Number(stage.probability))) : 0,
+        }))
+      : [{ name: "New", color: "#6366f1", probability: 0 }];
+
+  const [defaultPipeline] = await db
+    .select({ id: pipelines.id })
+    .from(pipelines)
+    .where(eq(pipelines.orgId, orgId))
+    .limit(1);
+
+  if (defaultPipeline) {
+    await db
+      .update(pipelines)
+      .set({
+        name: soul.pipeline?.name || "Pipeline",
+        stages: normalizedStages,
+        isDefault: true,
+        updatedAt: new Date(),
+      })
+      .where(eq(pipelines.id, defaultPipeline.id));
+  } else {
+    await db.insert(pipelines).values({
+      orgId,
+      name: soul.pipeline?.name || "Pipeline",
+      stages: normalizedStages,
+      isDefault: true,
+    });
   }
 
   await db

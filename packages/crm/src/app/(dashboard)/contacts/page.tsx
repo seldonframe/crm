@@ -4,8 +4,32 @@ import { getLabels } from "@/lib/soul/labels";
 import { EmptyState } from "@/components/shared/empty-state";
 import { CreateContactForm } from "@/components/contacts/create-contact-form";
 
-export default async function ContactsPage() {
-  const [labels, rows] = await Promise.all([getLabels(), listContacts()]);
+const sortOptions = [
+  { value: "recent", label: "Newest" },
+  { value: "name_asc", label: "Name A→Z" },
+  { value: "name_desc", label: "Name Z→A" },
+  { value: "score_desc", label: "Score High→Low" },
+  { value: "score_asc", label: "Score Low→High" },
+] as const;
+
+export default async function ContactsPage({
+  searchParams,
+}: {
+  searchParams: Promise<{ search?: string; status?: string; sort?: "recent" | "name_asc" | "name_desc" | "score_desc" | "score_asc" }>;
+}) {
+  const params = await searchParams;
+  const search = (params.search ?? "").trim();
+  const status = (params.status ?? "all").trim() || "all";
+  const sort = params.sort ?? "recent";
+
+  const [labels, rows] = await Promise.all([
+    getLabels(),
+    listContacts({
+      search: search || undefined,
+      status,
+      sort,
+    }),
+  ]);
 
   return (
     <section className="animate-page-enter space-y-4">
@@ -15,6 +39,39 @@ export default async function ContactsPage() {
       </div>
 
       <CreateContactForm />
+
+      <form method="get" className="crm-card grid gap-3 p-4 md:grid-cols-[1fr_220px_220px_auto] md:items-end">
+        <div>
+          <label htmlFor="contact-search" className="text-label text-[hsl(var(--color-text-secondary))]">
+            Search {labels.contact.plural}
+          </label>
+          <input id="contact-search" name="search" defaultValue={search} className="crm-input mt-1 h-10 w-full px-3" placeholder="Name, email, company" />
+        </div>
+
+        <div>
+          <label htmlFor="contact-status" className="text-label text-[hsl(var(--color-text-secondary))]">
+            Status
+          </label>
+          <input id="contact-status" name="status" defaultValue={status} className="crm-input mt-1 h-10 w-full px-3" placeholder="all or lead/customer" />
+        </div>
+
+        <div>
+          <label htmlFor="contact-sort" className="text-label text-[hsl(var(--color-text-secondary))]">
+            Sort
+          </label>
+          <select id="contact-sort" name="sort" defaultValue={sort} className="crm-input mt-1 h-10 w-full px-3">
+            {sortOptions.map((option) => (
+              <option key={option.value} value={option.value}>
+                {option.label}
+              </option>
+            ))}
+          </select>
+        </div>
+
+        <button type="submit" className="crm-button-primary h-10 px-4">
+          Apply
+        </button>
+      </form>
 
       {rows.length === 0 ? (
         <EmptyState

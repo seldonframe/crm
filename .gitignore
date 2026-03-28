@@ -40,4 +40,12 @@ yarn-error.log*
 *.tsbuildinfo
 next-env.d.ts
 
-.vercel
+# required root ignores
+node_modules/
+.next/
+.env
+.env.local
+.env.*.local
+dist/
+.turbo/
+.vercel/
