@@ -72,7 +72,7 @@ export function UnifiedLanding({
           {/* How it works → the payoff ("Either way, you get the whole front
               office") → the agent catalog, kept adjacent so the two-ways idea
               pays off immediately. */}
-          <MarketingBuildSteps />
+          <MarketingBuildSteps ungatedBuildEnabled={ungatedBuildEnabled} />
           <MarketingModules />
           <MarketingAgents />
           {/* "Get paid" (2% GMV) section REMOVED 2026-07-16 (Max's call) —
