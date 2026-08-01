@@ -11,7 +11,7 @@
 //   comparison is what LLMs cite and buyers trust.
 // - Update `LAST_UPDATED` when refreshing facts.
 
-export const LAST_UPDATED = "July 2026";
+export const LAST_UPDATED = "August 2026";
 
 export type AltFaqItem = { q: string; a: string };
 export type SwitchReason = { title: string; body: string };
@@ -977,12 +977,12 @@ export const COMPETITORS: Competitor[] = [
     heroSub:
       "A service bills you per call, forever. SeldonFrame is a platform you (or your agency) own — AI receptionist, website, CRM, and booking for $29/mo flat, on your own keys.",
     intro: [
-      "Most people looking for a Smith.ai alternative hit the same wall: per-call pricing and a quote gate. The public pricing page is now just a lead-capture form — no numbers until you talk to sales. And per-call billing, which users describe as a \"success tax,\" means your receptionist bill grows right along with your call volume, forever. It's also a service, not a platform: there's nothing to whitelabel, nothing to build on, and the CRM of record belongs to someone else.",
+      "Most people looking for a Smith.ai alternative hit the same wall: per-call pricing that grows with volume. The AI Receptionist page now shows real numbers — free to start (25 calls/mo), $150/mo for Pro, $500/mo for Enterprise — but every call above your plan still bills $1.67 to $3.00 each, and users describe per-call billing as a \"success tax\" that grows your bill right along with your call volume, forever. It's also a service, not a platform: there's nothing to whitelabel, nothing to build on, and the CRM of record belongs to someone else.",
       "That said, Smith.ai is impressive. The human-in-the-loop model delivers genuinely polished conversations, and for high-stakes professional services — law firms especially — a human voice on complex intake is worth paying for. But most local service businesses need every call answered instantly and booked into their own system — a job AI now does 24/7 for one flat platform fee.",
     ],
     them: {
       bestFor: "Professional services wanting human-quality call handling",
-      pricingModel: "Quote-gated (pricing page is a sales form); per-call billing that scales with volume",
+      pricingModel: "Free to start (25 calls/mo), then $150/mo Pro or $500/mo Enterprise — all billed $1.67–$3.00 per call",
       aiReceptionist: "Yes — AI + human hybrid, as a managed service",
       frontOffice: "None — answers calls and hands off; your CRM/calendar live elsewhere",
       whitelabel: "None — it's a consumed service, not a platform",
@@ -992,7 +992,7 @@ export const COMPETITORS: Competitor[] = [
     switchReasons: [
       {
         title: "Flat platform fee vs per-call forever",
-        body: "Per-call billing punishes growth — more calls means a bigger bill. SeldonFrame is $29/mo flat, with calls at carrier and provider cost on your own keys.",
+        body: "Per-call billing punishes growth — $1.67 to $3.00 per call, in-tier or as overage, means more calls always means a bigger bill. SeldonFrame is $29/mo flat, with calls at carrier and provider cost on your own keys.",
       },
       {
         title: "Own the system, not just the answer",

@@ -516,11 +516,11 @@ export const BEST_CATEGORIES: BestCategory[] = [
       {
         key: "smith-ai",
         name: "Smith.ai",
-        from: "human-hybrid; from ~$97.50/mo per-call plans",
+        from: "AI tier free to start (25 calls/mo), then $150/mo per-call plans",
         oneLiner: "A North-America-based receptionist service that mixes AI with real human receptionists, billed per call.",
         bestFor: "Professional services wanting a human voice on complex or sensitive calls",
         strengths: ["Genuinely smooth conversations with a human in the loop", "A good fit for sensitive calls (legal, medical)", "24/7 coverage without hiring staff"],
-        watchOut: "The bill grows with your call volume forever, and the pricing page is just a contact-sales form, not a price list.",
+        watchOut: "The bill grows with your call volume forever — $1.67 to $3.00 per call above your plan's included volume.",
         sourceUrl: "https://smith.ai/pricing/ai-receptionist",
       },
       {

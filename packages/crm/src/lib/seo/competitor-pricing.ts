@@ -14,7 +14,7 @@
 // - Update `verified` per-entry only when re-checking that competitor's page;
 //   PRICING-level LAST_UPDATED tracks the whole registry's last full pass.
 
-export const LAST_UPDATED = "July 2026";
+export const LAST_UPDATED = "August 2026";
 
 export type PricingPlan = {
   name: string;
@@ -51,7 +51,7 @@ export const PRICING: CompetitorPricing[] = [
   {
     slug: "gohighlevel",
     pricingUrl: "https://www.gohighlevel.com/pricing",
-    verified: "July 2026",
+    verified: "August 2026",
     quoteGated: false,
     freeTier: "None — 14-day free trial",
     annualNote: "Pay 10 months upfront and get 2 months free (about $970/$2,970/$4,970 per year).",
@@ -71,7 +71,7 @@ export const PRICING: CompetitorPricing[] = [
   {
     slug: "activecampaign",
     pricingUrl: "https://www.activecampaign.com/pricing",
-    verified: "July 2026",
+    verified: "August 2026",
     quoteGated: false,
     freeTier: "None — 14-day free trial",
     annualNote: "Prices shown are billed annually at 1,000 contacts; monthly billing runs higher, and the price climbs automatically as your contact list grows.",
@@ -91,7 +91,7 @@ export const PRICING: CompetitorPricing[] = [
   {
     slug: "hubspot",
     pricingUrl: "https://www.hubspot.com/pricing/marketing",
-    verified: "July 2026",
+    verified: "August 2026",
     quoteGated: false,
     freeTier: "Yes — free tools, up to 2 users, with HubSpot branding",
     annualNote: "Starter is about 25% cheaper billed annually ($15/seat vs $20/seat monthly); Pro and Enterprise are quoted as annual commitments.",
@@ -111,7 +111,7 @@ export const PRICING: CompetitorPricing[] = [
   {
     slug: "clickfunnels",
     pricingUrl: "https://www.clickfunnels.com/pricing",
-    verified: "July 2026",
+    verified: "August 2026",
     quoteGated: false,
     freeTier: "None — 14-day free trial + 30-day money-back guarantee",
     annualNote: "Annual billing saves roughly 16% (about $194–$594/year per tier).",
@@ -130,7 +130,7 @@ export const PRICING: CompetitorPricing[] = [
   {
     slug: "keap",
     pricingUrl: "https://keap.com/pricing",
-    verified: "July 2026",
+    verified: "August 2026",
     quoteGated: true,
     freeTier: "None — 14-day free trial",
     annualNote: "Billed annually works out to about $249/mo effective, versus $299/mo on the monthly plan (~17% off).",
@@ -148,7 +148,7 @@ export const PRICING: CompetitorPricing[] = [
   {
     slug: "linktree",
     pricingUrl: "https://linktr.ee/s/pricing/",
-    verified: "July 2026",
+    verified: "August 2026",
     quoteGated: false,
     freeTier: "Yes — Free forever plan (unlimited links, basic analytics, Linktree branding)",
     annualNote: "Annual billing saves roughly 30–37% (e.g. Pro $15 to $12/mo, Premium $35 to $24/mo).",
@@ -167,7 +167,7 @@ export const PRICING: CompetitorPricing[] = [
   {
     slug: "kartra",
     pricingUrl: "https://kartra.com/pricing/",
-    verified: "July 2026",
+    verified: "August 2026",
     quoteGated: false,
     freeTier: "None — 14-day free trial + 30-day money-back guarantee",
     annualNote: "Save up to 22% billed annually.",
@@ -187,7 +187,7 @@ export const PRICING: CompetitorPricing[] = [
   {
     slug: "sharpspring",
     pricingUrl: "https://www.constantcontact.com/pricing/lead-gen-crm",
-    verified: "July 2026",
+    verified: "August 2026",
     quoteGated: true,
     freeTier: "None",
     plans: [
@@ -203,7 +203,7 @@ export const PRICING: CompetitorPricing[] = [
   {
     slug: "klaviyo",
     pricingUrl: "https://www.klaviyo.com/pricing",
-    verified: "July 2026",
+    verified: "August 2026",
     quoteGated: false,
     freeTier: "Yes — 250 active profiles, 500 email sends/mo, 150 SMS credits/mo",
     plans: [
@@ -222,7 +222,7 @@ export const PRICING: CompetitorPricing[] = [
   {
     slug: "zoho",
     pricingUrl: "https://www.zoho.com/crm/zohocrm-pricing.html",
-    verified: "July 2026",
+    verified: "August 2026",
     quoteGated: false,
     freeTier: "Yes — up to 3 users",
     annualNote: "Save up to 34% per the live page banner; monthly billing runs roughly 20–34% higher than the annual per-user prices below.",
@@ -243,7 +243,7 @@ export const PRICING: CompetitorPricing[] = [
   {
     slug: "salesforce",
     pricingUrl: "https://www.salesforce.com/small-business/pricing/",
-    verified: "July 2026",
+    verified: "August 2026",
     quoteGated: true,
     freeTier: "Starter Suite has a 30-day free trial; a Foundations free tier exists for existing customers",
     annualNote: "Pro Suite and above are annual-commit by default; Starter Suite is the only edition billed monthly.",
@@ -262,7 +262,7 @@ export const PRICING: CompetitorPricing[] = [
   {
     slug: "vapi",
     pricingUrl: "https://vapi.ai/pricing",
-    verified: "July 2026",
+    verified: "August 2026",
     quoteGated: false,
     freeTier: "60+ minutes included to start; no ongoing free tier",
     plans: [
@@ -280,7 +280,7 @@ export const PRICING: CompetitorPricing[] = [
   {
     slug: "retell-ai",
     pricingUrl: "https://www.retellai.com/pricing",
-    verified: "July 2026",
+    verified: "August 2026",
     quoteGated: false,
     freeTier: "$10 free credits (about 60 minutes)",
     plans: [
@@ -288,7 +288,7 @@ export const PRICING: CompetitorPricing[] = [
       { name: "Enterprise", price: "Custom — talk to sales", whoFor: "High volume", limits: ["Dedicated server, 24/7 support, SSO"] },
     ],
     stacks: [
-      { label: "Per-minute components stack", detail: "Voice infrastructure ($0.055/min) + TTS ($0.015–$0.040/min depending on provider) + LLM ($0.045–$0.16/min depending on model) + telephony ($0.015/min) all bill separately and add up per call." },
+      { label: "Per-minute components stack", detail: "Voice infrastructure ($0.055/min) + TTS ($0.015–$0.040/min depending on provider) + LLM ($0.003–$0.16/min depending on model) + telephony ($0.015/min) all bill separately and add up per call." },
       { label: "Feature add-ons", detail: "Knowledge Base adds $0.005/min, PII removal $0.01/min, guardrails $0.005/min; phone numbers are $2/mo and extra concurrency is $8/mo per line beyond 20." },
     ],
     bottomLine:
@@ -297,11 +297,11 @@ export const PRICING: CompetitorPricing[] = [
   {
     slug: "synthflow",
     pricingUrl: "https://synthflow.ai/pricing",
-    verified: "July 2026",
+    verified: "August 2026",
     quoteGated: true,
     freeTier: "Trial minutes historically offered; unverified currently",
     plans: [
-      { name: "Enterprise (the only tier the live page shows)", price: "starting at reportedly ~$30,000/yr, custom-scoped", whoFor: "Contact-center-scale voice AI", limits: ["Custom concurrency, SIP trunking, MSA/DPA"] },
+      { name: "Enterprise (the only tier the live page shows)", price: "starting at $30,000/yr (confirmed on the live pricing page), custom-scoped", whoFor: "Contact-center-scale voice AI", limits: ["Custom concurrency, SIP trunking, MSA/DPA"] },
       { name: "Self-serve (reported, not on the live page)", price: "reported pay-as-you-go from ~$0.08–$0.09/min", whoFor: "Smaller teams", limits: ["Enterprise volume rates reportedly down to ~$0.07/min"] },
     ],
     stacks: [
@@ -309,12 +309,12 @@ export const PRICING: CompetitorPricing[] = [
       { label: "Per-minute engine, LLM & telephony", detail: "Base engine, LLM, and telephony costs stack per minute, on top of whatever plan you're on." },
     ],
     bottomLine:
-      "Synthflow's pricing model changed to enterprise-first — the public page now only shows custom, ~$30,000/year contracts. Older self-serve per-minute rates and the $2,000/mo whitelabel add-on still circulate in third-party sources but aren't verifiable on the live page — treat all numbers here as reported, not confirmed.",
+      "Synthflow's pricing model changed to enterprise-first — the public page now only shows one confirmed number: custom-scoped contracts starting at $30,000/year. Older self-serve per-minute rates and the $2,000/mo whitelabel add-on still circulate in third-party sources but aren't shown on the live page — treat those figures as reported, not confirmed.",
   },
   {
     slug: "chatbase",
     pricingUrl: "https://www.chatbase.co/pricing",
-    verified: "July 2026",
+    verified: "August 2026",
     quoteGated: false,
     freeTier: "Yes — 50 message credits/mo, 1 agent, agents deleted after 14 days inactivity",
     annualNote: "Prices shown are annual billing (20% off); monthly list price runs about 25% higher.",
@@ -334,7 +334,7 @@ export const PRICING: CompetitorPricing[] = [
   {
     slug: "botpress",
     pricingUrl: "https://botpress.com/pricing",
-    verified: "July 2026",
+    verified: "August 2026",
     quoteGated: true,
     freeTier: "Yes — free pay-as-you-go tier with 500 incoming messages/mo and a $5 monthly AI credit",
     annualNote: "Quoted Plus/Team prices are annual-plan rates — month-to-month billing costs more.",
@@ -354,7 +354,7 @@ export const PRICING: CompetitorPricing[] = [
   {
     slug: "stammer-ai",
     pricingUrl: "https://www.stammer.ai/pricing",
-    verified: "July 2026",
+    verified: "August 2026",
     quoteGated: true,
     freeTier: "None — 14-day free trial",
     plans: [
@@ -372,7 +372,7 @@ export const PRICING: CompetitorPricing[] = [
   {
     slug: "podium",
     pricingUrl: "https://www.podium.com/pricing",
-    verified: "July 2026",
+    verified: "August 2026",
     quoteGated: true,
     freeTier: "None",
     plans: [
@@ -390,7 +390,7 @@ export const PRICING: CompetitorPricing[] = [
   {
     slug: "vendasta",
     pricingUrl: "https://www.vendasta.com/pricing/",
-    verified: "July 2026",
+    verified: "August 2026",
     quoteGated: true,
     freeTier: "A free tier historically existed for the platform — not shown on the pricing page as of July 2026",
     plans: [
@@ -409,7 +409,7 @@ export const PRICING: CompetitorPricing[] = [
   {
     slug: "goodcall",
     pricingUrl: "https://www.goodcall.com/pricing",
-    verified: "July 2026",
+    verified: "August 2026",
     quoteGated: true,
     freeTier: "Free trial (no permanent free tier)",
     annualNote: "Annual billing saves 15%.",
@@ -428,7 +428,7 @@ export const PRICING: CompetitorPricing[] = [
   {
     slug: "voiceflow",
     pricingUrl: "https://www.voiceflow.com/pricing",
-    verified: "July 2026",
+    verified: "August 2026",
     quoteGated: true,
     freeTier: "Yes — Free/Sandbox tier for prototyping",
     annualNote: "10% off the base subscription only (not seats) — reduced from 20% in April 2025.",
@@ -448,7 +448,7 @@ export const PRICING: CompetitorPricing[] = [
   {
     slug: "lindy",
     pricingUrl: "https://www.lindy.ai/pricing",
-    verified: "July 2026",
+    verified: "August 2026",
     quoteGated: true,
     freeTier: "None — 7-day free trial (full Plus tier, no card required)",
     plans: [
@@ -467,7 +467,7 @@ export const PRICING: CompetitorPricing[] = [
   {
     slug: "durable",
     pricingUrl: "https://durable.com/pricing",
-    verified: "July 2026",
+    verified: "August 2026",
     quoteGated: false,
     freeTier: "Yes — durable.site subdomain, CRM to 10 customers, 5 AI images + 10 AI chat messages/mo",
     annualNote: "Save 15% billed annually.",
@@ -485,7 +485,7 @@ export const PRICING: CompetitorPricing[] = [
   {
     slug: "my-ai-front-desk",
     pricingUrl: "https://www.myaifrontdesk.com/pricing",
-    verified: "July 2026",
+    verified: "August 2026",
     quoteGated: true,
     freeTier: "None — 7-day free trial",
     annualNote: "Annual billing saves 20%.",
@@ -504,19 +504,20 @@ export const PRICING: CompetitorPricing[] = [
   {
     slug: "smith-ai",
     pricingUrl: "https://smith.ai/pricing/ai-receptionist",
-    verified: "July 2026",
-    quoteGated: true,
-    freeTier: "None",
+    verified: "August 2026",
+    quoteGated: false,
+    freeTier: "Yes — Free plan, 25 calls/mo included, $3.00/call after that",
     plans: [
-      { name: "AI Receptionist", price: "reported from ~$95/mo (~50-60 calls) up to ~$800/mo across three tiers", whoFor: "SMBs wanting 24/7 AI answering", limits: ["Per-call effective rate reported ~$1.60–$1.90 in-tier"] },
-      { name: "Virtual (human) Receptionist", price: "reported ~$292.50/mo (30 calls) up to ~$1,950/mo (300 calls)", whoFor: "Businesses wanting live agents", limits: ["Per-call rate reported ~$6.50–$9.75"] },
+      { name: "Free", price: "$0/mo", whoFor: "Testing AI call answering at low volume", limits: ["25 calls/mo included", "$3.00/call overage"] },
+      { name: "Pro", price: "$150/mo", whoFor: "SMBs wanting 24/7 AI answering", limits: ["75–300 calls/mo tiered, ~$2.00/call in-tier (up to 17% volume discount)", "Overage $2.17–$2.50/call"] },
+      { name: "Enterprise", price: "$500/mo", whoFor: "Higher-volume AI answering", limits: ["300–1,000+ calls/mo tiered, ~$1.67/call in-tier", "Overage $2.10–$2.17/call"] },
     ],
     stacks: [
-      { label: "Per-call billing — the real cost driver", detail: "Both the AI and human plans bill by the call — reported overage runs about $2.40/call beyond your plan's included volume, so busier months cost proportionally more." },
-      { label: "Custom AI training fee", detail: "Reported around $2,000, charged separately on monthly plans (bundled into annual plans for 2026)." },
+      { label: "Per-call billing — the real cost driver", detail: "Every tier bills by the call — overage runs $2.10–$3.00/call beyond your plan's included volume, so busier months cost proportionally more." },
+      { label: "Virtual (human) receptionist, priced separately", detail: "Smith.ai's human-hybrid Virtual Receptionist product is a separate line, not shown on the AI receptionist page — third-party sources report it from about $292.50/mo (30 calls) up to $1,950/mo (300 calls), unconfirmed." },
     ],
     bottomLine:
-      "Smith.ai's pricing pages hide numbers behind forms, so every figure here is third-party reported, not confirmed. The pattern is clear either way: it's a per-call service, so growth in call volume grows your bill proportionally — there's no flat platform fee.",
+      "Smith.ai's AI Receptionist pricing is now public: free to start (25 calls/mo), $150/mo for Pro, $500/mo for Enterprise. It's still a per-call service — every plan bills $1.67 to $3.00 per call, in-tier or as overage — so growth in call volume grows your bill proportionally, unlike a flat platform fee.",
   },
 ];
 
