@@ -282,7 +282,12 @@ export default async function DashboardLayout({
 
   return (
     <SoulProvider soul={soul} personality={personality}>
-      <IdentifyOnAuth userId={user?.id ?? null} email={user?.email ?? null} orgId={orgId} />
+      <IdentifyOnAuth
+        userId={user?.id ?? null}
+        email={user?.email ?? null}
+        orgId={user?.orgId ?? null}
+        activeOrgId={isSwitchedOrg ? orgId : null}
+      />
       <div className="min-h-screen w-full lg:p-3">
         <div className="flex min-h-screen w-full flex-col items-center justify-start bg-background/95 lg:rounded-2xl lg:border lg:border-border/80 lg:shadow-(--shadow-card)">
           <div className="animate-page-enter flex min-h-screen w-full flex-col md:flex-row">

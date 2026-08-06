@@ -13,12 +13,17 @@
 // straight through as a no-op, so call sites can always write
 // `captureFunnelEvent(buildXEvent({...}))` without an extra guard.
 
-import { captureServerEvent } from "@/lib/analytics/capture";
+import { captureServerEvent, getPosthogClient } from "@/lib/analytics/capture";
+
+export type FunnelPropertyValue = string | number | boolean | null;
 
 export type FunnelEvent = {
   event: string;
   distinctId: string;
-  properties: Record<string, unknown>;
+  /** Flat properties, plus PostHog's nested $set for person-property writes. */
+  properties: Record<string, FunnelPropertyValue> & {
+    $set?: Record<string, FunnelPropertyValue>;
+  };
 };
 
 function resolveDistinctId(userId: string | null | undefined, orgId: string | null | undefined): string | null {
@@ -50,7 +55,7 @@ export function buildSignedUpEvent(input: BuildSignedUpEventInput): FunnelEvent 
   const distinctId = resolveDistinctId(input.userId, input.orgId);
   if (!distinctId || !input.orgId?.trim()) return null;
 
-  const properties: Record<string, unknown> = {
+  const properties: FunnelEvent["properties"] = {
     org_id: input.orgId.trim(),
   };
 
@@ -83,7 +88,7 @@ export function buildWorkspaceCreatedEvent(input: BuildWorkspaceCreatedEventInpu
   const distinctId = resolveDistinctId(input.userId, input.orgId);
   if (!distinctId || !input.orgId?.trim()) return null;
 
-  const properties: Record<string, unknown> = {
+  const properties: FunnelEvent["properties"] = {
     org_id: input.orgId.trim(),
     source: input.source,
   };
@@ -118,10 +123,13 @@ export function buildCheckoutStartedEvent(input: BuildCheckoutStartedEventInput)
   const orgId = input.orgId?.trim();
   if (!userId || !orgId) return null;
 
-  const properties: Record<string, unknown> = {
+  const properties: FunnelEvent["properties"] = {
     org_id: orgId,
-    workspace_id: input.workspaceId ?? "",
   };
+
+  if (input.workspaceId) {
+    properties.workspace_id = input.workspaceId;
+  }
 
   if (input.tier) {
     properties.tier = input.tier;
@@ -139,25 +147,55 @@ export function buildCheckoutStartedEvent(input: BuildCheckoutStartedEventInput)
 /**
  * Thin fire-and-forget wrapper delegating to captureServerEvent. Accepts
  * the builder's null-on-missing-ids output directly so call sites never
- * need a separate guard — a null payload from a malformed builder input is
- * a silent no-op, logged so it's visible without ever affecting the
- * caller's request path.
+ * need a separate guard. A null payload is expected on legitimate paths
+ * (e.g. checkout with no org resolved yet) so this is a SILENT no-op —
+ * builders themselves are the right place to warn on genuinely malformed
+ * input, not this pass-through.
  */
 export function captureFunnelEvent(payload: FunnelEvent | null): void {
-  if (!payload) {
-    console.warn("[funnel] captureFunnelEvent skipped — builder returned null (missing required id)");
-    return;
-  }
+  if (!payload) return;
 
   try {
     captureServerEvent({
       event: payload.event,
       distinctId: payload.distinctId,
-      properties: payload.properties as Record<string, string | number | boolean | null>,
+      properties: payload.properties,
     });
   } catch (err) {
     console.warn(
       `[funnel] captureFunnelEvent threw (swallowed): ${err instanceof Error ? err.message : String(err)}`,
     );
+  }
+}
+
+/**
+ * Alias an anonymous org-keyed distinct id to the user who just claimed
+ * ownership of it. Every person-funnel event fired before a user exists
+ * (workspace_created) is keyed by orgId; every event fired after
+ * (signed_up, checkout_started) is keyed by userId. Without this alias
+ * PostHog sees two unrelated persons and the funnel never joins.
+ *
+ * Fire-and-forget, same posture as captureFunnelEvent: no-ops when either
+ * id is missing or when PostHog isn't configured, never throws into the
+ * caller's request path. Uses aliasImmediate (not the buffered alias())
+ * for the same serverless-safety reason captureServerEvent uses
+ * captureImmediate — see capture.ts.
+ */
+export function aliasOrgToUser(userId: string | null | undefined, orgId: string | null | undefined): void {
+  const trimmedUserId = userId?.trim();
+  const trimmedOrgId = orgId?.trim();
+  if (!trimmedUserId || !trimmedOrgId) return;
+
+  try {
+    const ph = getPosthogClient();
+    if (!ph) return;
+
+    void ph
+      .aliasImmediate({ distinctId: trimmedUserId, alias: trimmedOrgId })
+      .catch(() => {
+        // Swallow — an alias failure must be invisible to the caller.
+      });
+  } catch {
+    // Never let an alias-construction bug reach the caller's request path.
   }
 }

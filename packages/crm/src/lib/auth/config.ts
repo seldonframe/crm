@@ -5,7 +5,10 @@ import { db } from "@/db";
 import { accounts, organizations, users } from "@/db/schema";
 import { and, eq } from "drizzle-orm";
 import { sendNewSignupAlert } from "@/lib/notifications/ops-notifications";
-import { buildSignedUpEvent, captureFunnelEvent } from "@/lib/analytics/funnel";
+// funnel.ts (posthog-node) is imported lazily below, not statically here —
+// config.ts sits in the proxy/middleware module graph (config -> auth ->
+// src/proxy.ts), and a static import would pull posthog-node into that
+// bundle for every request, not just the rare createUser event.
 
 const BILLING_STATUSES = ["trialing", "active", "past_due", "canceled", "unpaid"] as const;
 const BILLING_PERIODS = ["monthly", "yearly"] as const;
@@ -426,6 +429,7 @@ export const authConfig = {
         const orgId = typeof (user as { orgId?: unknown }).orgId === "string" ? (user as { orgId: string }).orgId : null;
         const userId = typeof user.id === "string" ? user.id : null;
         const email = typeof user.email === "string" ? user.email : null;
+        const { buildSignedUpEvent, captureFunnelEvent } = await import("@/lib/analytics/funnel");
         captureFunnelEvent(buildSignedUpEvent({ userId, orgId, email }));
       } catch (err) {
         console.warn(

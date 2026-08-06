@@ -18,6 +18,7 @@ import {
   buildWorkspaceCreatedEvent,
   buildCheckoutStartedEvent,
   captureFunnelEvent,
+  aliasOrgToUser,
 } from "../../../src/lib/analytics/funnel";
 
 describe("buildSignedUpEvent", () => {
@@ -113,6 +114,11 @@ describe("buildCheckoutStartedEvent", () => {
     assert.equal(result, null);
   });
 
+  test("workspace_id omitted entirely when absent", () => {
+    const result = buildCheckoutStartedEvent({ userId: "user-1", orgId: "org-1", tier: "workspace" });
+    assert.equal("workspace_id" in (result?.properties ?? {}), false);
+  });
+
   test("price_id used instead of tier for the legacy path", () => {
     const result = buildCheckoutStartedEvent({
       userId: "user-1",
@@ -169,5 +175,46 @@ describe("captureFunnelEvent", () => {
   test("no-ops silently when given null (malformed input upstream)", () => {
     captureFunnelEvent(null);
     assert.equal(captured.length, 0);
+  });
+});
+
+describe("aliasOrgToUser", () => {
+  type AliasCall = { distinctId: string; alias: string };
+
+  let aliased: AliasCall[] = [];
+  const originalAliasImmediate = PostHog.prototype.aliasImmediate;
+
+  beforeEach(() => {
+    aliased = [];
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
+    (PostHog.prototype as any).aliasImmediate = async function (data: AliasCall) {
+      aliased.push(data);
+      return undefined;
+    };
+  });
+
+  afterEach(() => {
+    PostHog.prototype.aliasImmediate = originalAliasImmediate;
+  });
+
+  test("delegates to the posthog-node client with {distinctId: userId, alias: orgId}", () => {
+    aliasOrgToUser("user-1", "org-1");
+    assert.equal(aliased.length, 1);
+    assert.deepEqual(aliased[0], { distinctId: "user-1", alias: "org-1" });
+  });
+
+  test("no-ops when userId is missing", () => {
+    aliasOrgToUser(null, "org-1");
+    assert.equal(aliased.length, 0);
+  });
+
+  test("no-ops when orgId is missing", () => {
+    aliasOrgToUser("user-1", null);
+    assert.equal(aliased.length, 0);
+  });
+
+  test("no-ops when both are missing", () => {
+    aliasOrgToUser(undefined, undefined);
+    assert.equal(aliased.length, 0);
   });
 });

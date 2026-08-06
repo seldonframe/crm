@@ -734,6 +734,18 @@ export async function createManagedOrganizationAction(formData: FormData) {
 
     if (owner?.id) {
       await db.update(organizations).set({ ownerId: owner.id, updatedAt: new Date() }).where(eq(organizations.id, org.id));
+
+      // 2026-08-06 funnel observability — alias the org-keyed distinct id
+      // to the new owner, same as every other ownerId-claim site. Lazy
+      // import keeps posthog-node out of module graphs that don't need it.
+      try {
+        const { aliasOrgToUser } = await import("@/lib/analytics/funnel");
+        aliasOrgToUser(owner.id, org.id);
+      } catch (error) {
+        console.warn(
+          `[billing/orgs] aliasOrgToUser threw (swallowed): ${error instanceof Error ? error.message : String(error)}`,
+        );
+      }
     }
   }
 
@@ -1181,6 +1193,21 @@ export async function claimAnonymousWorkspaceForEmail(
     .update(organizations)
     .set({ ownerId: createdUser.id, updatedAt: new Date() })
     .where(eq(organizations.id, workspaceId));
+
+  // 2026-08-06 funnel observability — this is the canonical anonymous-org
+  // claim path (admin-token workspace -> real account). Alias the
+  // org-keyed distinct id to the new user so PostHog can join
+  // workspace_created (orgId-keyed) to signed_up/checkout_started
+  // (userId-keyed). Lazy import keeps posthog-node out of module graphs
+  // that don't need it.
+  try {
+    const { aliasOrgToUser } = await import("@/lib/analytics/funnel");
+    aliasOrgToUser(createdUser.id, workspaceId);
+  } catch (error) {
+    console.warn(
+      `[billing/orgs] aliasOrgToUser threw (swallowed): ${error instanceof Error ? error.message : String(error)}`,
+    );
+  }
 
   return { ok: true, userId: createdUser.id, userExisted: false };
 }
