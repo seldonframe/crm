@@ -15,6 +15,27 @@ import { test, expect } from "@playwright/test";
 
 const BROKEN_PAGE_PATTERN = /Application error|missingsecret/i;
 
+// Hard production guard for the FLOW tier — this tier creates real data
+// (a workspace, a checkout attempt) and must NEVER run against production,
+// even if someone sets E2E_FULL=1 by mistake while E2E_BASE_URL still
+// points at the production host. This check happens regardless of
+// E2E_FULL so the guard can't be bypassed by the same env var that gates
+// the tier on.
+function isProductionHost(rawBaseUrl: string | undefined): boolean {
+  if (!rawBaseUrl) return false;
+  try {
+    const host = new URL(rawBaseUrl).hostname.toLowerCase();
+    return host === "seldonframe.com" || host.endsWith(".seldonframe.com");
+  } catch {
+    // An unparsable base URL isn't a production host we can identify —
+    // fail open on "unknown", not on "safe to mutate".
+    return false;
+  }
+}
+
+const FLOW_BASE_URL = process.env.E2E_BASE_URL;
+const FLOW_IS_PRODUCTION = isProductionHost(FLOW_BASE_URL);
+
 test.describe("render tier (GET-only, safe everywhere)", () => {
   test("GET / is healthy", async ({ page }) => {
     // Reality check (verified live 2026-08-06): src/proxy.ts treats
@@ -53,10 +74,13 @@ test.describe("render tier (GET-only, safe everywhere)", () => {
   test("GET /signup renders the signup page", async ({ page }) => {
     const response = await page.goto("/signup");
     expect(response?.status()).toBe(200);
-    // Unique to /signup (login shares the same h1 but not this subline).
-    await expect(
-      page.getByText("Your website, booking, CRM, and AI receptionist", { exact: false })
-    ).toBeVisible();
+    // Durable structural sentinels, not marketing copy: the email input
+    // (shared shape with /login) plus the submit button text, which is
+    // unique to signup-form.tsx ("...email link" vs login's "...email").
+    // A marketing-copy sentinel here couples deploy-demo to unrelated
+    // landing-copy edits — see BLOCKING review 2026-08-06.
+    await expect(page.getByPlaceholder("you@company.com")).toBeVisible();
+    await expect(page.getByRole("button", { name: "Continue with email link" })).toBeVisible();
 
     const body = await page.content();
     expect(body).not.toMatch(BROKEN_PAGE_PATTERN);
@@ -65,10 +89,9 @@ test.describe("render tier (GET-only, safe everywhere)", () => {
   test("GET /login renders the login page", async ({ page }) => {
     const response = await page.goto("/login");
     expect(response?.status()).toBe(200);
-    // Unique to /login (signup shares the same h1 but not this subline).
-    await expect(
-      page.getByText("The operating system for your business.", { exact: false })
-    ).toBeVisible();
+    // Durable structural sentinels — see /signup test above for rationale.
+    await expect(page.getByPlaceholder("you@company.com")).toBeVisible();
+    await expect(page.getByRole("button", { name: "Continue with email" })).toBeVisible();
 
     const body = await page.content();
     expect(body).not.toMatch(BROKEN_PAGE_PATTERN);
@@ -88,6 +111,9 @@ test.describe("render tier (GET-only, safe everywhere)", () => {
 
 test.describe("flow tier (creates data — E2E_FULL=1 only, disposable envs only)", () => {
   test.skip(process.env.E2E_FULL !== "1", "set E2E_FULL=1 to run the data-creating flow tier");
+  // This guard must trigger even when E2E_FULL=1 — it is the last line of
+  // defense against accidentally mutating production, not a convenience.
+  test.skip(FLOW_IS_PRODUCTION, `refusing to run the data-creating flow tier against production host (${FLOW_BASE_URL})`);
 
   test("create-full workspace -> public workspace page -> checkout route is alive", async ({
     request,

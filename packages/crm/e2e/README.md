@@ -35,5 +35,8 @@ E2E_FULL=1 E2E_BASE_URL=https://your-disposable-env pnpm --filter @seldonframe/c
   and only when the `E2E_BASE_URL` repository variable is configured
   (`vars.E2E_BASE_URL`). `E2E_FULL` is never set in CI.
 - `.github/workflows/deploy-demo.yml` — after a successful deploy, runs
-  the RENDER tier against the deployed URL (or
-  `https://app.seldonframe.com` as a fallback) as a post-deploy smoke.
+  the RENDER tier as a post-deploy smoke. `E2E_BASE_URL` is hardcoded to
+  `https://app.seldonframe.com` in that workflow — the deploy step doesn't
+  expose the deployment's own URL as an output, so there is no "deployed
+  URL" being targeted here, and no fallback logic; it's just the fixed
+  demo host.
