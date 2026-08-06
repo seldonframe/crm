@@ -51,7 +51,7 @@ jobs:
           VERCEL_PROJECT_ID: ${{ secrets.VERCEL_PROJECT_ID }}
 
       - name: Install Playwright chromium
-        run: npx playwright install --with-deps chromium
+        run: pnpm --filter @seldonframe/crm exec playwright install --with-deps chromium
 
       - name: Post-deploy funnel smoke (RENDER tier, GET-only)
         # This deploy step doesn't expose a URL output, so we default to

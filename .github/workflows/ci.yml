@@ -74,7 +74,7 @@ jobs:
         run: pnpm install --frozen-lockfile
 
       - name: Install Playwright chromium
-        run: npx playwright install --with-deps chromium
+        run: pnpm --filter @seldonframe/crm exec playwright install --with-deps chromium
 
       - name: Funnel render-tier smoke
         # RENDER tier only — never set E2E_FULL here, it creates data.
