@@ -49,6 +49,14 @@ jobs:
       - name: Event-registry drift-detector
         run: pnpm emit:event-registry:check
 
+      - name: Typecheck (crm)
+        # Lands as a CI gate only now: fix/copilot-persist-ephemeral fixed
+        # the last standing tsc error in the package (TS2353 — route.ts's
+        # `persist: false` on executeTurn's input had no matching property).
+        # Keeping this out of `pnpm test:unit` above so a failure reports as
+        # its own clearly-named step.
+        run: pnpm --filter crm exec tsc --noEmit
+
       - name: Generator regression net
         run: cd packages/crm && node --import tsx --test tests/regression/generator-prompts.spec.ts
 

@@ -60,6 +60,7 @@ import type { BookingPolicy } from "@/lib/agents/booking/booking-policy";
 import { bindingToCtxBooking } from "@/lib/agents/booking/binding-ctx";
 import { captureLlmGeneration } from "@/lib/analytics/llm-capture";
 import { VOICE_PROFILE_NOTE_PATH } from "@/lib/agents/voice-profile/ingest-sent-mail";
+import { buildTurnMessages, type TurnMessage } from "@/lib/agents/turn-messages";
 
 const MODEL = process.env.ANTHROPIC_AGENT_MODEL?.trim() || "claude-sonnet-4-5-20250929";
 const MAX_TURN_ITERATIONS = 6; // tool-call cap per single turn (catches loops)
@@ -116,8 +117,25 @@ export async function executeTurn(input: {
    *  prompt is composed from the agent's own blueprint/soul, byte-for-byte
    *  unchanged. */
   persona?: DeploymentPromptPersona;
+  /** Ephemeral-turn flag (Never-Lies L2b, 2026-07-06). Default true (normal,
+   *  persisted turn). Set to false for SYNTHETIC turns that must never
+   *  appear as prior USER context in a future turn's history — e.g. the
+   *  copilot route's vision-retry coaching instruction (route.ts). When
+   *  false:
+   *    - the user turn is NOT inserted into agentTurns
+   *    - the assistant reply is NOT inserted into agentTurns (this includes
+   *      the capped-usage holding-reply insert)
+   *    - agentConversations aggregate counters tied to turn count/timing
+   *      (lastTurnAt, tokensIn/tokensOut, llmCostCents, turnCount) are NOT
+   *      updated, since they exist to record that a turn happened
+   *    - the in-memory Anthropic messages array still includes the turn (see
+   *      buildTurnMessages in ./turn-messages) so the model has full
+   *      context, and tool EXECUTION side effects still run unchanged
+   *  Net effect: a persist:false turn writes ZERO agentTurns rows. */
+  persist?: boolean;
 }): Promise<ExecuteTurnResult> {
   const t0 = Date.now();
+  const persist = input.persist !== false;
 
   // 1. Load conversation + agent + org + soul
   const [conv] = await db
@@ -182,12 +200,17 @@ export async function executeTurn(input: {
     .limit(1);
   const nextTurnIndex = (lastTurn?.turnIndex ?? -1) + 1;
 
-  await db.insert(agentTurns).values({
-    conversationId: input.conversationId,
-    turnIndex: nextTurnIndex,
-    role: "user",
-    content: input.userMessage,
-  });
+  if (persist) {
+    await db.insert(agentTurns).values({
+      conversationId: input.conversationId,
+      turnIndex: nextTurnIndex,
+      role: "user",
+      content: input.userMessage,
+    });
+  }
+  // persist:false — skip the insert. The DB-derived `history` selected below
+  // will therefore NOT include this turn; buildTurnMessages appends it in
+  // memory instead (see below), so the model still sees it.
 
   // 4. Build messages array from conversation history
   const history = await db
@@ -202,20 +225,14 @@ export async function executeTurn(input: {
     .orderBy(asc(agentTurns.turnIndex));
 
   // Convert Seldon turn shape → Anthropic Messages API shape.
-  type AnthropicMessage = {
-    role: "user" | "assistant";
-    content:
-      | string
-      | Array<
-          | { type: "text"; text: string }
-          | { type: "tool_use"; id: string; name: string; input: unknown }
-          | { type: "tool_result"; tool_use_id: string; content: string; is_error?: boolean }
-        >;
-  };
-  const messages: AnthropicMessage[] = [];
+  // TurnMessage (imported) is the same shape as the old locally-defined
+  // AnthropicMessage — kept as an alias so the rest of this function reads
+  // unchanged.
+  type AnthropicMessage = TurnMessage;
+  const historyMessages: AnthropicMessage[] = [];
   for (const turn of history) {
     if (turn.role === "user") {
-      messages.push({ role: "user", content: turn.content ?? "" });
+      historyMessages.push({ role: "user", content: turn.content ?? "" });
     } else if (turn.role === "assistant") {
       const blocks: Array<
         | { type: "text"; text: string }
@@ -227,14 +244,14 @@ export async function executeTurn(input: {
           blocks.push({ type: "tool_use", id: tc.id, name: tc.name, input: tc.input });
         }
       }
-      messages.push({ role: "assistant", content: blocks });
+      historyMessages.push({ role: "assistant", content: blocks });
       // Tool results from previous turns ride as a user message. Capped at
       // rebuild time (token economy, 2026-07-16): the FULL output is persisted
       // on the turn row, but every later turn of the conversation re-sends
       // this history — an unbounded historical payload would tax every turn
       // that follows it, forever.
       if (turn.toolResults && turn.toolResults.length > 0) {
-        messages.push({
+        historyMessages.push({
           role: "user",
           content: turn.toolResults.map((tr) => ({
             type: "tool_result" as const,
@@ -248,6 +265,13 @@ export async function executeTurn(input: {
       }
     }
   }
+
+  // persist:true — the DB insert above already happened before this select,
+  // so `historyMessages` already ends with the current user turn; unchanged.
+  // persist:false — no such row exists, so the current user turn is missing
+  // from `historyMessages`; append it in memory so the model still sees it
+  // (pure, unit-tested in turn-messages.spec.ts).
+  const messages: AnthropicMessage[] = buildTurnMessages(historyMessages, input.userMessage, persist);
 
   // 5. System prompt + tools
   // blueprintOverride is set by the eval runner for fixture-injection scenarios
@@ -341,24 +365,30 @@ export async function executeTurn(input: {
     const holdingReply = await resolveCappedUsageReply(agent.orgId);
     const latencyMs = Date.now() - t0;
 
-    await db.insert(agentTurns).values({
-      conversationId: input.conversationId,
-      turnIndex: nextTurnIndex + 1,
-      role: "assistant",
-      content: holdingReply,
-      toolCalls: null,
-      toolResults: null,
-      validatorsPassed: [],
-      latencyMs,
-      tokensIn: 0,
-      tokensOut: 0,
-      model: "usage_capped",
-    });
+    if (persist) {
+      await db.insert(agentTurns).values({
+        conversationId: input.conversationId,
+        turnIndex: nextTurnIndex + 1,
+        role: "assistant",
+        content: holdingReply,
+        toolCalls: null,
+        toolResults: null,
+        validatorsPassed: [],
+        latencyMs,
+        tokensIn: 0,
+        tokensOut: 0,
+        model: "usage_capped",
+      });
 
-    await db
-      .update(agentConversations)
-      .set({ lastTurnAt: new Date(), turnCount: sql`${agentConversations.turnCount} + 2` })
-      .where(eq(agentConversations.id, input.conversationId));
+      await db
+        .update(agentConversations)
+        .set({ lastTurnAt: new Date(), turnCount: sql`${agentConversations.turnCount} + 2` })
+        .where(eq(agentConversations.id, input.conversationId));
+    }
+    // persist:false — no agentTurns row for the holding reply, and the
+    // conversation's turnCount/lastTurnAt (which record that a turn
+    // happened) stay untouched. The holding reply text is still returned to
+    // the caller below.
 
     console.warn(
       `[agent-runtime] usage_capped agentId=${agent.id} convId=${conv.id} orgId=${agent.orgId}`,
@@ -782,34 +812,41 @@ export async function executeTurn(input: {
   const latencyMs = Date.now() - t0;
   const costCents = computeCostCents(totalTokensIn, totalTokensOut);
 
-  await db.insert(agentTurns).values({
-    conversationId: input.conversationId,
-    turnIndex: nextTurnIndex + 1,
-    role: "assistant",
-    content: finalText,
-    toolCalls: allToolCalls.length > 0 ? allToolCalls : null,
-    toolResults: allToolResults.length > 0 ? allToolResults : null,
-    validatorsPassed: validatorResults,
-    latencyMs,
-    tokensIn: totalTokensIn,
-    tokensOut: totalTokensOut,
-    // Record the model ACTUALLY used for the final call this turn (adaptive
-    // selection may have escalated a hard turn to the premium model), not the
-    // static default — so cost/observability reflect real spend.
-    model: lastModelUsed,
-  });
+  if (persist) {
+    await db.insert(agentTurns).values({
+      conversationId: input.conversationId,
+      turnIndex: nextTurnIndex + 1,
+      role: "assistant",
+      content: finalText,
+      toolCalls: allToolCalls.length > 0 ? allToolCalls : null,
+      toolResults: allToolResults.length > 0 ? allToolResults : null,
+      validatorsPassed: validatorResults,
+      latencyMs,
+      tokensIn: totalTokensIn,
+      tokensOut: totalTokensOut,
+      // Record the model ACTUALLY used for the final call this turn (adaptive
+      // selection may have escalated a hard turn to the premium model), not the
+      // static default — so cost/observability reflect real spend.
+      model: lastModelUsed,
+    });
 
-  // 9. Update conversation aggregates
-  await db
-    .update(agentConversations)
-    .set({
-      lastTurnAt: new Date(),
-      tokensIn: sql`${agentConversations.tokensIn} + ${totalTokensIn}`,
-      tokensOut: sql`${agentConversations.tokensOut} + ${totalTokensOut}`,
-      llmCostCents: sql`${agentConversations.llmCostCents} + ${costCents}`,
-      turnCount: sql`${agentConversations.turnCount} + 2`,
-    })
-    .where(eq(agentConversations.id, input.conversationId));
+    // 9. Update conversation aggregates
+    await db
+      .update(agentConversations)
+      .set({
+        lastTurnAt: new Date(),
+        tokensIn: sql`${agentConversations.tokensIn} + ${totalTokensIn}`,
+        tokensOut: sql`${agentConversations.tokensOut} + ${totalTokensOut}`,
+        llmCostCents: sql`${agentConversations.llmCostCents} + ${costCents}`,
+        turnCount: sql`${agentConversations.turnCount} + 2`,
+      })
+      .where(eq(agentConversations.id, input.conversationId));
+  }
+  // persist:false — zero agentTurns rows written for this turn (neither the
+  // user turn above nor the assistant reply here), and agentConversations'
+  // turn-count/timing aggregate is left untouched, since it exists to record
+  // that a turn happened. `costCents` is computed either way (harmless, no
+  // side effect) but only applied to the aggregate when persisted.
 
   // v1.27.9 — agents.tokensUsedToday increment removed (see budget note
   // above). Per-turn tokens still persist on agent_turns rows for
