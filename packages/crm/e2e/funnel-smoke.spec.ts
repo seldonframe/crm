@@ -16,18 +16,24 @@ import { test, expect } from "@playwright/test";
 const BROKEN_PAGE_PATTERN = /Application error|missingsecret/i;
 
 test.describe("render tier (GET-only, safe everywhere)", () => {
-  test("GET / renders the marketing landing page", async ({ page, request }) => {
+  test("GET / is healthy", async ({ page }) => {
+    // Reality check (verified live 2026-08-06): src/proxy.ts treats
+    // app.seldonframe.com / localhost / 127.0.0.1 / *.vercel.app as the
+    // "app host" and unconditionally redirects `/` there to /login
+    // (anonymous) or /dashboard (authenticated) BEFORE the marketing
+    // landing page ((public)/page.tsx) is ever reached — that page only
+    // renders at `/` on the marketing host (seldonframe.com /
+    // www.seldonframe.com), which E2E_BASE_URL does not target here.
+    // So on every environment this suite actually runs against, `/`
+    // resolving to a healthy /login is the correct sentinel, not
+    // landing-page nav copy.
     const response = await page.goto("/");
     expect(response?.status()).toBe(200);
-
-    // Stable structural sentinel from the fixed marketing nav
-    // (src/components/landing/marketing-nav.tsx) — not marketing copy,
-    // won't churn with headline/positioning rewrites.
-    await expect(page.getByLabel("SeldonFrame — home")).toBeVisible();
+    expect(new URL(page.url()).pathname).toBe("/login");
+    await expect(page.getByRole("heading", { name: "Welcome to SeldonFrame" })).toBeVisible();
 
     const body = await page.content();
     expect(body).not.toMatch(BROKEN_PAGE_PATTERN);
-    void request;
   });
 
   test("GET /api/auth/providers exposes at least one provider (AUTH_SECRET sentinel)", async ({

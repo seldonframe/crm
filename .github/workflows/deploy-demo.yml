@@ -49,3 +49,14 @@ jobs:
         env:
           VERCEL_ORG_ID: ${{ secrets.VERCEL_ORG_ID }}
           VERCEL_PROJECT_ID: ${{ secrets.VERCEL_PROJECT_ID }}
+
+      - name: Install Playwright chromium
+        run: npx playwright install --with-deps chromium
+
+      - name: Post-deploy funnel smoke (RENDER tier, GET-only)
+        # This deploy step doesn't expose a URL output, so we default to
+        # the known demo host. Never sets E2E_FULL — GET-only, safe
+        # against production.
+        run: pnpm --filter @seldonframe/crm exec playwright test e2e/funnel-smoke.spec.ts
+        env:
+          E2E_BASE_URL: https://app.seldonframe.com
