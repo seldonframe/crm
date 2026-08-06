@@ -5,6 +5,7 @@ import { db } from "@/db";
 import { accounts, organizations, users } from "@/db/schema";
 import { and, eq } from "drizzle-orm";
 import { sendNewSignupAlert } from "@/lib/notifications/ops-notifications";
+import { buildSignedUpEvent, captureFunnelEvent } from "@/lib/analytics/funnel";
 
 const BILLING_STATUSES = ["trialing", "active", "past_due", "canceled", "unpaid"] as const;
 const BILLING_PERIODS = ["monthly", "yearly"] as const;
@@ -411,6 +412,24 @@ export const authConfig = {
       } catch (err) {
         console.warn(
           `[auth][events.createUser] sendNewSignupAlert threw (swallowed): ${err instanceof Error ? err.message : String(err)}`,
+        );
+      }
+
+      // 2026-08-06 funnel observability — signed_up person-funnel event.
+      // Never let a capture failure affect signup: captureFunnelEvent is
+      // itself fire-and-forget/catch-swallowing, but events.createUser's
+      // own signature has no provider/account context to cheaply derive
+      // `method`, so it's omitted here (builder treats it as optional).
+      // orgId comes from the adapter's createUser `returning` (auth.ts) —
+      // NextAuth passes the adapter's return value through as `user`.
+      try {
+        const orgId = typeof (user as { orgId?: unknown }).orgId === "string" ? (user as { orgId: string }).orgId : null;
+        const userId = typeof user.id === "string" ? user.id : null;
+        const email = typeof user.email === "string" ? user.email : null;
+        captureFunnelEvent(buildSignedUpEvent({ userId, orgId, email }));
+      } catch (err) {
+        console.warn(
+          `[auth][events.createUser] signed_up capture threw (swallowed): ${err instanceof Error ? err.message : String(err)}`,
         );
       }
     },

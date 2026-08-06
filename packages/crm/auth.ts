@@ -173,6 +173,12 @@ const adapter = {
           email: users.email,
           emailVerified: users.emailVerified,
           image: users.avatarUrl,
+          // 2026-08-06 funnel observability — orgId isn't part of NextAuth's
+          // AdapterUser shape, but events.createUser (lib/auth/config.ts)
+          // needs it to fire signed_up without a second DB query. Extra
+          // fields on the returned object are ignored by NextAuth itself,
+          // just carried through to the events.createUser callback.
+          orgId: users.orgId,
         });
 
       if (!created) {
