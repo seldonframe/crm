@@ -71,6 +71,12 @@ export const CRITICAL_COLUMNS = [
     migration: "0022_organizations_timezone",
     why: "NOT NULL DEFAULT 'UTC'; read on scheduled-trigger next-fire computation.",
   },
+  {
+    table: "organizations",
+    column: "is_internal",
+    migration: "0078_organizations_is_internal",
+    why: "NOT NULL DEFAULT false; read on growth-metrics org exclusion and funnel event builders.",
+  },
 ];
 
 /**
