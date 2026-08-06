@@ -15,6 +15,23 @@ if (process.env.AUTH_URL) process.env.AUTH_URL = process.env.AUTH_URL.trim();
 if (process.env.GOOGLE_CLIENT_ID) process.env.GOOGLE_CLIENT_ID = process.env.GOOGLE_CLIENT_ID.trim();
 if (process.env.GOOGLE_CLIENT_SECRET) process.env.GOOGLE_CLIENT_SECRET = process.env.GOOGLE_CLIENT_SECRET.trim();
 
+// 2026-08-06 — auth secret hardening. Preview/Dev Vercel environments were
+// found to have NO auth secret configured at all (Production had
+// AUTH_SECRET, but "[auth][logger][error] Please define a secret" still
+// surfaced on / in prod, tracing back to secret being read once at module
+// load rather than at NextAuth() call time). resolveAuthSecret is pure and
+// exported so it's unit-testable without booting NextAuth; NextAuth() below
+// calls it at invocation time, not via a stale module-load constant.
+export function resolveAuthSecret(env: Record<string, string | undefined>): string | undefined {
+  const authSecret = env.AUTH_SECRET?.trim();
+  if (authSecret) return authSecret;
+
+  const nextAuthSecret = env.NEXTAUTH_SECRET?.trim();
+  if (nextAuthSecret) return nextAuthSecret;
+
+  return undefined;
+}
+
 function slugify(input: string) {
   return input
     .toLowerCase()
@@ -182,9 +199,20 @@ const adapter = {
   },
 };
 
+const resolvedAuthSecret = resolveAuthSecret(process.env);
+if (
+  !resolvedAuthSecret &&
+  (process.env.VERCEL_ENV === "production" || process.env.NODE_ENV === "production")
+) {
+  console.error(
+    "[auth] AUTH_SECRET/NEXTAUTH_SECRET missing or empty — sessions will fail",
+  );
+}
+
 export const { handlers, signIn, signOut, auth } = NextAuth({
   debug: true,
   trustHost: true,
+  secret: resolvedAuthSecret,
   // 2026-05-17 — explicit cookie config to fix the PKCE-cookie-missing-on-
   // callback bug we hit repeatedly on prod Google OAuth.
   //
