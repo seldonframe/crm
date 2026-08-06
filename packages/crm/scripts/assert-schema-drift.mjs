@@ -75,7 +75,7 @@ export const CRITICAL_COLUMNS = [
     table: "organizations",
     column: "is_internal",
     migration: "0078_organizations_is_internal",
-    why: "NOT NULL DEFAULT false; read on growth-metrics org exclusion and funnel event builders.",
+    why: "NOT NULL DEFAULT false; no reader yet (staged for growth-metrics exclusion) — guarded because Drizzle full-row selects on organizations 500 if the column is schema-declared but unapplied.",
   },
 ];
 

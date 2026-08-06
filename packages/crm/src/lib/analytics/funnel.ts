@@ -53,7 +53,12 @@ export type BuildSignedUpEventInput = {
  */
 export function buildSignedUpEvent(input: BuildSignedUpEventInput): FunnelEvent | null {
   const distinctId = resolveDistinctId(input.userId, input.orgId);
-  if (!distinctId || !input.orgId?.trim()) return null;
+  if (!distinctId || !input.orgId?.trim()) {
+    // Signup always has an org by the time events.createUser fires — a
+    // missing id here is genuinely malformed input, not a quiet path.
+    console.warn("[funnel] buildSignedUpEvent: missing user/org id — event dropped");
+    return null;
+  }
 
   const properties: FunnelEvent["properties"] = {
     org_id: input.orgId.trim(),
@@ -86,7 +91,12 @@ export type BuildWorkspaceCreatedEventInput = {
  */
 export function buildWorkspaceCreatedEvent(input: BuildWorkspaceCreatedEventInput): FunnelEvent | null {
   const distinctId = resolveDistinctId(input.userId, input.orgId);
-  if (!distinctId || !input.orgId?.trim()) return null;
+  if (!distinctId || !input.orgId?.trim()) {
+    // createFullWorkspace always has an orgId by capture time — a missing
+    // id here is genuinely malformed input, not a quiet path.
+    console.warn("[funnel] buildWorkspaceCreatedEvent: missing org id — event dropped");
+    return null;
+  }
 
   const properties: FunnelEvent["properties"] = {
     org_id: input.orgId.trim(),
@@ -148,9 +158,10 @@ export function buildCheckoutStartedEvent(input: BuildCheckoutStartedEventInput)
  * Thin fire-and-forget wrapper delegating to captureServerEvent. Accepts
  * the builder's null-on-missing-ids output directly so call sites never
  * need a separate guard. A null payload is expected on legitimate paths
- * (e.g. checkout with no org resolved yet) so this is a SILENT no-op —
- * builders themselves are the right place to warn on genuinely malformed
- * input, not this pass-through.
+ * (e.g. checkout with no org resolved yet) so this is a SILENT no-op.
+ * Where a null return IS malformed (signed_up / workspace_created, which
+ * always have an org by capture time), the builder itself warns;
+ * checkout_started's null is a legitimate quiet path and stays silent.
  */
 export function captureFunnelEvent(payload: FunnelEvent | null): void {
   if (!payload) return;

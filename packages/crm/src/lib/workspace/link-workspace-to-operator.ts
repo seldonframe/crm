@@ -98,18 +98,13 @@ export async function linkWorkspaceToOperator(
       return { ok: false, reason: "owned_by_other" };
     }
 
-    // 2026-08-06 funnel observability — alias the org-keyed distinct id to
-    // the new owner so PostHog can join workspace_created (orgId-keyed) to
-    // signed_up/checkout_started (userId-keyed). Lazy import keeps
-    // posthog-node out of module graphs that don't need it.
-    try {
-      const { aliasOrgToUser } = await import("@/lib/analytics/funnel");
-      aliasOrgToUser(userId, workspaceId);
-    } catch (error) {
-      console.warn(
-        `[link-workspace-to-operator] aliasOrgToUser threw (swallowed): ${error instanceof Error ? error.message : String(error)}`,
-      );
-    }
+    // 2026-08-06 funnel observability — deliberately NO aliasOrgToUser here,
+    // unlike the other ownerId-claim sites. This is the agency/operator claim
+    // path: one operator claims many client workspaces, and a PostHog alias
+    // per claim would irreversibly merge every client workspace's org-keyed
+    // person into the operator's person record. Client workspaces should be
+    // modelled as a PostHog group if org-level funnels are ever needed on
+    // this path.
   }
 
   // Best-effort membership upsert. The unique (org_id, user_id) index
