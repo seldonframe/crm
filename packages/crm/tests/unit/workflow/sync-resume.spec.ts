@@ -12,7 +12,7 @@ import type { AgentSpec } from "../../../src/lib/agents/validator";
 import { resumePendingWaitsForEventInContext } from "../../../src/lib/events/bus";
 import { startRun } from "../../../src/lib/workflow/runtime";
 import type { RuntimeContext } from "../../../src/lib/workflow/types";
-import { InMemoryRuntimeStorage } from "./storage-memory";
+import { InMemoryRuntimeStorage, testLoadRunContext } from "./storage-memory";
 
 const ORG_ID = "org_sync_01";
 
@@ -21,6 +21,8 @@ function makeContext(now = new Date()): RuntimeContext {
     storage: new InMemoryRuntimeStorage(),
     invokeTool: async () => ({ data: { ok: true } }),
     now: () => now,
+    // DI seam (types.ts) — see runtime.spec.ts for why this is needed.
+    loadRunContext: testLoadRunContext,
   };
 }
 

@@ -15,7 +15,7 @@ import {
 } from "../../../src/lib/workflow/runtime";
 import type { RuntimeContext } from "../../../src/lib/workflow/types";
 import { TIMER_EVENT_TYPE } from "../../../src/lib/workflow/types";
-import { InMemoryRuntimeStorage } from "./storage-memory";
+import { InMemoryRuntimeStorage, testLoadRunContext } from "./storage-memory";
 
 const ORG_ID = "org_test_01";
 
@@ -37,6 +37,11 @@ function makeContext(options: {
       return { data: { ok: true } };
     },
     now: () => options.frozenNow ?? new Date(),
+    // DI seam (types.ts) — advanceRun's context-load guard now fails
+    // the run closed instead of degrading to a placeholder identity,
+    // so hermetic tests need a synthetic loader since there's no real
+    // Postgres in this test process.
+    loadRunContext: testLoadRunContext,
   };
 }
 
@@ -510,6 +515,11 @@ describe("runtime — step-result trace (2c PR 3 M1)", () => {
         throw new Error("boom");
       },
       now: () => new Date(),
+      // DI seam (types.ts) — this test builds its RuntimeContext
+      // inline rather than via makeContext(), so it needs its own
+      // loadRunContext injection to get past the context-load guard
+      // and reach the "boom" thrown by invokeTool.
+      loadRunContext: testLoadRunContext,
     };
     const spec: AgentSpec = {
       name: "Fail trace",
