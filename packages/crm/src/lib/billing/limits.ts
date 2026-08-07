@@ -8,11 +8,17 @@
 // the agent dispatcher) keep compiling and never block.
 //
 // enforceWorkspaceLimit is the live gate:
-//   inactive (no plan) = 0 full workspaces
-//   builder            = 0 full workspaces (landing pages capped at 10
-//                        separately via lib/tier/limits.ts)
-//   workspace          = 1
-//   agency             = unlimited (billed per-seat past 10)
+//   inactive (no plan)    = 1 full workspace — "first workspace is free
+//                           forever" (CLAUDE.md §1). This was a live
+//                           P0: the constant below returned 0 for
+//                           `inactive`, so `0 < 0` was false and EVERY
+//                           brand-new user's first build was denied with
+//                           a 402 before any work happened — while the
+//                           deny message itself said "Your first
+//                           workspace is free." Fixed 2026-08-07.
+//   builder / everything else = read straight from the plans catalog
+//                           (plans.ts), which is the single source of
+//                           truth `maxSubAccountsForTier` already uses.
 //
 // The tier resolver is injectable via `deps` so the gate is
 // unit-testable without a DB (mirrors hasFeature's DI pattern).
@@ -43,13 +49,17 @@ const defaultDeps: WorkspaceLimitDeps = {
   resolveTier: async (orgId) => normalizeTierId(await resolveTierForWorkspace(orgId)),
 };
 
-/** Full-workspace allowance per tier. builder + inactive get 0 (builder
- *  sells landing pages, not workspaces); workspace = 1; agency = -1
- *  (unlimited, overage billed per-seat past the included count). */
+/** Full-workspace allowance per tier. `inactive` (no plan) gets the
+ *  magic first-run allowance of 1 — the first workspace is free forever
+ *  (CLAUDE.md §1) — every other tier reads its cap straight off the
+ *  plans catalog (`getPlan(tier).limits.maxOrgs`), mirroring
+ *  `maxSubAccountsForTier` below so this file never drifts from
+ *  plans.ts again. `getPlan` has no "inactive" entry (it isn't a
+ *  sellable/grandfathered plan), hence the explicit branch. -1 =
+ *  unlimited. */
 function maxFullWorkspacesForTier(tier: BillingTier): number {
-  if (tier === "agency") return -1;
-  if (tier === "workspace") return 1;
-  return 0; // builder, inactive
+  if (tier === "inactive") return 1;
+  return getPlan(tier)?.limits.maxOrgs ?? 0;
 }
 
 /**
@@ -70,10 +80,14 @@ export async function enforceAgentRunLimit(orgId: string): Promise<LimitDecision
 }
 
 /**
- * Workspace-creation cap. builder/inactive = 0 full workspaces,
- * workspace = 1, agency = unlimited. The acting org's tier is resolved
- * from its primary org (walking the agency chain for managed
- * workspaces).
+ * Workspace-creation cap. `inactive` (no plan) gets the magic
+ * first-workspace-free allowance of 1 (CLAUDE.md §1); every other tier
+ * (builder, workspace, agency, and the new sellable ladder) reads its
+ * cap straight from the plans catalog (`getPlan(tier).limits.maxOrgs`)
+ * — see `maxFullWorkspacesForTier` above. -1 there means unlimited.
+ * Future cap changes belong in plans.ts, not here. The acting org's
+ * tier is resolved from its primary org (walking the agency chain for
+ * managed workspaces).
  */
 export async function enforceWorkspaceLimit(
   params: {
@@ -95,12 +109,17 @@ export async function enforceWorkspaceLimit(
   // Over (or at) the cap. 2026-06-22 magic first-run: the first workspace is
   // free on us, so the over-cap copy leads with that and points at the BYOK
   // + plan upgrade as the path to more — not a scolding "you're capped".
+  //
+  // 2026-08-07: dropped the dead `tier === "builder"` branch here — since
+  // builder's cap now comes straight from the catalog (-1, unlimited), it
+  // can never reach this deny path, and the branch's copy ("Builder
+  // includes landing pages only") had drifted false anyway (builder has
+  // sold full front-office workspaces since the 2026-07-08 pricing ladder;
+  // see plans.ts).
   const message =
     tier === "workspace"
       ? `Your first workspace is free. Add your Anthropic key and upgrade to spin up more client workspaces.`
-      : tier === "builder"
-        ? `Builder includes landing pages only. Upgrade to Workspace to create a full business workspace (CRM, booking, chatbot).`
-        : `Your first workspace is free. Choose a plan to add more.`;
+      : `Your first workspace is free. Choose a plan to add more.`;
 
   return {
     allowed: false,
