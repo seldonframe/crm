@@ -297,33 +297,53 @@ export async function advanceRun(context: RuntimeContext, runId: string): Promis
     // asCustomerContext call strips the agency field so customer-
     // facing dispatchers can't accidentally leak agency branding.
     //
-    // 2026-08-07 — GUARD. loadRunContext (via buildRunContext) hits a
-    // live DB query and can throw: no DB connection in tests, a
-    // transient blip, a workspace row that's missing/deleted. That
-    // used to escape uncaught here, which (a) stranded the run in
-    // status="running" forever with zero failure record — a never-
-    // lies violation, since a dead run kept reporting as running —
-    // and (b) meant every hermetic unit test using InMemoryRuntime-
-    // Storage + a synthetic org id failed identically against a
-    // HEALTHY database, because there is no DB in that test's
-    // process at all. Mirror startRun's best-effort philosophy: on
-    // failure, degrade to a DB-free fallback context instead of
-    // failing the run outright. Steps that don't need workspace/
-    // customer identity proceed normally; steps that DO need it
-    // already fail closed inside their own dispatcher (see
-    // dispatchConversation's contactId/phone checks) and get a
-    // proper markRunFailed + step_result through the ordinary path
-    // below — never a crash. If even the DB-free fallback throws
-    // (belt-and-suspenders — it's pure and shouldn't), that's a
-    // genuine, unrecoverable failure: mark the run failed honestly
-    // with a step_result row rather than let the exception propagate
-    // and strand the run. Never persisted — the next tick retries the
-    // real build, so a transient blip self-heals.
-    const { loadRunContext, buildFallbackRunContext } = await import("./build-run-context");
+    // 2026-08-07 — GUARD, fail-closed. loadRunContext (via
+    // buildRunContext) hits a live DB query and can throw: no DB
+    // connection, a transient blip, a workspace row that's missing/
+    // deleted. That used to escape uncaught here, which stranded the
+    // run in status="running" forever with zero failure record — a
+    // never-lies violation, since a dead run kept reporting as
+    // running. A prior version of this guard "fixed" that by
+    // degrading to a DB-free fallback context (empty workspace name,
+    // "UTC" timezone) and PROCEEDING with the step. That was rejected
+    // in review: the fallback's empty name/timezone are real fields
+    // consumed downstream with no validation —
+    // dispatchConversation interpolates workspace.name straight into
+    // an outbound SMS body ("thanks for reaching out to !"), and
+    // tool-invoker.ts's parseInWorkspaceTimezone falls back to that
+    // same degraded "UTC", re-opening the exact wrong-hour-booking bug
+    // its own comment says it exists to prevent. The dispatcher-level
+    // contactId/phone guard reviewers hoped would catch this provides
+    // ZERO incremental protection here: it runs
+    // resolveCustomerFromTriggerPayload on the SAME triggerPayload the
+    // healthy path uses, so it behaves identically degraded. On main
+    // (pre-guard), this failure produced no message and no booking —
+    // a stranded run. Proceeding on a degraded context turned that
+    // into "action taken with silently wrong content," which is worse
+    // for a product whose invariant is four-state honesty. So: on
+    // failure here, this closes ONLY the context-load path — a run
+    // never dispatches a step on invented identity. It does NOT mean
+    // no path can strand a run at status="running"; dispatchConversation
+    // has its own bare, un-try/caught DB calls (the CAS update and the
+    // inbound-message lookup) that are out of scope for this fix.
+    //
+    // A *transient* DB blip here self-heals: this failure is never
+    // persisted to workflow_runs.context, so the next cron tick (or
+    // manual retry) calls loadRunContext again and may succeed. A
+    // *deterministic* failure — the workspace row is genuinely gone —
+    // fails identically every tick and stays failed until an operator
+    // intervenes; that is correct, not a bug.
+    //
+    // context.loadRunContext is an optional DI seam (types.ts) so
+    // hermetic tests can inject a synthetic RunContext instead of
+    // production tolerating a missing one. Production omits it and
+    // gets the real DB-backed loader.
+    const { loadRunContext } = await import("./build-run-context");
     const { asCustomerContext } = await import("./run-context-customer");
+    const loadContext = context.loadRunContext ?? loadRunContext;
     let runContext: import("./run-context-customer").CustomerRunContext;
     try {
-      const fullContext = await loadRunContext({
+      const fullContext = await loadContext({
         id: run.id,
         orgId: run.orgId,
         archetypeId: run.archetypeId,
@@ -333,44 +353,52 @@ export async function advanceRun(context: RuntimeContext, runId: string): Promis
       });
       runContext = asCustomerContext(fullContext);
     } catch (primaryErr) {
-      const primaryReason = primaryErr instanceof Error ? primaryErr.message : String(primaryErr);
-      try {
-        const fallback = buildFallbackRunContext({
-          runId: run.id,
-          orgId: run.orgId,
-          archetypeId: run.archetypeId,
-          triggerPayload: run.triggerPayload,
-          triggerEventId: run.triggerEventId,
-          now: context.now(),
-        });
-        runContext = asCustomerContext(fallback);
-        if (run.orgId) {
-          await context.storage
-            .appendEventLog({
-              orgId: run.orgId,
-              eventType: "workflow.run_context_degraded",
-              payload: { runId: run.id, stepId: run.currentStepId, reason: primaryReason },
-            })
-            .catch(() => {
-              // Observability only — never let a logging failure strand the run.
-            });
+      const reason = primaryErr instanceof Error ? primaryErr.message : String(primaryErr);
+      // NB-3: this scenario IS the DB being unavailable, so a DB
+      // insert for observability (appendEventLog) would itself be
+      // liable to fail — and the review flagged the old degrade path
+      // for swallowing that failure silently. Log unconditionally to
+      // stderr/stdout (Vercel captures console.warn) so the failure
+      // is visible even when the DB write below also fails.
+      // eslint-disable-next-line no-console
+      console.warn({
+        event: "workflow.run_context_failed",
+        runId: run.id,
+        stepId: step.id,
+        reason,
+      });
+      // NB-4: keep this logging call in its own try/catch, separate
+      // from any try whose catch would attribute a DIFFERENT failure
+      // to this one — a throw from appendStepResult/markRunFailed
+      // below must never be misreported as an event-log failure, and
+      // vice versa.
+      if (run.orgId) {
+        try {
+          await context.storage.appendEventLog({
+            orgId: run.orgId,
+            eventType: "workflow.run_context_failed",
+            payload: { runId: run.id, stepId: run.currentStepId, reason },
+          });
+        } catch (logErr) {
+          // eslint-disable-next-line no-console
+          console.warn({
+            event: "workflow.run_context_failed_log_write_failed",
+            runId: run.id,
+            reason: logErr instanceof Error ? logErr.message : String(logErr),
+          });
         }
-      } catch (fallbackErr) {
-        const fallbackReason =
-          fallbackErr instanceof Error ? fallbackErr.message : String(fallbackErr);
-        const reason = `context unavailable: ${primaryReason} (fallback also failed: ${fallbackReason})`;
-        await context.storage.appendStepResult({
-          runId: run.id,
-          stepId: step.id,
-          stepType: step.type,
-          outcome: "failed",
-          captureValue: null,
-          errorMessage: reason,
-          durationMs: 0,
-        });
-        await markRunFailed(context, runId, reason);
-        return;
       }
+      await context.storage.appendStepResult({
+        runId: run.id,
+        stepId: step.id,
+        stepType: step.type,
+        outcome: "failed",
+        captureValue: null,
+        errorMessage: `context unavailable: ${reason}`,
+        durationMs: 0,
+      });
+      await markRunFailed(context, runId, `context unavailable: ${reason}`);
+      return;
     }
 
     const dispatchStart = Date.now();

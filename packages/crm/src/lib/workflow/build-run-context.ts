@@ -168,58 +168,6 @@ export async function buildRunContext(input: {
   };
 }
 
-/**
- * DB-free fallback RunContext for advanceRun's context-load guard
- * (runtime.ts). buildRunContext/loadRunContext can throw — no DB
- * connection in tests, a transient blip, or a workspace row that's
- * missing/deleted — and that used to escape uncaught, stranding the
- * run in status="running" forever with no failure record.
- *
- * This never throws: resolveCustomerFromTriggerPayload and buildClock
- * are both pure, DB-free functions. Dispatchers that genuinely need
- * real customer/workspace identity (e.g. dispatchConversation, which
- * checks runContext.customer.contactId / .phone) already fail closed
- * on an empty value and surface a clean `fail` NextAction — so a step
- * that can't proceed on a degraded context still gets a proper
- * markRunFailed + step_result record through the normal path, it just
- * no longer crashes the advancement loop to get there. Steps that
- * don't touch workspace/customer identity proceed normally.
- *
- * Deliberately not persisted to workflow_runs.context — the next tick
- * calls loadRunContext again and retries the real build, so a
- * transient blip self-heals instead of calcifying a placeholder.
- */
-export function buildFallbackRunContext(input: {
-  runId: string;
-  orgId: string;
-  archetypeId: string;
-  triggerPayload: Record<string, unknown>;
-  triggerEventId: string | null;
-  now: Date;
-}): RunContext {
-  const clock = buildClock(input.now, "UTC");
-  const customer = resolveCustomerFromTriggerPayload(input.triggerPayload);
-  const workspace: RunContextWorkspace = {
-    id: input.orgId,
-    name: "",
-    slug: "",
-    timezone: "UTC",
-    soul: {} as OrgSoul,
-    theme: {},
-  };
-  return {
-    runId: input.runId,
-    orgId: input.orgId,
-    archetypeId: input.archetypeId,
-    startedAt: clock.nowIso,
-    customer,
-    workspace,
-    agency: null,
-    clock,
-    source: { type: "manual", triggerEventId: input.triggerEventId },
-  };
-}
-
 function resolveSource(
   eventType: string,
   payload: Record<string, unknown>,

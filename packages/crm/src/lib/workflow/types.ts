@@ -328,6 +328,27 @@ export type RuntimeContext = {
     inputTokens: number | undefined;
     outputTokens: number | undefined;
   }) => Promise<void>;
+  /**
+   * 2026-08-07 — DI seam for the RunContext load in advanceRun.
+   * Production omits this and gets the real `loadRunContext` from
+   * build-run-context.ts (a live DB read). Hermetic tests that need
+   * advanceRun to proceed past the context load without a real
+   * Postgres connection inject a synthetic loader here instead of
+   * relying on production tolerating a missing/degraded context —
+   * that tolerance was the bug (see runtime.ts's fail-closed comment
+   * on the context-load guard). A test that does NOT inject this and
+   * exercises advanceRun/startRun against InMemoryRuntimeStorage will
+   * hit the same "no DB in this process" failure production hits for
+   * a deleted workspace row, and the run correctly ends `failed`.
+   */
+  loadRunContext?: (run: {
+    id: string;
+    orgId: string;
+    archetypeId: string;
+    triggerPayload: Record<string, unknown>;
+    triggerEventId: string | null;
+    context: Record<string, unknown> | null;
+  }) => Promise<import("./run-context").RunContext>;
 };
 
 // ---------------------------------------------------------------------
