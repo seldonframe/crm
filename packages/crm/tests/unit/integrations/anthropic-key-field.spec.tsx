@@ -95,7 +95,7 @@ describe("<EncryptionNotice>", () => {
   test("renders the canonical AES-256-GCM sentence", () => {
     const html = renderToString(<EncryptionNotice />);
     assert.match(html, /Keys are encrypted with AES-256-GCM/);
-    assert.match(html, /SF cannot read your raw keys/);
+    assert.match(html, /Seldon cannot read your raw keys/);
     assert.match(html, /decrypted in memory at agent-turn time/);
   });
 
