@@ -125,13 +125,21 @@ export async function executeTurn(input: {
    *    - the user turn is NOT inserted into agentTurns
    *    - the assistant reply is NOT inserted into agentTurns (this includes
    *      the capped-usage holding-reply insert)
-   *    - agentConversations aggregate counters tied to turn count/timing
-   *      (lastTurnAt, tokensIn/tokensOut, llmCostCents, turnCount) are NOT
-   *      updated, since they exist to record that a turn happened
+   *    - ONLY lastTurnAt and turnCount are withheld on agentConversations —
+   *      they exist to record that a TURN happened, and a synthetic retry
+   *      turn must not move them
+   *    - token/cost aggregates (tokensIn, tokensOut, llmCostCents) on
+   *      agentConversations STILL accrue, because the LLM call behind a
+   *      persist:false turn is real and billed regardless of persist —
+   *      un-recording it would silently undercount org spend for every
+   *      reader that sums llmCostCents. agentConversations.tokensIn may by
+   *      design exceed sum(agentTurns.tokensIn): "tokens spent on this
+   *      conversation" vs. "tokens attributable to recorded turns"
    *    - the in-memory Anthropic messages array still includes the turn (see
    *      buildTurnMessages in ./turn-messages) so the model has full
    *      context, and tool EXECUTION side effects still run unchanged
-   *  Net effect: a persist:false turn writes ZERO agentTurns rows. */
+   *  Net effect: a persist:false turn writes ZERO agentTurns rows, but its
+   *  real token/cost spend is still counted. */
   persist?: boolean;
 }): Promise<ExecuteTurnResult> {
   const t0 = Date.now();
@@ -394,7 +402,7 @@ export async function executeTurn(input: {
       `[agent-runtime] usage_capped agentId=${agent.id} convId=${conv.id} orgId=${agent.orgId}`,
     );
 
-    if (nextTurnIndex === 0 && conv.status !== "test") {
+    if (persist && nextTurnIndex === 0 && conv.status !== "test") {
       await writeFirstTurnActivity(agent, orgRow.id, conv.id, input.userMessage);
     }
 
@@ -829,24 +837,40 @@ export async function executeTurn(input: {
       // static default — so cost/observability reflect real spend.
       model: lastModelUsed,
     });
-
-    // 9. Update conversation aggregates
-    await db
-      .update(agentConversations)
-      .set({
-        lastTurnAt: new Date(),
-        tokensIn: sql`${agentConversations.tokensIn} + ${totalTokensIn}`,
-        tokensOut: sql`${agentConversations.tokensOut} + ${totalTokensOut}`,
-        llmCostCents: sql`${agentConversations.llmCostCents} + ${costCents}`,
-        turnCount: sql`${agentConversations.turnCount} + 2`,
-      })
-      .where(eq(agentConversations.id, input.conversationId));
   }
+
+  // 9. Update conversation aggregates. Money and turn-existence are split:
+  // tokensIn/tokensOut/llmCostCents accrue UNCONDITIONALLY, because the LLM
+  // call that produced totalTokensIn/totalTokensOut/costCents was real and
+  // billed regardless of persist — a persist:false retry still makes a real
+  // Anthropic call (up to MAX_TURN_ITERATIONS with tools) and those tokens
+  // must never be un-recorded. sum(agentConversations.llmCostCents) is read
+  // as org spend by the usage-cap gate (src/lib/ai/client.ts), the usage-cap
+  // cron/lib (usage-cap.ts, cron/usage-caps/route.ts), the agency billing
+  // rollup (usage-rollup.ts), super-admin workspace stats, and the
+  // conversations dashboard cost column — none of those must silently lose
+  // tokens because a turn was ephemeral.
+  // lastTurnAt/turnCount stay gated on `persist`: they exist to record that a
+  // TURN happened (and turnCount is read as a user-visible "N turns" count
+  // and as an abandonment signal — turnCount <= 2 → "abandoned" in
+  // improve/source-conversations.ts), so a synthetic retry turn must not
+  // move them. Net effect: agentConversations.tokensIn/tokensOut may exceed
+  // sum(agentTurns.tokensIn/tokensOut) by design — "tokens spent on this
+  // conversation" vs. "tokens attributable to recorded turns".
+  await db
+    .update(agentConversations)
+    .set({
+      tokensIn: sql`${agentConversations.tokensIn} + ${totalTokensIn}`,
+      tokensOut: sql`${agentConversations.tokensOut} + ${totalTokensOut}`,
+      llmCostCents: sql`${agentConversations.llmCostCents} + ${costCents}`,
+      ...(persist
+        ? { lastTurnAt: new Date(), turnCount: sql`${agentConversations.turnCount} + 2` }
+        : {}),
+    })
+    .where(eq(agentConversations.id, input.conversationId));
   // persist:false — zero agentTurns rows written for this turn (neither the
-  // user turn above nor the assistant reply here), and agentConversations'
-  // turn-count/timing aggregate is left untouched, since it exists to record
-  // that a turn happened. `costCents` is computed either way (harmless, no
-  // side effect) but only applied to the aggregate when persisted.
+  // user turn above nor the assistant reply here). See the aggregate-update
+  // comment above for what still accrues vs. what stays untouched.
 
   // v1.27.9 — agents.tokensUsedToday increment removed (see budget note
   // above). Per-turn tokens still persist on agent_turns rows for
@@ -859,8 +883,11 @@ export async function executeTurn(input: {
 
   // 10. Activity bridge — first user turn → activity row on contact's
   // timeline. Subsequent turns are aggregated for the operator review
-  // surface (v1.26.1).
-  if (nextTurnIndex === 0 && conv.status !== "test") {
+  // surface (v1.26.1). Gated on `persist`: a persist:false turn writes no
+  // agentTurns row, so an activity row referencing it would dangle. Not
+  // reachable today (the retry always follows an already-persisted first
+  // turn), but cheap to close off.
+  if (persist && nextTurnIndex === 0 && conv.status !== "test") {
     await writeFirstTurnActivity(agent, orgRow.id, conv.id, input.userMessage);
   }
 
