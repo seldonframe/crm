@@ -29,7 +29,7 @@ import {
   advanceRun,
   startRun,
 } from "../../src/lib/workflow/runtime";
-import { InMemoryRuntimeStorage } from "./workflow/storage-memory";
+import { InMemoryRuntimeStorage, testLoadRunContext } from "./workflow/storage-memory";
 import type {
   AgentSpec,
   EventRegistry,
@@ -97,6 +97,9 @@ describe("SLICE 11 C3 — end-to-end cost capture", () => {
       recordLlmUsage: async (input) => {
         recordedCalls.push(input);
       },
+      // DI seam (types.ts) — see tests/unit/workflow/runtime.spec.ts
+      // for why this is needed.
+      loadRunContext: testLoadRunContext,
     };
 
     // Start the run + drive advancement.
@@ -154,6 +157,9 @@ describe("SLICE 11 C3 — end-to-end cost capture", () => {
       recordLlmUsage: async (input) => {
         recordedCalls.push(input);
       },
+      // DI seam (types.ts) — see tests/unit/workflow/runtime.spec.ts
+      // for why this is needed.
+      loadRunContext: testLoadRunContext,
     };
     const runId = await startRun(ctx, {
       orgId: ORG,
@@ -179,6 +185,12 @@ describe("SLICE 11 C3 — end-to-end cost capture", () => {
       },
       now: () => new Date(),
       // invokeClaude intentionally omitted
+      // DI seam (types.ts) — injected so this test actually exercises
+      // the missing-invokeClaude failure it's named for, rather than
+      // failing earlier at the context-load guard for an unrelated
+      // reason. See tests/unit/workflow/runtime.spec.ts for why the
+      // seam itself is needed.
+      loadRunContext: testLoadRunContext,
     };
     const runId = await startRun(ctx, {
       orgId: ORG,
