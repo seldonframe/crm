@@ -13,6 +13,11 @@
 # testing
 /coverage
 
+# playwright artifacts (any workspace)
+test-results/
+playwright-report/
+blob-report/
+
 # next.js
 /.next/
 **/.next/

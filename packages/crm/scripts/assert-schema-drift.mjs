@@ -71,6 +71,12 @@ export const CRITICAL_COLUMNS = [
     migration: "0022_organizations_timezone",
     why: "NOT NULL DEFAULT 'UTC'; read on scheduled-trigger next-fire computation.",
   },
+  {
+    table: "organizations",
+    column: "is_internal",
+    migration: "0078_organizations_is_internal",
+    why: "NOT NULL DEFAULT false; no reader yet (staged for growth-metrics exclusion) — guarded because Drizzle full-row selects on organizations 500 if the column is schema-declared but unapplied.",
+  },
 ];
 
 /**
