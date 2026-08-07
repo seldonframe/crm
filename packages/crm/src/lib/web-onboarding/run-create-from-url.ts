@@ -56,7 +56,9 @@ import { logEvent } from "@/lib/observability/log";
 
 export type RunDeps = {
   enforceWorkspaceLimit: (args: { primaryOrgId: string | null; ownedWorkspaceCount: number }) => Promise<LimitDecision>;
-  getOwnedWorkspaceCount: (userId: string) => Promise<number>;
+  /** excludeOrgId: the caller's own primary/agency org — never counted
+   *  against their tenant-workspace cap. See owned-workspace-count.ts. */
+  getOwnedWorkspaceCount: (userId: string, excludeOrgId?: string | null) => Promise<number>;
   /**
    * 2026-06-18 — MANAGED AI (BYOK gate removed). Resolves the Anthropic
    * key used for URL extraction: the operator's own BYOK key if they've
@@ -216,7 +218,10 @@ export async function runCreateFromUrl(input: RunInput): Promise<RunResult> {
       //    own per-IP rate limit (resolveWebBuildGate) is the guardrail
       //    for that path instead, so this whole step is skipped.
       if (input.sessionUser) {
-        const ownedCount = await input.deps.getOwnedWorkspaceCount(input.sessionUser.id);
+        const ownedCount = await input.deps.getOwnedWorkspaceCount(
+          input.sessionUser.id,
+          input.sessionUser.primaryOrgId,
+        );
         const decision = await input.deps.enforceWorkspaceLimit({
           primaryOrgId: input.sessionUser.primaryOrgId,
           ownedWorkspaceCount: ownedCount,

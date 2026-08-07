@@ -20,7 +20,9 @@ import { applyLandingTemplateForWorkspace } from "@/lib/landing/apply-landing-te
 
 export type RunPasteDeps = {
   enforceWorkspaceLimit: (args: { primaryOrgId: string | null; ownedWorkspaceCount: number }) => Promise<LimitDecision>;
-  getOwnedWorkspaceCount: (userId: string) => Promise<number>;
+  /** excludeOrgId: the caller's own primary/agency org — never counted
+   *  against their tenant-workspace cap. See owned-workspace-count.ts. */
+  getOwnedWorkspaceCount: (userId: string, excludeOrgId?: string | null) => Promise<number>;
   /** 2026-06-18 — MANAGED AI (BYOK gate removed). See run-create-from-url
    *  RunDeps.resolveExtractionKey for the contract. */
   resolveExtractionKey: (orgId: string | null) => Promise<{ key: string } | null>;
@@ -76,7 +78,10 @@ export async function runCreateFromPaste(input: RunPasteInput): Promise<RunPaste
       const pastedText = rawText.trim();
 
       // 3. Workspace limit
-      const ownedCount = await input.deps.getOwnedWorkspaceCount(input.sessionUser.id);
+      const ownedCount = await input.deps.getOwnedWorkspaceCount(
+        input.sessionUser.id,
+        input.sessionUser.primaryOrgId,
+      );
       const decision = await input.deps.enforceWorkspaceLimit({
         primaryOrgId: input.sessionUser.primaryOrgId,
         ownedWorkspaceCount: ownedCount,

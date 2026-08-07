@@ -218,13 +218,13 @@ describe("buildNavGroups — hiddenBlocks filtering", () => {
 // ---------------------------------------------------------------------
 
 describe("buildNavGroups — super-admin", () => {
-  test("adds the SF Admin entry (/super-admin) for super-admins", () => {
+  test("adds the Seldon Admin entry (/super-admin) for super-admins", () => {
     const groups = buildNavGroups(baseInput({ isSuperAdmin: true }));
     assert.equal(countHref(groups, "/super-admin"), 1);
-    assert.equal(findItem(groups, "/super-admin")?.label, "SF Admin");
+    assert.equal(findItem(groups, "/super-admin")?.label, "Seldon Admin");
   });
 
-  test("omits SF Admin for non-super-admins", () => {
+  test("omits Seldon Admin for non-super-admins", () => {
     const groups = buildNavGroups(baseInput({ isSuperAdmin: false }));
     assert.equal(hasHref(groups, "/super-admin"), false);
   });
@@ -316,7 +316,7 @@ describe("buildNavGroups — inside-client-workspace session", () => {
     assert.equal(hasHref(groups, "/docs"), false);
   });
 
-  test("adds SF Admin for super-admins inside a client workspace", () => {
+  test("adds Seldon Admin for super-admins inside a client workspace", () => {
     const groups = buildNavGroups(baseInput({ sessionType: "inside-client-workspace", isSuperAdmin: true }));
     assert.equal(hasHref(groups, "/super-admin"), true);
   });
