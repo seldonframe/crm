@@ -33,7 +33,7 @@ import type {
   AgentSpec,
 } from "../../src/lib/agents/validator";
 import type { RuntimeContext } from "../../src/lib/workflow/types";
-import { InMemoryRuntimeStorage } from "./workflow/storage-memory";
+import { InMemoryRuntimeStorage, testLoadRunContext } from "./workflow/storage-memory";
 
 const NOW = new Date("2026-04-25T12:00:00Z");
 const ORG = "org_clinic";
@@ -78,6 +78,11 @@ function makeE2EHarness(opts: { seedAppointment: boolean }) {
     },
     now: () => NOW,
     soulStore,
+    // DI seam (types.ts) — advanceRun's context-load guard now fails
+    // the run closed instead of degrading to a placeholder identity,
+    // so hermetic tests need a synthetic loader since there's no real
+    // Postgres in this test process.
+    loadRunContext: testLoadRunContext,
   };
 
   const ctx: DispatchContext = {
