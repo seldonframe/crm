@@ -33,6 +33,7 @@ import { resolvePersonalityForBusiness } from "@/lib/crm/personality-generator";
 import { classifyBusinessTypeFromSoul } from "@/lib/page-schema/classify-business";
 import { inferTimezone } from "@/lib/workspace/infer-timezone";
 import { trackEvent } from "@/lib/analytics/track";
+import { buildWorkspaceCreatedEvent, captureFunnelEvent } from "@/lib/analytics/funnel";
 import type { AestheticArchetypeId } from "@/lib/workspace/aesthetic-archetypes";
 import { buildBusinessHoursSoulPatch } from "@/lib/workspace/business-hours-soul";
 import { seedIntakeFieldsOnBookingTemplates } from "@/lib/workspace/seed-booking-intake-fields";
@@ -754,6 +755,19 @@ export async function createFullWorkspace(
       source: "mcp_atomic",
     },
     { orgId: createResult.orgId }
+  );
+
+  // 2026-08-06 funnel observability — workspace_created person-funnel
+  // event, right beside the existing internal workspace_created_full
+  // trackEvent above. This is the single choke point for ALL creation
+  // paths (API route, provisionClientWorkspace, MCP), so one capture here
+  // covers everything. No owner/creator user id is in scope at this call
+  // site (createAnonymousWorkspace sets ownerId: null at creation time),
+  // so distinct id falls back to orgId — see buildWorkspaceCreatedEvent.
+  // is_internal is likewise not in scope here (only createResult.orgId is
+  // available, no org row loaded) — omitted rather than adding a query.
+  captureFunnelEvent(
+    buildWorkspaceCreatedEvent({ orgId: createResult.orgId, source: "mcp_atomic" }),
   );
 
   return {

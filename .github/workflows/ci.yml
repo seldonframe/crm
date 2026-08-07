@@ -48,3 +48,36 @@ jobs:
 
       - name: Event-registry drift-detector
         run: pnpm emit:event-registry:check
+
+      - name: Generator regression net
+        run: cd packages/crm && node --import tsx --test tests/regression/generator-prompts.spec.ts
+
+  e2e-smoke:
+    runs-on: ubuntu-latest
+    if: vars.E2E_BASE_URL != ''
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v7
+
+      - name: Setup pnpm
+        uses: pnpm/action-setup@v6
+        with:
+          version: 10.18.1
+
+      - name: Setup Node
+        uses: actions/setup-node@v6
+        with:
+          node-version: 24
+          cache: pnpm
+
+      - name: Install
+        run: pnpm install --frozen-lockfile
+
+      - name: Install Playwright chromium
+        run: pnpm --filter @seldonframe/crm exec playwright install --with-deps chromium
+
+      - name: Funnel render-tier smoke
+        # RENDER tier only — never set E2E_FULL here, it creates data.
+        run: pnpm --filter @seldonframe/crm exec playwright test e2e/funnel-smoke.spec.ts
+        env:
+          E2E_BASE_URL: ${{ vars.E2E_BASE_URL }}
