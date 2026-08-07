@@ -30,7 +30,7 @@ import { resumePendingWaitsForEventInContext } from "../../../src/lib/events/bus
 import type { AgentSpec } from "../../../src/lib/agents/validator";
 import { startRun } from "../../../src/lib/workflow/runtime";
 import type { RuntimeContext } from "../../../src/lib/workflow/types";
-import { InMemoryRuntimeStorage } from "../workflow/storage-memory";
+import { InMemoryRuntimeStorage, testLoadRunContext } from "../workflow/storage-memory";
 
 const ORG_ID = "org_1a_integration";
 
@@ -39,6 +39,9 @@ function makeContext(): RuntimeContext {
     storage: new InMemoryRuntimeStorage(),
     invokeTool: async () => ({ data: { ok: true } }),
     now: () => new Date(),
+    // DI seam (types.ts) — see tests/unit/workflow/runtime.spec.ts for
+    // why this is needed.
+    loadRunContext: testLoadRunContext,
   };
 }
 
