@@ -40,7 +40,10 @@ test("returns 200 with playbook shape when ?url present", async () => {
   assert.equal(body.status, "instructions");
   assert.equal(body.url_echo, targetUrl);
   assert.equal(typeof body.instructions, "string");
-  assert.equal(body.next_tool, "create_workspace_v2");
+  // Retargeted 2026-07-02 (8a1eaee44): the from-url playbook now points at the
+  // atomic create_full_workspace path (the R1 multi-page site engine), not the
+  // block-iterated v2 flow.
+  assert.equal(body.next_tool, "create_full_workspace");
 
   // Sanity: instructions actually mention WebFetch + the URL was substituted
   assert.match(body.instructions, /WebFetch/);
@@ -51,7 +54,7 @@ test("returns 200 with playbook shape when ?url present", async () => {
   );
 
   // Required fields contract — these must stay exact; downstream
-  // create_workspace_v2 enforces them.
+  // create_full_workspace enforces them.
   for (const field of [
     "business_name",
     "city",
@@ -90,7 +93,23 @@ test("required_fields_schema includes both required and optional fields", async 
       properties: Record<string, unknown>;
     };
   };
-  // 6 required + 11 optional = 17 properties total
-  assert.equal(Object.keys(body.required_fields_schema.properties).length, 17);
+  // 6 required + 14 optional = 20 properties total.
+  // Was 17 until e4f886d0e (2026-05-22, "Phase U") added exactly three
+  // OPTIONAL enrichment fields — photos / faq / services_detailed. The
+  // required[] list was not touched, so the 6 below still holds.
+  assert.equal(Object.keys(body.required_fields_schema.properties).length, 20);
   assert.equal(body.required_fields_schema.required.length, 6);
+
+  // Name the Phase U fields explicitly so the next drift reports which key
+  // moved instead of surfacing as an opaque integer mismatch.
+  for (const field of ["photos", "faq", "services_detailed"]) {
+    assert.ok(
+      field in body.required_fields_schema.properties,
+      `required_fields_schema.properties is missing the Phase U field ${field}`
+    );
+    assert.ok(
+      !body.required_fields_schema.required.includes(field),
+      `Phase U field ${field} is optional and must not appear in required[]`
+    );
+  }
 });
