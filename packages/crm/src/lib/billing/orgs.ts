@@ -10,10 +10,11 @@ import { auth } from "@/auth";
 import { db } from "@/db";
 import { contacts, orgMembers, organizations, partnerAgencies, users } from "@/db/schema";
 import { getOrgFeatures, normalizeTierId } from "@/lib/billing/features";
-import { enforceWorkspaceLimit } from "@/lib/billing/limits";
+import { enforceWorkspaceLimit, maxFullWorkspacesForTier } from "@/lib/billing/limits";
 import { assertWritable } from "@/lib/demo/server";
 import { getPlan } from "@/lib/billing/plans";
 import { getOrgSubscription } from "@/lib/billing/subscription";
+import { getOwnedWorkspaceCount } from "@/lib/web-onboarding/owned-workspace-count";
 import { installSoul, type FrameworkConfig } from "@/lib/soul/install";
 import { seedInitialBlocks } from "@/lib/soul-compiler/blocks";
 import type { SoulV4 } from "@/lib/soul-compiler/schema";
@@ -206,17 +207,6 @@ async function getBillingUserForAdminTokenOrg(orgId: string) {
 const WORKSPACE_UPGRADE_REQUIRED_MESSAGE =
   "You've used your free workspace. Each additional workspace requires a paid tier (Growth $29/mo for up to 3 workspaces, or Scale $99/mo for unlimited).";
 
-async function getOwnedWorkspaceCount(userId: string) {
-  const [result] = await db
-    .select({ count: sql<number>`count(*)` })
-    .from(organizations)
-    // Front-office bridge: archived client workspaces are excluded so they never
-    // count against the builder's workspace limit / trigger a charge.
-    .where(and(eq(organizations.ownerId, userId), isNull(organizations.archivedAt)));
-
-  return Number(result?.count ?? 0);
-}
-
 /**
  * April 30, 2026 — pricing migration. The old "per-workspace add-on
  * quantity" model (legacy WORKSPACE_ADDON_MONTHLY_PRICE_ID) is gone.
@@ -237,11 +227,21 @@ function loadWorkspaceTierStatus(
   const stripeSubscriptionId = orgSubscription?.stripeSubscriptionId ?? null;
   const active = tier !== "inactive";
 
-  // Full-workspace allowance per tier. Agency = sentinel `999`
-  // (effectively unlimited for UI/display; the real gate uses
-  // `enforceWorkspaceLimit`); Workspace = 1; Builder = 0 (landing pages
-  // only).
-  const tierAllowance = tier === "agency" ? 999 : tier === "workspace" ? 1 : 0;
+  // 2026-08-07 — this used to be a hardcoded `agency`/`workspace`-only
+  // table left over from before the 2026-07-08 pricing ladder. It never
+  // learned the 5 new sellable tier ids (builder / managed /
+  // agency_starter / agency_growth / agency_scale), so every one of
+  // them silently fell into the `: 0` branch and displayed a 1-workspace
+  // cap here — even though `enforceWorkspaceLimit` (the actual gate)
+  // already read builder/agency_* as unlimited from the catalog. Now
+  // derived from the SAME `maxFullWorkspacesForTier` the gate uses, so
+  // this display value can't drift from enforcement again. Unlimited
+  // (-1) renders as the sentinel total 999 (quantity = 999 -
+  // FREE_WORKSPACE_ALLOWANCE) so the "X / Y" UI keeps working without a
+  // special case — the real gate is still `enforceWorkspaceLimit`.
+  const cap = maxFullWorkspacesForTier(tier);
+  const tierAllowance =
+    cap === -1 ? 999 - FREE_WORKSPACE_ALLOWANCE : Math.max(0, cap - FREE_WORKSPACE_ALLOWANCE);
 
   return {
     stripeSubscriptionId,
@@ -252,8 +252,39 @@ function loadWorkspaceTierStatus(
   };
 }
 
-async function ensureWorkspaceCreationBillingForUser(user: Awaited<ReturnType<typeof getBillingUserById>>, existingWorkspaces: number) {
-  const decision = await enforceWorkspaceLimit({
+// 2026-08-07 — deps seam (mirrors the enforceWorkspaceLimit DI pattern
+// in lib/billing/limits.ts, and the repo-wide preference for DI over
+// mock.module — see tests/unit/auth/magic-link-redirect.spec.ts) so
+// this composition — count-then-gate — is unit-testable with no DB.
+// This is the exact gate the MCP path (POST /api/v1/workspace/create,
+// via createWorkspaceFromSoulAction / createWorkspaceFromSetupAction)
+// runs through.
+export type EnsureWorkspaceCreationBillingDeps = {
+  getOwnedWorkspaceCount: (userId: string, excludeOrgId?: string | null) => Promise<number>;
+  enforceWorkspaceLimit: typeof enforceWorkspaceLimit;
+};
+
+const defaultEnsureWorkspaceCreationBillingDeps: EnsureWorkspaceCreationBillingDeps = {
+  getOwnedWorkspaceCount,
+  enforceWorkspaceLimit,
+};
+
+/**
+ * Count-then-gate for workspace creation. `excludeOrgId` (the caller's
+ * own primary org, `user.orgId`) is threaded into the shared counter so
+ * the operator's own primary org is never counted against their
+ * tenant-workspace cap — this was the P0 bug: the old private counter
+ * here counted `organizations.ownerId === userId`, which INCLUDES the
+ * primary org every signup path stamps at account creation, so a
+ * brand-new user's count was already 1 before they ever created a
+ * workspace, and `1 < 1` (cap 1, first-workspace-free) was false.
+ */
+export async function ensureWorkspaceCreationBillingForUser(
+  user: Awaited<ReturnType<typeof getBillingUserById>>,
+  deps: EnsureWorkspaceCreationBillingDeps = defaultEnsureWorkspaceCreationBillingDeps,
+) {
+  const existingWorkspaces = await deps.getOwnedWorkspaceCount(user.id, user.orgId ?? null);
+  const decision = await deps.enforceWorkspaceLimit({
     userId: user.id,
     primaryOrgId: user.orgId ?? null,
     ownedWorkspaceCount: existingWorkspaces,
@@ -371,7 +402,7 @@ export async function getWorkspaceLimitStatus() {
   const plan = getPlan(user.planId ?? "");
   const orgSubscription = await getOrgSubscription(user.orgId);
   const orgFeatures = getOrgFeatures(orgSubscription.tier ?? "free");
-  const ownedWorkspaceCount = await getOwnedWorkspaceCount(user.id);
+  const ownedWorkspaceCount = await getOwnedWorkspaceCount(user.id, user.orgId ?? null);
   const tierStatus = loadWorkspaceTierStatus(orgSubscription);
   // Tier-based cap: free=1, growth=3, scale=unlimited (rendered as
   // 999 here so the UI's "X / Y" display still works without a
@@ -394,7 +425,7 @@ export async function getWorkspaceLimitStatusForUser(userId: string) {
   const plan = getPlan(user.planId ?? "");
   const orgSubscription = await getOrgSubscription(user.orgId);
   const orgFeatures = getOrgFeatures(orgSubscription.tier ?? "free");
-  const ownedWorkspaceCount = await getOwnedWorkspaceCount(user.id);
+  const ownedWorkspaceCount = await getOwnedWorkspaceCount(user.id, user.orgId ?? null);
   const tierStatus = loadWorkspaceTierStatus(orgSubscription);
   // Tier-based cap: free=1, growth=3, scale=unlimited (rendered as
   // 999 here so the UI's "X / Y" display still works without a
@@ -904,8 +935,7 @@ export async function createWorkspaceFromSoulAction(input: CreateWorkspaceFromSo
   // Anonymous workspaces are free-tier with bearer-token admin access;
   // they don't count toward any user's workspace quota.
   if (user) {
-    const existingWorkspaces = await getOwnedWorkspaceCount(user.id);
-    await ensureWorkspaceCreationBillingForUser(user, existingWorkspaces);
+    await ensureWorkspaceCreationBillingForUser(user);
   }
 
   const baseSlug = slugify(businessName) || `workspace-${randomUUID().slice(0, 8)}`;
@@ -1041,8 +1071,7 @@ export async function createWorkspaceFromSetupAction(input: CreateWorkspaceFromS
     throw new Error("Framework is required");
   }
 
-  const existingWorkspaces = await getOwnedWorkspaceCount(user.id);
-  await ensureWorkspaceCreationBillingForUser(user, existingWorkspaces);
+  await ensureWorkspaceCreationBillingForUser(user);
 
   const baseSlug = slugify(businessName) || `workspace-${randomUUID().slice(0, 8)}`;
   let slug = baseSlug;

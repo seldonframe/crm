@@ -57,7 +57,14 @@ const defaultDeps: WorkspaceLimitDeps = {
  *  plans.ts again. `getPlan` has no "inactive" entry (it isn't a
  *  sellable/grandfathered plan), hence the explicit branch. -1 =
  *  unlimited. */
-function maxFullWorkspacesForTier(tier: BillingTier): number {
+// 2026-08-07 — exported so lib/billing/orgs.ts can derive its DISPLAY
+// cap (getWorkspaceLimitStatus's `maxOrgs`) from the exact same catalog
+// read the enforcement gate below uses, instead of a second hardcoded
+// table that drifted from the 2026-07-08 pricing ladder (it still only
+// recognized the old "agency"/"workspace" tier ids and silently
+// allotted every current sellable tier — builder, managed,
+// agency_starter, agency_growth, agency_scale — a display cap of 1).
+export function maxFullWorkspacesForTier(tier: BillingTier): number {
   if (tier === "inactive") return 1;
   return getPlan(tier)?.limits.maxOrgs ?? 0;
 }
