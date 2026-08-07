@@ -344,9 +344,8 @@ export default async function DashboardPage({
     | null = null;
   if (!isOperatorSession && user?.id) {
     try {
-      // 2026-08-07 — pass excludeOrgId (#182's second argument), matching
-      // run-create-from-url / run-create-from-paste and lib/billing/orgs.ts.
-      // The identifier is the operator's PRIMARY org (`user.orgId`), NOT the
+      // 2026-08-07 — pass excludeOrgId (#182's second argument). The
+      // identifier is the operator's PRIMARY org (`user.orgId`), NOT the
       // cookie-backed ACTIVE `orgId` above: when an operator has switched
       // into a client workspace, that active org IS a counted tenant
       // workspace and excluding it would under-count. Both forms return the
@@ -354,6 +353,16 @@ export default async function DashboardPage({
       // for the primary org), so this is defense-in-depth — without it this
       // badge and the gate that blocks the build would silently disagree the
       // moment one does.
+      //
+      // NOT full parity with the other call sites, deliberately noted: every
+      // other site pairs excludeOrgId with the SAME org on the gate
+      // (orgs.ts:286-289, run-create-from-*.ts) whereas this one excludes the
+      // primary org but gates on the ACTIVE `orgId` below. That pairing is
+      // pre-existing and untouched here; the consequence is that an operator
+      // switched into a client workspace sees a badge whose TIER resolves
+      // from the client workspace while the COUNT excludes their own primary
+      // org. Worth reconciling in its own change — do not read this call as
+      // certifying parity.
       const ownedWorkspaceCount = await getOwnedWorkspaceCount(user.id, user.orgId ?? null);
       const decision = await enforceWorkspaceLimit({
         userId: user.id,
