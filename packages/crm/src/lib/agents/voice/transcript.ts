@@ -103,6 +103,25 @@ export async function startVoiceConversation(args: {
         to_number: args.toNumber ?? null,
       },
     });
+
+    // 2026-08-07 — activation-moment analytics. Fire-and-forget: never
+    // awaited, internally swallows every error, never delays this insert.
+    // recordAgentConversationStarted does its own DB reads (independent of
+    // insertConversation's injected dep), so unit tests that inject a fake
+    // insertConversation still exercise this — it fails closed (caught,
+    // logged, no-op) against the real @/db import with no test database.
+    void (async () => {
+      const { recordAgentConversationStarted } = await import(
+        "@/lib/analytics/record-agent-activation"
+      );
+      await recordAgentConversationStarted({
+        orgId: args.orgId,
+        agentId: args.agentId,
+        conversationId: id,
+        channel: "voice",
+      });
+    })();
+
     return id;
   } catch (error) {
     logEvent("voice_call_transcript_persist_error", { error, step: "start" });
