@@ -7,6 +7,22 @@ with a checkable plan, gets ticked off as it ships, and ends with a review block
 
 ## In flight
 
+### Task — funnel observability: auth-secret fix + PostHog funnel events + e2e smoke (2026-08-06, worktree funnel-observability) — BUILT, awaiting merge
+
+Approved by Max after the funnel audit (visitor→paid = 234→10→12→2→0; zero external payers ever; funnel
+unmeasurable in PostHog). Branch feat/funnel-observability off origin/main @ 589220221, 10 commits.
+
+- [x] A. Auth secret: explicit `secret:` into NextAuth via pure `resolveAuthSecret()` (AUTH_SECRET ?? NEXTAUTH_SECRET — v5 only auto-reads the former) + prod fail-loud log + 7 specs
+- [x] B. PostHog funnel: `signed_up` (events.createUser) · `workspace_created` (createFullWorkspace choke point) · `checkout_started` (both Stripe checkout paths, observation-only) · `$identify` client component in (dashboard) layout (home org, active_org_id clears via explicit null) · `aliasOrgToUser` at 5 self-serve ownerId-claim sites (NOT the agency operator-claim path — irreversible person merges) · lazy imports keep posthog-node out of the proxy graph · organizations.is_internal + migration 0078 (journaled; founder backfill; **apply by hand**; staged — no reader yet)
+- [x] C. E2E + CI: @playwright/test + two-tier funnel-smoke (RENDER always/GET-only incl. /api/auth/providers AUTH_SECRET sentinel — live-passed 5/5 vs production; FLOW gated E2E_FULL=1 + hard prod-host guard) · ci.yml + generator regression net + e2e job gated on E2E_BASE_URL · deploy-demo post-deploy smoke · playwright install via workspace bin (not root npx)
+
+**Review (2026-08-06):** verify-build PASS — 106 tests; tsc/use-server/journal clean; regression grep empty.
+Opus round 1: 2 blocking (npx playwright drift; funnel not joinable across orgId/userId spaces) — both fixed.
+Round 2: ship, no blocking. Deferred/known: typecheck CI gate NOT added (pre-existing TS2353 in
+api/copilot/turn/route.ts on main — fix that first); is_internal wiring into jwt→session→identify is the
+next slice; AUTH_SECRET absent from Vercel Preview env (ops task, one command); wasted $create_alias on
+inline-org signup paths accepted for uniformity.
+
 ### Task — cursor.directory security-scan fixes: @seldonframe/mcp (2026-07-17, worktree vibrant-hamilton-3697cd)
 
 Scan flagged 4 findings; plugin hidden pending review. Ground truth established before coding:
