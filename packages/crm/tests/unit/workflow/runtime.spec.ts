@@ -418,11 +418,20 @@ describe("runtime — await_event step", () => {
 });
 
 // ---------------------------------------------------------------------
-// conversation step (stub behavior per PR 2 ambiguity resolution)
+// conversation step — identity guard
+//
+// 2026-08-07 — this suite used to assert the PR 2 STUB behavior
+// ("advance straight to on_exit.next" → completed). That stub was a
+// 40-line placeholder with a TODO(2c-followup); the real engine landed
+// in 002a8239d (conversation engine V1) and 38911872a moved identity
+// resolution onto runContext. conversation.ts now fails the run CLOSED
+// when the run context carries no contact identity, which is the
+// intended behavior — a conversation step with nobody to talk to must
+// not be reported as a completed run.
 // ---------------------------------------------------------------------
 
-describe("runtime — conversation step (stub)", () => {
-  test("stub advances directly to on_exit.next", async () => {
+describe("runtime — conversation step", () => {
+  test("fails closed when the trigger payload carries no contact identity", async () => {
     const context = makeContext();
     const spec: AgentSpec = {
       name: "Conv stub test",
@@ -447,7 +456,21 @@ describe("runtime — conversation step (stub)", () => {
       triggerPayload: {},
     });
     const run = await context.storage.getRun(runId);
-    assert.equal(run!.status, "completed");
+    assert.equal(run!.status, "failed");
+
+    // Pin the GUARD, not merely "some failure": the step-result row must
+    // name the dispatcher's contactId check as the reason. Without this,
+    // any unrelated breakage that fails the run would keep the test green.
+    const memory = context.storage as InMemoryRuntimeStorage;
+    const results = memory.stepResults.filter((r) => r.runId === runId);
+    assert.equal(results.length, 1);
+    assert.equal(results[0]!.stepId, "chat");
+    assert.equal(results[0]!.stepType, "conversation");
+    assert.equal(results[0]!.outcome, "failed");
+    assert.equal(
+      results[0]!.errorMessage,
+      "conversation: runContext.customer.contactId missing",
+    );
   });
 });
 
