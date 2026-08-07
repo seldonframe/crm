@@ -89,9 +89,66 @@ describe("UpgradeModal — free tier (add-a-card branch, flag-independent)", () 
     // bounces to `next`, which re-402s on the inactive tier (saving a
     // card never raises the cap) — an unbreakable loop. The at-cap
     // modal must send visitors to the real upgrade surface instead.
-    render(<UpgradeModal open={true} onOpenChange={() => {}} tier="inactive" used={1} limit={1} />);
-    const cta = screen.getByRole("button", { name: /choose a plan/i });
-    assert.ok(cta, "Choose-a-plan CTA missing");
+    //
+    // This must actually observe the navigation target, not just that
+    // the button renders — a button-existence check passes unchanged
+    // even if the CTA's handler is reverted to send visitors back into
+    // /signup/billing. The component navigates via a hard
+    // `window.location.href = ...` assignment (not a link/href), so the
+    // only observable signal is that assignment.
+    //
+    // `window.location` itself can't be stubbed directly: per the HTML
+    // spec it's an "unforgeable" own property (configurable: false),
+    // and jsdom enforces that, so `Object.defineProperty(window,
+    // "location", ...)` throws "Cannot redefine property: location".
+    // Real navigation is also a no-op in jsdom ("Not implemented:
+    // navigation to another Document") and never updates
+    // `location.href`, so reading it back afterward wouldn't work
+    // either. Instead, swap the global `window` binding itself (which
+    // IS configurable — see tests/setup-dom.ts) for a Proxy that
+    // forwards everything to the real jsdom window except `location`,
+    // where it hands back a stub object that records the assignment.
+    // The component's bare `window` reference resolves against
+    // globalThis at call time, so it picks up the proxy.
+    const realWindow = window;
+    let assignedHref: string | undefined;
+    const locationStub = {
+      get href() {
+        return assignedHref ?? "";
+      },
+      set href(value: string) {
+        assignedHref = value;
+      },
+    };
+    const proxyWindow = new Proxy(realWindow, {
+      get(target, prop, _receiver) {
+        if (prop === "location") return locationStub;
+        return Reflect.get(target, prop, target);
+      },
+    });
+    Object.defineProperty(globalThis, "window", {
+      value: proxyWindow,
+      configurable: true,
+      writable: true,
+      enumerable: false,
+    });
+    try {
+      render(<UpgradeModal open={true} onOpenChange={() => {}} tier="inactive" used={1} limit={1} />);
+      const cta = screen.getByRole("button", { name: /choose a plan/i });
+      fireEvent.click(cta);
+      assert.equal(
+        assignedHref,
+        "/settings/billing",
+        "Choose-a-plan CTA must navigate to /settings/billing, not /signup/billing",
+      );
+    } finally {
+      Object.defineProperty(globalThis, "window", {
+        value: realWindow,
+        configurable: true,
+        writable: true,
+        enumerable: false,
+      });
+    }
   });
 
   test("does NOT render any tier cards on free", () => {

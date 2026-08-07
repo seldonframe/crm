@@ -80,10 +80,14 @@ export async function enforceAgentRunLimit(orgId: string): Promise<LimitDecision
 }
 
 /**
- * Workspace-creation cap. builder/inactive = 0 full workspaces,
- * workspace = 1, agency = unlimited. The acting org's tier is resolved
- * from its primary org (walking the agency chain for managed
- * workspaces).
+ * Workspace-creation cap. `inactive` (no plan) gets the magic
+ * first-workspace-free allowance of 1 (CLAUDE.md §1); every other tier
+ * (builder, workspace, agency, and the new sellable ladder) reads its
+ * cap straight from the plans catalog (`getPlan(tier).limits.maxOrgs`)
+ * — see `maxFullWorkspacesForTier` above. -1 there means unlimited.
+ * Future cap changes belong in plans.ts, not here. The acting org's
+ * tier is resolved from its primary org (walking the agency chain for
+ * managed workspaces).
  */
 export async function enforceWorkspaceLimit(
   params: {
