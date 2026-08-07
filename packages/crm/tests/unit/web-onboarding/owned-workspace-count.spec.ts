@@ -10,6 +10,8 @@
 // fully unit-testable. The shape we mock matches the actual query.
 import { describe, test } from "node:test";
 import assert from "node:assert/strict";
+import { readFileSync } from "node:fs";
+import { fileURLToPath } from "node:url";
 
 import { countOwnedWorkspacesFromRows } from "../../../src/lib/web-onboarding/owned-workspace-count";
 
@@ -64,5 +66,46 @@ describe("countOwnedWorkspacesFromRows", () => {
       assert.equal(countOwnedWorkspacesFromRows(rows, null), 2);
       assert.equal(countOwnedWorkspacesFromRows(rows, undefined), 2);
     });
+  });
+});
+
+// 2026-08-07 — call-site coverage. The exclusion above only defends the
+// operator's own org if every caller actually PASSES excludeOrgId. #182
+// threaded it through run-create-from-url / run-create-from-paste and #183
+// through lib/billing/orgs.ts, but the dashboard header CTA still called
+// the one-argument form — so the displayed "used / limit" badge and the
+// gate that blocks the build would silently disagree the moment any write
+// path inserts an org_members owner row for a primary org (exactly what
+// the exclusion exists to defend against). The identifier must be the
+// operator's PRIMARY org (`user.orgId`), never the cookie-backed ACTIVE
+// org (`orgId`) — when an operator has switched into a client workspace
+// the active org IS a counted tenant workspace, and excluding it would
+// under-count.
+describe("getOwnedWorkspaceCount call sites all pass excludeOrgId", () => {
+  function src(relativePath: string): string {
+    return readFileSync(fileURLToPath(new URL(relativePath, import.meta.url)), "utf8");
+  }
+
+  test("the dashboard header CTA passes the operator's own primary org", () => {
+    const page = src("../../../src/app/(dashboard)/dashboard/page.tsx");
+    const calls = page.match(/getOwnedWorkspaceCount\([^)]*\)/g) ?? [];
+    assert.ok(calls.length >= 1, "expected the dashboard to count owned workspaces");
+    for (const call of calls) {
+      assert.match(
+        call,
+        /getOwnedWorkspaceCount\(\s*user\.id\s*,\s*user\.orgId \?\? null\s*\)/,
+        `dashboard call site must exclude the operator's own primary org: ${call}`,
+      );
+    }
+  });
+
+  test("the MCP path (lib/billing/orgs.ts) still passes it — #183, unchanged", () => {
+    const orgs = src("../../../src/lib/billing/orgs.ts");
+    const calls = orgs.match(/getOwnedWorkspaceCount\((?!\s*$)[^)]*\)/g) ?? [];
+    const invocations = calls.filter((c) => /\(\s*user\.id/.test(c));
+    assert.ok(invocations.length >= 1, "expected at least one invocation in orgs.ts");
+    for (const call of invocations) {
+      assert.match(call, /user\.orgId \?\? null/, `orgs.ts call site regressed: ${call}`);
+    }
   });
 });
