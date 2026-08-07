@@ -344,7 +344,17 @@ export default async function DashboardPage({
     | null = null;
   if (!isOperatorSession && user?.id) {
     try {
-      const ownedWorkspaceCount = await getOwnedWorkspaceCount(user.id);
+      // 2026-08-07 — pass excludeOrgId (#182's second argument), matching
+      // run-create-from-url / run-create-from-paste and lib/billing/orgs.ts.
+      // The identifier is the operator's PRIMARY org (`user.orgId`), NOT the
+      // cookie-backed ACTIVE `orgId` above: when an operator has switched
+      // into a client workspace, that active org IS a counted tenant
+      // workspace and excluding it would under-count. Both forms return the
+      // same number today (no signup path writes an org_members owner row
+      // for the primary org), so this is defense-in-depth — without it this
+      // badge and the gate that blocks the build would silently disagree the
+      // moment one does.
+      const ownedWorkspaceCount = await getOwnedWorkspaceCount(user.id, user.orgId ?? null);
       const decision = await enforceWorkspaceLimit({
         userId: user.id,
         primaryOrgId: orgId,
