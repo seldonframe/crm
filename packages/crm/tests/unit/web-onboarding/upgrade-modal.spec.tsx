@@ -58,16 +58,40 @@ function setTierLadderEnv(value: "1" | undefined) {
 describe("UpgradeModal — free tier (add-a-card branch, flag-independent)", () => {
   beforeEach(() => setTierLadderEnv(undefined));
 
-  test("renders the add-a-card title and subtitle", () => {
+  test("renders the choose-a-plan title and subtitle", () => {
+    // 2026-08-07: retitled from "Add a card to unlock more workspaces" —
+    // saving a card never raises the inactive tier's cap, only choosing
+    // a plan does (see upgrade-modal.tsx's freeTitle/freeDestination
+    // comments for the infinite-loop bug this fixed).
     render(<UpgradeModal open={true} onOpenChange={() => {}} tier="free" used={1} limit={1} />);
     assert.ok(
-      screen.queryAllByText(/add a card to unlock more workspaces/i).length > 0,
-      "Add-a-card title missing",
+      screen.queryAllByText(/choose a plan to add more workspaces/i).length > 0,
+      "Choose-a-plan title missing",
     );
     assert.ok(
       screen.queryAllByText(/you've used 1\/1 workspace/i).length > 0,
       "used-N/N subtitle missing",
     );
+  });
+
+  test("never renders '0/0' in the subtitle when limit is 0 (stale/legacy caller)", () => {
+    render(<UpgradeModal open={true} onOpenChange={() => {}} tier="inactive" used={0} limit={0} />);
+    assert.equal(screen.queryAllByText(/0\/0/).length, 0, "must never render 0/0");
+    assert.ok(
+      screen.queryAllByText(/your first workspace is free/i).length > 0,
+      "limit-0 fallback copy missing",
+    );
+  });
+
+  test("routes the free/inactive CTA to /settings/billing, not the card-capture page", () => {
+    // Regression test for the infinite billing loop: /signup/billing's
+    // early-return for a user who already has a card on file just
+    // bounces to `next`, which re-402s on the inactive tier (saving a
+    // card never raises the cap) — an unbreakable loop. The at-cap
+    // modal must send visitors to the real upgrade surface instead.
+    render(<UpgradeModal open={true} onOpenChange={() => {}} tier="inactive" used={1} limit={1} />);
+    const cta = screen.getByRole("button", { name: /choose a plan/i });
+    assert.ok(cta, "Choose-a-plan CTA missing");
   });
 
   test("does NOT render any tier cards on free", () => {
