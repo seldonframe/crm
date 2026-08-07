@@ -296,17 +296,82 @@ export async function advanceRun(context: RuntimeContext, runId: string): Promis
     // refreshes the clock so long-paused runs see today's date; the
     // asCustomerContext call strips the agency field so customer-
     // facing dispatchers can't accidentally leak agency branding.
-    const { loadRunContext } = await import("./build-run-context");
+    //
+    // 2026-08-07 — GUARD. loadRunContext (via buildRunContext) hits a
+    // live DB query and can throw: no DB connection in tests, a
+    // transient blip, a workspace row that's missing/deleted. That
+    // used to escape uncaught here, which (a) stranded the run in
+    // status="running" forever with zero failure record — a never-
+    // lies violation, since a dead run kept reporting as running —
+    // and (b) meant every hermetic unit test using InMemoryRuntime-
+    // Storage + a synthetic org id failed identically against a
+    // HEALTHY database, because there is no DB in that test's
+    // process at all. Mirror startRun's best-effort philosophy: on
+    // failure, degrade to a DB-free fallback context instead of
+    // failing the run outright. Steps that don't need workspace/
+    // customer identity proceed normally; steps that DO need it
+    // already fail closed inside their own dispatcher (see
+    // dispatchConversation's contactId/phone checks) and get a
+    // proper markRunFailed + step_result through the ordinary path
+    // below — never a crash. If even the DB-free fallback throws
+    // (belt-and-suspenders — it's pure and shouldn't), that's a
+    // genuine, unrecoverable failure: mark the run failed honestly
+    // with a step_result row rather than let the exception propagate
+    // and strand the run. Never persisted — the next tick retries the
+    // real build, so a transient blip self-heals.
+    const { loadRunContext, buildFallbackRunContext } = await import("./build-run-context");
     const { asCustomerContext } = await import("./run-context-customer");
-    const fullContext = await loadRunContext({
-      id: run.id,
-      orgId: run.orgId,
-      archetypeId: run.archetypeId,
-      triggerPayload: run.triggerPayload,
-      triggerEventId: run.triggerEventId,
-      context: run.context,
-    });
-    const runContext = asCustomerContext(fullContext);
+    let runContext: import("./run-context-customer").CustomerRunContext;
+    try {
+      const fullContext = await loadRunContext({
+        id: run.id,
+        orgId: run.orgId,
+        archetypeId: run.archetypeId,
+        triggerPayload: run.triggerPayload,
+        triggerEventId: run.triggerEventId,
+        context: run.context,
+      });
+      runContext = asCustomerContext(fullContext);
+    } catch (primaryErr) {
+      const primaryReason = primaryErr instanceof Error ? primaryErr.message : String(primaryErr);
+      try {
+        const fallback = buildFallbackRunContext({
+          runId: run.id,
+          orgId: run.orgId,
+          archetypeId: run.archetypeId,
+          triggerPayload: run.triggerPayload,
+          triggerEventId: run.triggerEventId,
+          now: context.now(),
+        });
+        runContext = asCustomerContext(fallback);
+        if (run.orgId) {
+          await context.storage
+            .appendEventLog({
+              orgId: run.orgId,
+              eventType: "workflow.run_context_degraded",
+              payload: { runId: run.id, stepId: run.currentStepId, reason: primaryReason },
+            })
+            .catch(() => {
+              // Observability only — never let a logging failure strand the run.
+            });
+        }
+      } catch (fallbackErr) {
+        const fallbackReason =
+          fallbackErr instanceof Error ? fallbackErr.message : String(fallbackErr);
+        const reason = `context unavailable: ${primaryReason} (fallback also failed: ${fallbackReason})`;
+        await context.storage.appendStepResult({
+          runId: run.id,
+          stepId: step.id,
+          stepType: step.type,
+          outcome: "failed",
+          captureValue: null,
+          errorMessage: reason,
+          durationMs: 0,
+        });
+        await markRunFailed(context, runId, reason);
+        return;
+      }
+    }
 
     const dispatchStart = Date.now();
     const action = await dispatchStep(run, step, context, runContext);
