@@ -17,6 +17,9 @@ import type {
   StoredStepResult,
   StoredWait,
 } from "../../../src/lib/workflow/types";
+import { buildClock, resolveCustomerFromTriggerPayload } from "../../../src/lib/workflow/build-run-context";
+import type { RunContext, RunContextWorkspace } from "../../../src/lib/workflow/run-context";
+import type { OrgSoul } from "../../../src/lib/soul/types";
 
 export type StoredEventLog = {
   id: string;
@@ -173,4 +176,56 @@ export class InMemoryRuntimeStorage implements RuntimeStorage {
       .sort((a, b) => b.createdAt.getTime() - a.createdAt.getTime())
       .map((r) => ({ ...r }));
   }
+}
+
+// ---------------------------------------------------------------------
+// testLoadRunContext — synthetic, DB-free RunContext loader.
+//
+// 2026-08-07 — advanceRun's context-load guard (runtime.ts) fails the
+// run closed when loadRunContext throws, rather than degrading to a
+// placeholder identity and proceeding (that degrade-and-proceed
+// approach shipped real SMS with an empty business name and was
+// rejected in review). Every hermetic workflow spec that drives
+// advanceRun/startRun through InMemoryRuntimeStorage needs SOMETHING
+// to satisfy the context load, since there is no real Postgres in
+// this test process. Wire this in via RuntimeContext.loadRunContext
+// (the DI seam types.ts adds) instead of relying on production
+// tolerating a missing workspace.
+//
+// Fields are populated with realistic non-empty test values (not
+// empty strings) — specs exercising conversation/tool-invoker
+// dispatch that read workspace.name / workspace.timezone need a
+// realistic identity to reach their own assertions.
+// ---------------------------------------------------------------------
+
+export async function testLoadRunContext(run: {
+  id: string;
+  orgId: string;
+  archetypeId: string;
+  triggerPayload: Record<string, unknown>;
+  triggerEventId: string | null;
+  context: Record<string, unknown> | null;
+}): Promise<RunContext> {
+  if (run.context) return run.context as unknown as RunContext;
+  const clock = buildClock(new Date(), "UTC");
+  const customer = resolveCustomerFromTriggerPayload(run.triggerPayload);
+  const workspace: RunContextWorkspace = {
+    id: run.orgId,
+    name: "Test Workspace",
+    slug: "test-workspace",
+    timezone: "UTC",
+    soul: {} as OrgSoul,
+    theme: {},
+  };
+  return {
+    runId: run.id,
+    orgId: run.orgId,
+    archetypeId: run.archetypeId,
+    startedAt: clock.nowIso,
+    customer,
+    workspace,
+    agency: null,
+    clock,
+    source: { type: "manual", triggerEventId: run.triggerEventId },
+  };
 }
