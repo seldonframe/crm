@@ -27,7 +27,7 @@ import type { AgentSpec } from "../../../src/lib/agents/validator";
 import { resumePendingWaitsForEventInContext } from "../../../src/lib/events/bus";
 import { resumeWait, startRun } from "../../../src/lib/workflow/runtime";
 import type { RuntimeContext, StoredRun, StoredWait } from "../../../src/lib/workflow/types";
-import { InMemoryRuntimeStorage } from "./storage-memory";
+import { InMemoryRuntimeStorage, testLoadRunContext } from "./storage-memory";
 
 const ORG_ID = "org_onboarding";
 
@@ -125,6 +125,8 @@ function makeContext(frozenNow?: Date): { context: RuntimeContext; calls: ToolCa
       return { data: { id: `stub_${tool}_${calls.length}` } };
     },
     now: () => frozenNow ?? new Date(),
+    // DI seam (types.ts) — see runtime.spec.ts for why this is needed.
+    loadRunContext: testLoadRunContext,
   };
   return { context, calls };
 }
