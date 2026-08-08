@@ -19,8 +19,16 @@
 //   pnpm tsx scripts/replay-ops.ts show-trace <traceId>
 //   pnpm tsx scripts/replay-ops.ts compile <traceId>
 //   pnpm tsx scripts/replay-ops.ts list-skills [--deployment <id>]
-//   pnpm tsx scripts/replay-ops.ts enable <skillId>
+//   pnpm tsx scripts/replay-ops.ts enable <skillId> [--filter '<json>']
 //   pnpm tsx scripts/replay-ops.ts disable <skillId>
+//   pnpm tsx scripts/replay-ops.ts set-filter <skillId> --filter '<json>'
+//
+// --filter is a JSON object of {senderEndsWith?, senderContains?,
+// subjectContains?} (all provided conditions AND-matched, case-insensitive)
+// or the literal string "null" to CLEAR a skill's filter. Validated with
+// lib/deployments/replay/trigger-filter.ts's validateTriggerFilter — same
+// function attemptL0Replay uses at replay time, so a filter that passes
+// here is guaranteed to parse there too.
 //
 // DB-connection pattern mirrors scripts/validate-brain-v2.ts: load
 // .env(.local) candidates via dotenv (override:false — never clobbers an
@@ -259,6 +267,8 @@ async function cmdListSkills(flags: Record<string, string>) {
       status: replaySkills.status,
       healCount: replaySkills.healCount,
       lastReplayAt: replaySkills.lastReplayAt,
+      triggerFilter: replaySkills.triggerFilter,
+      idempotency: replaySkills.idempotency,
     })
     .from(replaySkills)
     .orderBy(desc(replaySkills.createdAt));
@@ -275,17 +285,183 @@ async function cmdListSkills(flags: Record<string, string>) {
   console.log(`${rows.length} skill(s):\n`);
   for (const row of rows) {
     console.log(
-      `${row.id}  deployment=${row.deploymentId}  name=${row.name ?? "-"}  status=${row.status}  heals=${row.healCount}  lastReplay=${row.lastReplayAt ? row.lastReplayAt.toISOString() : "-"}`,
+      `${row.id}  deployment=${row.deploymentId}  name=${row.name ?? "-"}  status=${row.status}  heals=${row.healCount}  lastReplay=${row.lastReplayAt ? row.lastReplayAt.toISOString() : "-"}  filter=${row.triggerFilter ? truncate(row.triggerFilter, 200) : "-"}  idempotency=${row.idempotency ? truncate(row.idempotency, 200) : "-"}`,
     );
   }
 }
 
-async function setSkillStatus(skillId: string | undefined, status: "enabled" | "disabled") {
+/**
+ * Set (or clear) a skill's Replay gate v2 idempotency config
+ * (replay_skills.idempotency, migration 0077). Validated with the SAME
+ * passesGateV2 function replay-before-llm.ts uses at replay time, checked
+ * BEFORE any DB write, so a config that's accepted here is guaranteed to
+ * pass there too — mirrors set-filter/enable's parseFilterFlag pattern
+ * exactly. Requires the skill's OWN destructive step number (--step) and
+ * the key var (--key-var, only "message_id" is ever accepted — sender/
+ * subject are attacker-influenceable and forbidden as key material).
+ */
+async function cmdSetIdempotency(skillId: string | undefined, flags: Record<string, string>) {
+  const usage =
+    "usage: set-idempotency <skillId> --step <N> --key-var message_id  |  set-idempotency <skillId> --clear";
+  if (!skillId) {
+    console.error(usage);
+    process.exitCode = 1;
+    return;
+  }
+
+  const { db } = await import("@/db");
+  const { replaySkills } = await import("@/db/schema/replay-skills");
+  const { eq } = await import("drizzle-orm");
+
+  const [skill] = await db
+    .select({ id: replaySkills.id, deploymentId: replaySkills.deploymentId, skillMd: replaySkills.skillMd })
+    .from(replaySkills)
+    .where(eq(replaySkills.id, skillId))
+    .limit(1);
+  if (!skill) {
+    console.error(`skill not found: ${skillId}`);
+    process.exitCode = 1;
+    return;
+  }
+
+  if (flags.clear) {
+    await db
+      .update(replaySkills)
+      .set({ idempotency: null, updatedAt: new Date() })
+      .where(eq(replaySkills.id, skillId));
+    console.log(`${skillId}: idempotency config cleared  (deployment ${skill.deploymentId})`);
+    return;
+  }
+
+  if (!flags.step || !flags["key-var"]) {
+    console.error(usage);
+    process.exitCode = 1;
+    return;
+  }
+
+  const stepN = Number.parseInt(flags.step, 10);
+  if (!Number.isFinite(stepN) || stepN < 1) {
+    console.error(`--step must be a positive integer, got: ${flags.step}`);
+    process.exitCode = 1;
+    return;
+  }
+
+  const { parseSkill } = await import("@seldonframe/reelier/skill");
+  let parsed: import("@seldonframe/reelier/skill").ReelierSkill;
+  try {
+    parsed = parseSkill(skill.skillMd);
+  } catch (err) {
+    console.error(`skill_md failed to parse: ${err instanceof Error ? err.message : String(err)}`);
+    process.exitCode = 1;
+    return;
+  }
+
+  const { passesGateV2 } = await import("@/lib/deployments/replay/gate-v2");
+  const config = { stepN, keyVar: flags["key-var"] };
+  const gate = passesGateV2(parsed, config);
+  if (!gate.ok) {
+    console.error(`set-idempotency rejected: ${gate.reason}`);
+    process.exitCode = 1;
+    return;
+  }
+
+  await db
+    .update(replaySkills)
+    .set({ idempotency: config, updatedAt: new Date() })
+    .where(eq(replaySkills.id, skillId));
+  console.log(
+    `${skillId}: idempotency -> step ${stepN} key ${config.keyVar}  (deployment ${skill.deploymentId})\n\n` +
+      `WARNING: once SF_REPLAY_GATE_V2=1 is set, gate v2 replay will EXECUTE this skill's destructive ` +
+      `step FOR REAL during L0 replay (claim-guarded against a double-send, but a real send nonetheless). ` +
+      `Review the compiled skill_md above before enabling this in production, and run the staging drill ` +
+      `(spec §Rollout item 3: 10 consecutive live events, assert exactly one send per key) before flipping the flag.`,
+  );
+}
+
+/** Parse + strictly validate a `--filter` CLI flag value with the SAME
+ *  validator attemptL0Replay uses at replay time. The literal string
+ *  "null" clears the filter. Returns null and prints an error (caller sets
+ *  exitCode) on any parse/validation failure — never throws. */
+async function parseFilterFlag(
+  raw: string,
+): Promise<{ ok: true; filter: import("@/lib/deployments/replay/trigger-filter").TriggerFilter | null } | { ok: false }> {
+  const { validateTriggerFilter } = await import("@/lib/deployments/replay/trigger-filter");
+  if (raw.trim() === "null") return { ok: true, filter: null };
+  let parsed: unknown;
+  try {
+    parsed = JSON.parse(raw);
+  } catch (err) {
+    console.error(`--filter is not valid JSON: ${err instanceof Error ? err.message : String(err)}`);
+    return { ok: false };
+  }
+  const validated = validateTriggerFilter(parsed);
+  if (!validated.ok) {
+    console.error(`--filter rejected: ${validated.error}`);
+    return { ok: false };
+  }
+  return { ok: true, filter: validated.filter };
+}
+
+async function cmdSetFilter(skillId: string | undefined, flags: Record<string, string>) {
+  if (!skillId || !flags.filter) {
+    console.error("usage: set-filter <skillId> --filter '<json>' (or --filter 'null' to clear)");
+    process.exitCode = 1;
+    return;
+  }
+  const parsed = await parseFilterFlag(flags.filter);
+  if (!parsed.ok) {
+    process.exitCode = 1;
+    return;
+  }
+
+  const { db } = await import("@/db");
+  const { replaySkills } = await import("@/db/schema/replay-skills");
+  const { eq } = await import("drizzle-orm");
+
+  const [skill] = await db
+    .select({ id: replaySkills.id, deploymentId: replaySkills.deploymentId })
+    .from(replaySkills)
+    .where(eq(replaySkills.id, skillId))
+    .limit(1);
+  if (!skill) {
+    console.error(`skill not found: ${skillId}`);
+    process.exitCode = 1;
+    return;
+  }
+
+  await db
+    .update(replaySkills)
+    .set({ triggerFilter: parsed.filter, updatedAt: new Date() })
+    .where(eq(replaySkills.id, skillId));
+  console.log(
+    `${skillId}: trigger_filter -> ${parsed.filter ? JSON.stringify(parsed.filter) : "null"}  (deployment ${skill.deploymentId})`,
+  );
+}
+
+async function setSkillStatus(
+  skillId: string | undefined,
+  status: "enabled" | "disabled",
+  flags: Record<string, string> = {},
+) {
   if (!skillId) {
     console.error(`usage: ${status === "enabled" ? "enable" : "disable"} <skillId>`);
     process.exitCode = 1;
     return;
   }
+
+  // Optional `--filter` on `enable` — validated with the SAME function
+  // attemptL0Replay uses at replay time, checked BEFORE any DB write so an
+  // invalid --filter never partially enables a skill.
+  let triggerFilter: import("@/lib/deployments/replay/trigger-filter").TriggerFilter | null | undefined;
+  if (status === "enabled" && flags.filter) {
+    const parsed = await parseFilterFlag(flags.filter);
+    if (!parsed.ok) {
+      process.exitCode = 1;
+      return;
+    }
+    triggerFilter = parsed.filter;
+  }
+
   const { db } = await import("@/db");
   const { replaySkills } = await import("@/db/schema/replay-skills");
   const { eq } = await import("drizzle-orm");
@@ -304,9 +480,20 @@ async function setSkillStatus(skillId: string | undefined, status: "enabled" | "
   try {
     await db
       .update(replaySkills)
-      .set({ status, updatedAt: new Date() })
+      .set({
+        status,
+        updatedAt: new Date(),
+        // Only touch trigger_filter when --filter was actually passed —
+        // an `enable` with no --filter leaves whatever's already stored
+        // (e.g. a filter set earlier via set-filter, or null from a fresh
+        // compile) untouched.
+        ...(triggerFilter !== undefined ? { triggerFilter } : {}),
+      })
       .where(eq(replaySkills.id, skillId));
-    console.log(`${skillId}: ${skill.status} -> ${status}  (deployment ${skill.deploymentId})`);
+    console.log(
+      `${skillId}: ${skill.status} -> ${status}  (deployment ${skill.deploymentId})` +
+        (triggerFilter !== undefined ? `  filter -> ${triggerFilter ? JSON.stringify(triggerFilter) : "null"}` : ""),
+    );
   } catch (err) {
     if (status === "enabled" && isUniqueViolation(err)) {
       console.error(
@@ -348,20 +535,29 @@ async function main() {
       await cmdListSkills(flags);
       break;
     case "enable":
-      await setSkillStatus(positional[0], "enabled");
+      await setSkillStatus(positional[0], "enabled", flags);
       break;
     case "disable":
       await setSkillStatus(positional[0], "disabled");
       break;
+    case "set-filter":
+      await cmdSetFilter(positional[0], flags);
+      break;
+    case "set-idempotency":
+      await cmdSetIdempotency(positional[0], flags);
+      break;
     default:
       console.error(
-        "usage: replay-ops.ts <list-traces|show-trace|compile|list-skills|enable|disable> [args]\n\n" +
+        "usage: replay-ops.ts <list-traces|show-trace|compile|list-skills|enable|disable|set-filter|set-idempotency> [args]\n\n" +
           "  list-traces [--org <id>] [--deployment <id>] [--limit N]\n" +
           "  show-trace <traceId>\n" +
           "  compile <traceId>\n" +
           "  list-skills [--deployment <id>]\n" +
-          "  enable <skillId>\n" +
-          "  disable <skillId>",
+          "  enable <skillId> [--filter '<json>']\n" +
+          "  disable <skillId>\n" +
+          "  set-filter <skillId> --filter '<json>'\n" +
+          "  set-idempotency <skillId> --step <N> --key-var message_id  |  set-idempotency <skillId> --clear\n" +
+          "    (Replay gate v2 — also requires SF_REPLAY_GATE_V2=1 to activate at replay time)",
       );
       process.exitCode = command ? 1 : 0;
   }
