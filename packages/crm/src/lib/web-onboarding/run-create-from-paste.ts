@@ -11,6 +11,7 @@
 //   - seedClientContactInAgencyCrm called with sourceUrl: null
 
 import { createSseStream, SSE_RESPONSE_HEADERS } from "./sse";
+import { CREDITS_EXHAUSTED_UI_MESSAGE } from "./anthropic-error-map";
 import type { CreateFullWorkspaceInput, CreateFullWorkspaceResult } from "@/lib/workspace/create-full";
 import type { LimitDecision } from "@/lib/billing/limits";
 import type { ExtractedBusinessFacts } from "./extraction-prompt";
@@ -19,7 +20,9 @@ import { applyLandingTemplateForWorkspace } from "@/lib/landing/apply-landing-te
 
 export type RunPasteDeps = {
   enforceWorkspaceLimit: (args: { primaryOrgId: string | null; ownedWorkspaceCount: number }) => Promise<LimitDecision>;
-  getOwnedWorkspaceCount: (userId: string) => Promise<number>;
+  /** excludeOrgId: the caller's own primary/agency org — never counted
+   *  against their tenant-workspace cap. See owned-workspace-count.ts. */
+  getOwnedWorkspaceCount: (userId: string, excludeOrgId?: string | null) => Promise<number>;
   /** 2026-06-18 — MANAGED AI (BYOK gate removed). See run-create-from-url
    *  RunDeps.resolveExtractionKey for the contract. */
   resolveExtractionKey: (orgId: string | null) => Promise<{ key: string } | null>;
@@ -75,7 +78,10 @@ export async function runCreateFromPaste(input: RunPasteInput): Promise<RunPaste
       const pastedText = rawText.trim();
 
       // 3. Workspace limit
-      const ownedCount = await input.deps.getOwnedWorkspaceCount(input.sessionUser.id);
+      const ownedCount = await input.deps.getOwnedWorkspaceCount(
+        input.sessionUser.id,
+        input.sessionUser.primaryOrgId,
+      );
       const decision = await input.deps.enforceWorkspaceLimit({
         primaryOrgId: input.sessionUser.primaryOrgId,
         ownedWorkspaceCount: ownedCount,
@@ -116,7 +122,16 @@ export async function runCreateFromPaste(input: RunPasteInput): Promise<RunPaste
         facts = await input.deps.extractBusinessFactsFromPaste({ pastedText, byokKey: extraction.key });
       } catch (err: unknown) {
         const reason = (err as { reason?: string }).reason ?? "extraction_failed";
-        sse.error(422, { reason });
+        // 2026-07-16 — credits_exhausted honesty fix (mirrors run-create-from-url):
+        // out-of-credits is non-retryable until credits are added, so the payload
+        // must carry the honest message instead of a bare reason the UI maps to
+        // "We couldn't read that site."
+        sse.error(
+          422,
+          reason === "credits_exhausted"
+            ? { reason, message: CREDITS_EXHAUSTED_UI_MESSAGE }
+            : { reason },
+        );
         sse.close();
         return;
       }

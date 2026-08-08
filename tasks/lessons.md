@@ -2392,3 +2392,27 @@ Prevention: to diff/typecheck a "before my change" baseline in a worktree,
 use `git worktree add` against a specific commit, or `git show <sha>:<path>`,
 or just re-run the same check on the parent repo path — never stash.
 - 2026-07-16 — Quote disputes (reviewer vs implementer) are settled by re-fetching the SOURCE, never the plan doc both relied on: the 'misquote' block was a false positive — both quotes were verbatim substrings of different sentences. (docs/learnings/2026-07-16-adjudicate-at-the-source.md)
+- 2026-07-16 — verify-runner EDITED code to fix type errors it found (checker must never write): its uncommitted worktree edits were half-lost at commit time and the broken half shipped. Rule: gate agents report, orchestrator fixes; run `git status` before AND after any gate dispatch and treat unexpected dirt as a gate violation.
+- 2026-07-16 — 'First price the reader meets' includes META DESCRIPTION and JSON-LD, not just body copy — the smoke caught $29 at byte 2761 (the <meta>) after all body anchors were fixed. Band/truth sweeps must include heroSub/metadata fields and word-form prices ('29 dollars'), which dodge $-greps.
+- 2026-07-16 — Worktree creation is a 3-step ritual: add + BOTH node_modules junctions. Skipping junctions makes every spec fail with ERR_MODULE_NOT_FOUND 'tsx' — 18 phantom failures before the real one.
+- 2026-07-16 — Booking intake questions must classify from the SOUL (business vertical), never from theme.aestheticArchetype (a look pick): the design picker stamped B2B questions on an HVAC company. When a creation-time seed and a render-time lazy resolver must agree, they call ONE shared function — the first cut diverged and would have permanently seeded contractor fields on physios. (docs/learnings/2026-07-16-intake-semantics-from-soul-not-look.md)
+- 2026-07-16 — Anthropic's out-of-credits error is HTTP 400 invalid_request_error, NOT 402/429 — a status-only error mapping shipped a retryable "Something broke" lie for a non-retryable condition. Rule: never map provider errors by status alone; keep ONE shared mapper per provider (the copy-pasted catch block in paste-extractor is exactly how mappings drift) and give every non-retryable reason honest copy + suppressed retry affordance. (docs/learnings/2026-07-16-credits-exhausted-400-mapping.md)
+- 2026-07-16 — In an agentic loop, every byte entering the conversation is a RECURRING cost (re-billed each iteration + every later turn's history rebuild): cap tool results at the entry seam, cache-mark the static prefix (system + last tool + moving message breakpoint, ≤4 markers), and never cache-mark a call whose prefix has no possible reader (the no-tools regen call). Diagnosis method: bracket the spend window with your own ok/error receipts (first-ok→last-ok), not the provider dashboard. (docs/learnings/2026-07-16-llm-credit-drain-diagnosis-and-token-economy.md)
+
+## L-39 — Batched dep failures: bisect with one-variable branches on the failing CI itself; hold via bot config
+
+- **Trigger (2026-07-18):** dependabot's 37-bump group PR #123 failed Vercel with
+  "Server Actions must be async functions" in the GENERATED workflow step route.
+  Local builds are unreliable in worktrees, so the isolation ran as two pushed
+  branches with Vercel preview as the oracle: workflow-pair-only → FAIL (#133),
+  everything-else → GREEN (#134). Culprit = workflow 4.6.0/@workflow/next 4.1.0
+  bundling "use server" files into sync __esm() closures (vercel/workflow#817).
+- **Rules:** (a) when the failing gate is reachable, use IT as the test harness —
+  don't approximate it locally; (b) `@dependabot ignore` comment-commands do NOT
+  work on grouped PRs — encode holds as `ignore:` entries in dependabot.yml with
+  the tracking issue + removal condition; (c) a dependabot branch can be based on
+  stale main — rebuild splits from origin/main, never cherry-pick its tree;
+  (d) SDK bumps can't change wire-level API behavior (stop_reason values, usage
+  shape, provider error text) — compat-review only the SDK-owned surface (type
+  exports, deep import paths, error classes).
+- Full note: docs/learnings/2026-07-18-dependabot-batch-isolation-by-preview-build.md
