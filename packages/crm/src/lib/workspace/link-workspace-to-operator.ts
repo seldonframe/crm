@@ -97,6 +97,14 @@ export async function linkWorkspaceToOperator(
       // Lost the race to another claimer.
       return { ok: false, reason: "owned_by_other" };
     }
+
+    // 2026-08-06 funnel observability — deliberately NO aliasOrgToUser here,
+    // unlike the other ownerId-claim sites. This is the agency/operator claim
+    // path: one operator claims many client workspaces, and a PostHog alias
+    // per claim would irreversibly merge every client workspace's org-keyed
+    // person into the operator's person record. Client workspaces should be
+    // modelled as a PostHog group if org-level funnels are ever needed on
+    // this path.
   }
 
   // Best-effort membership upsert. The unique (org_id, user_id) index

@@ -152,12 +152,38 @@ export type DispatchComposioEventResult = {
  *  payload. Tolerates a few plausible field names/shapes; returns null when
  *  absent (the caller then runs WITHOUT dedupe — a missing id must never
  *  silently drop a real trigger). Never throws. */
-function extractMessageId(payload: Record<string, unknown>): string | null {
+export function extractMessageId(payload: Record<string, unknown>): string | null {
   const direct = payload.messageId ?? payload.message_id;
   if (typeof direct === "string" && direct.trim().length > 0) return direct.trim();
   const nested = (payload.data as Record<string, unknown> | undefined)?.messageId;
   if (typeof nested === "string" && nested.trim().length > 0) return nested.trim();
   return null;
+}
+
+/** Best-effort extraction of the sender/from address from a composio Gmail
+ *  webhook payload. Tolerates a few plausible field names/shapes (Composio's
+ *  own trigger schema is unverified until live smoke — see extractMessageId's
+ *  sibling comment); returns "" when absent (never assumed present — a
+ *  trigger_filter with a `sender*` condition then simply never matches on a
+ *  payload that carries no sender, which is the correct fail-closed
+ *  direction for a filter gate). Never throws. */
+export function extractSender(payload: Record<string, unknown>): string {
+  const direct = payload.sender ?? payload.from;
+  if (typeof direct === "string" && direct.trim().length > 0) return direct.trim();
+  const nested = payload.data as Record<string, unknown> | undefined;
+  const nestedValue = nested?.sender ?? nested?.from;
+  if (typeof nestedValue === "string" && nestedValue.trim().length > 0) return nestedValue.trim();
+  return "";
+}
+
+/** Best-effort extraction of the subject line from a composio Gmail webhook
+ *  payload. Same tolerance/never-throws contract as extractSender. */
+export function extractSubject(payload: Record<string, unknown>): string {
+  const direct = payload.subject;
+  if (typeof direct === "string" && direct.trim().length > 0) return direct.trim();
+  const nested = (payload.data as Record<string, unknown> | undefined)?.subject;
+  if (typeof nested === "string" && nested.trim().length > 0) return nested.trim();
+  return "";
 }
 
 /**

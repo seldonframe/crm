@@ -137,6 +137,21 @@ async function defaultCreateConversation(input: {
       "ensureWorkspaceCopilotAgent: conversation insert returned no row",
     );
   }
+
+  // 2026-08-07 — activation-moment analytics. Fire-and-forget: never
+  // awaited, internally swallows every error, never delays this insert.
+  void (async () => {
+    const { recordAgentConversationStarted } = await import(
+      "@/lib/analytics/record-agent-activation"
+    );
+    await recordAgentConversationStarted({
+      orgId: input.orgId,
+      agentId: input.agentId,
+      conversationId: created.id,
+      channel: "copilot",
+    });
+  })();
+
   return created;
 }
 
