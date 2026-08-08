@@ -143,6 +143,18 @@ export async function signupAction(_: AuthActionState, formData: FormData): Prom
           throw error;
         }
       }
+
+      // 2026-08-06 funnel observability — alias the org-keyed distinct id
+      // to the new user, same as every other ownerId-claim site. Lazy
+      // import keeps posthog-node out of module graphs that don't need it.
+      try {
+        const { aliasOrgToUser } = await import("@/lib/analytics/funnel");
+        aliasOrgToUser(owner.id, org.id);
+      } catch (error) {
+        console.warn(
+          `[auth][actions] aliasOrgToUser threw (swallowed): ${error instanceof Error ? error.message : String(error)}`,
+        );
+      }
     }
 
     try {

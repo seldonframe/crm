@@ -15,6 +15,31 @@ if (process.env.AUTH_URL) process.env.AUTH_URL = process.env.AUTH_URL.trim();
 if (process.env.GOOGLE_CLIENT_ID) process.env.GOOGLE_CLIENT_ID = process.env.GOOGLE_CLIENT_ID.trim();
 if (process.env.GOOGLE_CLIENT_SECRET) process.env.GOOGLE_CLIENT_SECRET = process.env.GOOGLE_CLIENT_SECRET.trim();
 
+// 2026-08-06 — auth secret hardening. Preview/Dev Vercel environments were
+// found to have NO auth secret configured at all (Production had
+// AUTH_SECRET, but "[auth][logger][error] Please define a secret" still
+// surfaced on / in prod). resolveAuthSecret is pure and exported so it's
+// unit-testable without booting NextAuth. It is still evaluated once at
+// module load (NextAuth() itself runs at module load too, so there is no
+// "call time" re-evaluation happening here — that framing in an earlier
+// version of this comment was wrong), and env trimming already happened
+// above at lines 10-11 before this function ever sees the values. The two
+// real behavioral deltas this adds over reading `process.env.AUTH_SECRET`
+// directly are: (1) an explicit fallback to NEXTAUTH_SECRET — Auth.js v5
+// only auto-reads AUTH_SECRET, not the legacy v4 env var name — and (2) a
+// production-only visibility log (below) when neither resolves, so a
+// misconfigured prod env fails loudly instead of surfacing as a generic
+// auth-provider error downstream.
+export function resolveAuthSecret(env: Record<string, string | undefined>): string | undefined {
+  const authSecret = env.AUTH_SECRET?.trim();
+  if (authSecret) return authSecret;
+
+  const nextAuthSecret = env.NEXTAUTH_SECRET?.trim();
+  if (nextAuthSecret) return nextAuthSecret;
+
+  return undefined;
+}
+
 function slugify(input: string) {
   return input
     .toLowerCase()
@@ -156,6 +181,12 @@ const adapter = {
           email: users.email,
           emailVerified: users.emailVerified,
           image: users.avatarUrl,
+          // 2026-08-06 funnel observability — orgId isn't part of NextAuth's
+          // AdapterUser shape, but events.createUser (lib/auth/config.ts)
+          // needs it to fire signed_up without a second DB query. Extra
+          // fields on the returned object are ignored by NextAuth itself,
+          // just carried through to the events.createUser callback.
+          orgId: users.orgId,
         });
 
       if (!created) {
@@ -174,6 +205,21 @@ const adapter = {
         }
       }
 
+      // 2026-08-06 funnel observability — this org just gained an owner,
+      // so alias the pre-owner org-keyed distinct id (workspace_created)
+      // to the new user-keyed distinct id (signed_up) so PostHog can join
+      // the two halves of the funnel into one person. Lazy import: this
+      // file is reachable from proxy.ts (src/auth.ts -> ../auth), and a
+      // static import would pull posthog-node into that module graph.
+      try {
+        const { aliasOrgToUser } = await import("@/lib/analytics/funnel");
+        aliasOrgToUser(created.id, org.id);
+      } catch (error) {
+        console.warn(
+          `[auth][adapter] aliasOrgToUser threw (swallowed): ${error instanceof Error ? error.message : String(error)}`,
+        );
+      }
+
       return created;
     } catch (err) {
       console.error("[auth][adapter] createUser FAILED:", err);
@@ -182,9 +228,20 @@ const adapter = {
   },
 };
 
+const resolvedAuthSecret = resolveAuthSecret(process.env);
+if (
+  !resolvedAuthSecret &&
+  (process.env.VERCEL_ENV === "production" || process.env.NODE_ENV === "production")
+) {
+  console.error(
+    "[auth] AUTH_SECRET/NEXTAUTH_SECRET missing or empty — sessions will fail",
+  );
+}
+
 export const { handlers, signIn, signOut, auth } = NextAuth({
   debug: true,
   trustHost: true,
+  secret: resolvedAuthSecret,
   // 2026-05-17 — explicit cookie config to fix the PKCE-cookie-missing-on-
   // callback bug we hit repeatedly on prod Google OAuth.
   //
