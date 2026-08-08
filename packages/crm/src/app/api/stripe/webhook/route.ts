@@ -20,6 +20,7 @@ import { getOrgSubscription, updateOrgSubscription } from "@/lib/billing/subscri
 import { applyBrandingForTier, reRenderAllSurfacesForOrg } from "@/lib/blueprint/rerender-org";
 import { trackEvent } from "@/lib/analytics/track";
 import { getPlan } from "@/lib/billing/plans";
+import { maxFullWorkspacesForTier } from "@/lib/billing/limits";
 import { sendPaidConversionAlert } from "@/lib/notifications/ops-notifications";
 
 function getStripeClient() {
@@ -242,7 +243,15 @@ export async function POST(req: NextRequest) {
       // Workspace cap from the resolved tier (-1 = unlimited stored as
       // a sentinel; the create-workspace gate uses `getMaxOrgs()` to
       // turn it into POSITIVE_INFINITY).
-      const maxWorkspaces = tier === "agency" ? -1 : tier === "workspace" ? 1 : 0;
+      //
+      // 2026-08-07 — this used to be a hardcoded `agency`/`workspace`-only
+      // ternary, the third and last copy of the table #182/#183 killed in
+      // lib/billing/limits.ts and lib/billing/orgs.ts. It never learned the
+      // 2026-07-08 pricing ladder, so builder / managed / agency_starter /
+      // agency_growth / agency_scale all fell into its `: 0` branch and
+      // persisted a cap of 0 while the real gate read them off the catalog.
+      // Now derived from the same `maxFullWorkspacesForTier` the gate uses.
+      const maxWorkspaces = maxFullWorkspacesForTier(tier);
       const currentPeriodEnd = (subscription as Stripe.Subscription & { current_period_end?: number }).current_period_end;
       const selfServiceEnabled = tier !== "inactive";
       // OpenClaw / layer2 metadata flags ride along on the base price
@@ -444,7 +453,8 @@ export async function POST(req: NextRequest) {
 
       const tier = resolveTierFromSubscription(subscription);
       const priceId = pickBasePriceId(subscription, tier) ?? subscription.items.data[0]?.price?.id ?? null;
-      const maxWorkspaces = tier === "agency" ? -1 : tier === "workspace" ? 1 : 0;
+      // Catalog-derived — see checkout.session.completed above.
+      const maxWorkspaces = maxFullWorkspacesForTier(tier);
       const currentPeriodEnd = (subscription as Stripe.Subscription & { current_period_end?: number }).current_period_end;
       const selfServiceEnabled = tier !== "inactive";
       let openClawEnabled = false;
@@ -508,7 +518,11 @@ export async function POST(req: NextRequest) {
 
       await updateOrgSubscription(orgId, {
         tier: "inactive",
-        maxWorkspaces: 0,
+        // 2026-08-07 — was a literal 0, the `: 0` branch of the same
+        // retired table. Derived here too so `inactive` can't mean 0 on
+        // this path and 1 (the first-workspace-free allowance the gate
+        // actually grants) on the three tier-resolving paths above.
+        maxWorkspaces: maxFullWorkspacesForTier("inactive"),
         status: "canceled",
         stripeSubscriptionId: null,
         selfServiceEnabled: false,
@@ -575,8 +589,11 @@ export async function POST(req: NextRequest) {
       const previousSubscription = await getOrgSubscription(orgId);
 
       let stripePriceId: string | null = null;
-      let maxWorkspaces = 0;
       let tier: BillingTier = "inactive";
+      // Seeded from the same catalog helper as the assignment below, so the
+      // no-subscription fallback agrees with what tier "inactive" means
+      // everywhere else in this file.
+      let maxWorkspaces = maxFullWorkspacesForTier("inactive");
       let selfServiceEnabled = false;
       let openClawEnabled = false;
       let layer2Enabled = false;
@@ -585,7 +602,8 @@ export async function POST(req: NextRequest) {
         const subscription = await stripe.subscriptions.retrieve(subscriptionId);
         tier = resolveTierFromSubscription(subscription);
         stripePriceId = pickBasePriceId(subscription, tier) ?? subscription.items.data[0]?.price?.id ?? null;
-        maxWorkspaces = tier === "agency" ? -1 : tier === "workspace" ? 1 : 0;
+        // Catalog-derived — see checkout.session.completed above.
+        maxWorkspaces = maxFullWorkspacesForTier(tier);
         selfServiceEnabled = tier !== "inactive";
 
         if (stripePriceId) {

@@ -40,6 +40,15 @@ jobs:
         # the exact cause of the 0019 / 0055 production outages. No DB needed.
         run: pnpm db:check-journaled
 
+      - name: Typecheck (crm)
+        # Lands as a CI gate only now: fix/copilot-persist-ephemeral fixed
+        # the last standing tsc error in the package (TS2353 — route.ts's
+        # `persist: false` on executeTurn's input had no matching property).
+        # Kept out of `pnpm test:unit` below so a failure reports as its own
+        # clearly-named step. Runs BEFORE the unit-test suite (fail-fast: a
+        # ~40s typecheck shouldn't wait on a full test run to report).
+        run: pnpm --filter @seldonframe/crm exec tsc --noEmit
+
       - name: Unit tests
         run: pnpm test:unit
 
