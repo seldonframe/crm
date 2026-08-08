@@ -140,13 +140,38 @@ type UpgradeTarget = LegacyUpgradeTarget | LadderUpgradeTarget;
 // User-facing strings — value-forward, no exclamation marks, no emoji.
 const SHARED_COPY = {
   title: "Add another client workspace",
-  // Card-capture branch headline (legacy "free"/inactive callers). Less
-  // jargony than the tier-comparison wording: matches the limits.ts ask.
-  freeTitle: "Add a card to unlock more workspaces",
+  // Legacy "free"/inactive-tier at-cap branch. Was "Add a card to
+  // unlock more workspaces" — retitled 2026-08-07 alongside the
+  // freeDestination fix below: saving a card never raises the inactive
+  // tier's workspace cap, only choosing a plan does, so the headline
+  // now matches the actual unblocking action.
+  freeTitle: "Choose a plan to add more workspaces",
+  // 2026-08-07: `limit === 0` used to render the nonsense "You've used
+  // 0/0 workspaces" — a stale display path from before the first-
+  // workspace-free fix (limits.ts's `inactive` cap is 1 now, never 0),
+  // and still reachable defensively if a caller passes a stale/legacy
+  // limit. Drop the used/limit clause entirely in that case rather than
+  // print a fraction that can never make sense.
   freeSubtitleTemplate: (used: number, limit: number) =>
-    `You've used ${used}/${limit} workspace${limit === 1 ? "" : "s"}. Save a card to keep building — we won't charge it until you upgrade.`,
-  freeCta: "Save a card and continue",
-  freeDestination: "/signup/billing?next=/clients/new",
+    limit === 0
+      ? `Your first workspace is free. Choose a plan to add more.`
+      : `You've used ${used}/${limit} workspace${limit === 1 ? "" : "s"}. Choose a plan to add more.`,
+  // 2026-08-07 — was "/signup/billing?next=/clients/new". That page's
+  // ENTIRE job is card capture, and a returning user who already has
+  // stripe_payment_method_id set skips straight through via
+  // `redirect(next)`. On the inactive tier, saving a card never raises
+  // the workspace cap (only an actual paid subscription does — see
+  // limits.ts), so `next` (this same gated page) 402s again, the modal
+  // reopens, and the visitor is bounced right back here: an infinite
+  // loop with no way out (production victim: a user with a card on
+  // file and no plan, stuck exactly here). This modal only ever renders
+  // when the operator is already AT their cap (file header: "Surfaced
+  // from /clients, /clients/new's 402 path"), so the meaningful next
+  // step is always "pick a plan," never "save a card" — send them to
+  // the real billing/upgrade surface instead, which does not bounce
+  // back into this dialog.
+  freeCta: "Choose a plan",
+  freeDestination: "/settings/billing",
   subtitleTemplate: (used: number, limit: number) =>
     `You're using ${used} of ${limit} workspace${limit === 1 ? "" : "s"} on your current plan`,
   footer:
