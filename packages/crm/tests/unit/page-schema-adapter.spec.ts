@@ -51,7 +51,11 @@ describe("blueprintFromSchema — workspace conversion", () => {
       "The open-source Business OS platform"
     );
     assert.equal(blueprint.workspace.theme.mode, "light"); // clean = light
-    assert.equal(blueprint.workspace.theme.accent, "#14b8a6"); // default
+    // Emerald brand default — `tokensForPersonality`'s `defaultAccent`
+    // param (src/lib/page-schema/design-tokens.ts). Teal #14b8a6 was
+    // retired repo-wide by b2b13cf64 (2026-07-13, #65); that commit
+    // touched no test files, which is why this assertion went stale.
+    assert.equal(blueprint.workspace.theme.accent, "#059669"); // default
   });
 
   test("SaaS workspace gets empty contact.phone (no phone CTA in nav)", () => {
