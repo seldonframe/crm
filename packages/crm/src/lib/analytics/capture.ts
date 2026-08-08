@@ -44,10 +44,15 @@ export function getPosthogClient(): PostHog | null {
   return client;
 }
 
+export type CaptureServerPropertyValue = string | number | boolean | null;
+
 export type CaptureServerEventInput = {
   event: string;
   distinctId: string;
-  properties?: Record<string, string | number | boolean | null>;
+  /** Flat values, plus PostHog's nested $set for person-property writes. */
+  properties?: Record<string, CaptureServerPropertyValue> & {
+    $set?: Record<string, CaptureServerPropertyValue>;
+  };
 };
 
 /**
