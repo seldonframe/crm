@@ -129,19 +129,29 @@ describe("<OnboardingShell> — a11y + chrome", () => {
     assert.match(html, /SeldonFrame — home/);
   });
 
-  test("brand mark uses the teal-500 accent (#14b8a6)", () => {
+  test("brand mark uses the emerald-600 accent (#059669)", () => {
     // Visual contract: the progress bar fill AND the logo's accent
-    // strokes both use #14b8a6. The shell renders both inline (logo as
+    // strokes both use #059669. The shell renders both inline (logo as
     // SVG strokes, bar via Tailwind arbitrary class), so this test
     // exists to catch a future palette swap that updates one but not
     // the other.
+    //
+    // 2026-08-07 — Retargeted from the old teal #14b8a6 to emerald
+    // #059669. The swap was deliberate and complete: b2b13cf64 (#65,
+    // 2026-07-13) "feat(brand): emerald green — replace muted teal
+    // across all pages + dashboard" retired #14b8a6 across 123 files.
+    // BOTH halves this test guards moved together, so it caught no
+    // partial swap — it was simply left behind (this spec was last
+    // touched at f76c534b1, which predates the brand commit). The
+    // shipped surfaces agree: public/logo{,-full,-small}.svg and
+    // src/lib/auth/config.ts all use #059669.
     const html = renderToString(
       <OnboardingShell step={2} total={3} title="Test" />,
     );
-    // The progress bar fill uses a Tailwind bg-[#14b8a6] class
-    assert.match(html, /bg-\[#14b8a6\]/);
+    // The progress bar fill uses a Tailwind bg-[#059669] class
+    assert.match(html, /bg-\[#059669\]/);
     // The logo SVG strokes use the literal hex
-    assert.match(html, /stroke="#14b8a6"/);
+    assert.match(html, /stroke="#059669"/);
   });
 
   test("showLogo={false} omits the brand mark + homepage link", () => {
