@@ -368,6 +368,19 @@ async function defaultGetOrCreateConversation(
     .returning({ id: agentConversations.id });
 
   if (!created) throw new Error("agent_conversations insert returned no row");
+
+  // 2026-08-07 — activation-moment analytics. Fire-and-forget: never awaited,
+  // internally swallows every error, never delays or fails this insert.
+  const { recordAgentConversationStarted } = await import(
+    "@/lib/analytics/record-agent-activation"
+  );
+  void recordAgentConversationStarted({
+    orgId: args.orgId,
+    agentId: args.agentId,
+    conversationId: created.id,
+    channel: args.channel,
+  });
+
   return created.id;
 }
 

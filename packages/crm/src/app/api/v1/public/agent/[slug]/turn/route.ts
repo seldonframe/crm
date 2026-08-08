@@ -201,6 +201,23 @@ export async function POST(
       );
     }
     conversationId = created.id;
+
+    // 2026-08-07 — activation-moment analytics. Only for real ("active")
+    // conversations — the operator test sandbox routes through this same
+    // endpoint with status="test" (decidePublicConversationStatus above),
+    // and that traffic must never count as activation. Fire-and-forget:
+    // never awaited, internally swallows every error.
+    if (conversationStatus === "active") {
+      const { recordAgentConversationStarted } = await import(
+        "@/lib/analytics/record-agent-activation"
+      );
+      void recordAgentConversationStarted({
+        orgId: agentRow.orgId,
+        agentId: agentRow.id,
+        conversationId,
+        channel: "web",
+      });
+    }
   }
 
   // SSE branch ───────────────────────────────────────────────────────────
