@@ -9,7 +9,7 @@
 // every card like a YouTube thumbnail, not a print ad.
 //
 // Palette (MKT, matches components/marketplace/marketplace-data.ts):
-//   ink   #221D17   paper  #F6F2EA   green  #00897B   dark  #1F2B24
+//   ink   #221D17   paper  #F6F2EA   green  #1F2B24   dark  #1F2B24
 //
 // SECURITY: every field rendered by these layouts may originate from a public
 // query string (app/api/og/route.tsx is an unauthenticated GET route). Every
@@ -26,8 +26,15 @@ export const OG_HEIGHT = 630;
 export const OG_COLORS = {
   ink: "#221D17",
   paper: "#F6F2EA",
-  green: "#00897B",
+  // CAUTION: green === dark since the forest rebrand (#68). Green is safe as
+  // a background/fill or on light surfaces only — text colored `green` on a
+  // `dark`/`ink` card is invisible. Use `paper` for text accents on dark.
+  green: "#1F2B24",
   dark: "#1F2B24",
+  // Warm sand — the muted accent for secondary text on dark surfaces
+  // (kickers, connectors, taglines). Same family as `paper`, already used
+  // as the outlined-pill border on light cards.
+  sand: "#D8CFBE",
 } as const;
 
 // ─── param sanitizing ───────────────────────────────────────────────────────
@@ -137,7 +144,9 @@ function BrandMark({ onDark }: { onDark: boolean }): ReactElement {
           width: 40,
           height: 40,
           borderRadius: 10,
-          backgroundColor: OG_COLORS.green,
+          // green === dark since the forest rebrand: a green tile on a dark
+          // card is invisible, so the tile flips to paper on dark surfaces.
+          backgroundColor: onDark ? OG_COLORS.paper : OG_COLORS.green,
         }}
       />
       <div
@@ -167,7 +176,12 @@ function Pill({
   filled: boolean;
   onDark: boolean;
 }): ReactElement {
-  const border = filled ? "none" : `2px solid ${onDark ? "#4A5D52" : "#D8CFBE"}`;
+  const border = filled ? "none" : `2px solid ${onDark ? "#4A5D52" : OG_COLORS.sand}`;
+  // Filled pills flip with the surface: green fill + paper text on light
+  // cards, paper fill + forest text on dark cards (a green fill on a dark
+  // card blends into the background and the pill reads as floating text).
+  const filledBackground = onDark ? OG_COLORS.paper : OG_COLORS.green;
+  const filledColor = onDark ? OG_COLORS.green : OG_COLORS.paper;
   return (
     <div
       style={{
@@ -175,12 +189,12 @@ function Pill({
         alignItems: "center",
         padding: "14px 28px",
         borderRadius: 999,
-        backgroundColor: filled ? OG_COLORS.green : "transparent",
+        backgroundColor: filled ? filledBackground : "transparent",
         border,
         fontSize: 30,
         fontWeight: 700,
         fontFamily: "Inter-Bold",
-        color: filled ? OG_COLORS.paper : (onDark ? OG_COLORS.paper : OG_COLORS.ink),
+        color: filled ? filledColor : (onDark ? OG_COLORS.paper : OG_COLORS.ink),
       }}
     >
       {children}
@@ -225,9 +239,11 @@ function CardFrame({
   );
 }
 
-/** Thin green accent bar, bottom of every card — the one recurring visual
- *  signature tying the whole thumbnail series together. */
-function AccentBar(): ReactElement {
+/** Thin accent bar, bottom of every card — the one recurring visual
+ *  signature tying the whole thumbnail series together. Forest on light
+ *  surfaces, paper on dark ones (green === dark, so a green bar on a dark
+ *  card is invisible). */
+function AccentBar({ onDark }: { onDark: boolean }): ReactElement {
   return (
     <div
       style={{
@@ -235,7 +251,7 @@ function AccentBar(): ReactElement {
         width: "100%",
         height: 10,
         borderRadius: 6,
-        backgroundColor: OG_COLORS.green,
+        backgroundColor: onDark ? OG_COLORS.paper : OG_COLORS.green,
       }}
     />
   );
@@ -263,8 +279,10 @@ export function SfVsCard({ name, price }: { name: string; price: string }): Reac
           {"SeldonFrame"}
         </div>
         <div style={{ display: "flex", fontSize: 92, fontWeight: 800, fontFamily: "Inter-ExtraBold", lineHeight: 1.02 }}>
-          <span style={{ color: OG_COLORS.paper, marginRight: 24 }}>{"vs"}</span>
-          <span style={{ color: OG_COLORS.green }}>{safeName}</span>
+          {/* sand connector + paper name (not green — green === dark) keeps
+              the emphasis on the two names at thumbnail size. */}
+          <span style={{ color: OG_COLORS.sand, marginRight: 24 }}>{"vs"}</span>
+          <span style={{ color: OG_COLORS.paper }}>{safeName}</span>
         </div>
       </div>
       <div style={{ display: "flex", flexDirection: "column", gap: 24 }}>
@@ -272,7 +290,7 @@ export function SfVsCard({ name, price }: { name: string; price: string }): Reac
           <Pill filled onDark>{"$29/mo flat"}</Pill>
           <Pill filled={false} onDark>{safePrice}</Pill>
         </div>
-        <AccentBar />
+        <AccentBar onDark />
       </div>
     </CardFrame>
   );
@@ -286,7 +304,9 @@ export function VsCard({ a, b }: { a: string; b: string }): ReactElement {
     <CardFrame background={OG_COLORS.ink} texture={false}>
       <BrandMark onDark />
       <div style={{ display: "flex", flexDirection: "column", gap: 20 }}>
-        <div style={{ display: "flex", fontSize: 34, fontWeight: 700, fontFamily: "Inter-Bold", color: OG_COLORS.green, textTransform: "uppercase", letterSpacing: 2 }}>
+        {/* sand, not green: green === ink-adjacent since the forest rebrand,
+            so a green kicker on the ink card was near-invisible. */}
+        <div style={{ display: "flex", fontSize: 34, fontWeight: 700, fontFamily: "Inter-Bold", color: OG_COLORS.sand, textTransform: "uppercase", letterSpacing: 2 }}>
           {"The honest comparison"}
         </div>
         <div style={{ display: "flex", fontSize: 84, fontWeight: 800, fontFamily: "Inter-ExtraBold", color: OG_COLORS.paper, lineHeight: 1.05 }}>
@@ -295,7 +315,7 @@ export function VsCard({ a, b }: { a: string; b: string }): ReactElement {
       </div>
       <div style={{ display: "flex", flexDirection: "column", gap: 24 }}>
         <Pill filled onDark>{"Plus: the both-worlds option"}</Pill>
-        <AccentBar />
+        <AccentBar onDark />
       </div>
     </CardFrame>
   );
@@ -312,13 +332,15 @@ export function AltCard({ name, price }: { name: string; price: string }): React
         <div style={{ display: "flex", fontSize: 92, fontWeight: 800, fontFamily: "Inter-ExtraBold", color: OG_COLORS.paper, lineHeight: 1.02 }}>
           {safeName}
         </div>
-        <div style={{ display: "flex", fontSize: 92, fontWeight: 800, fontFamily: "Inter-ExtraBold", color: OG_COLORS.green, lineHeight: 1.02 }}>
+        {/* sand, not green (green === dark): keeps "alternative" as the
+            qualifier line while the competitor name carries the emphasis. */}
+        <div style={{ display: "flex", fontSize: 92, fontWeight: 800, fontFamily: "Inter-ExtraBold", color: OG_COLORS.sand, lineHeight: 1.02 }}>
           {"alternative"}
         </div>
       </div>
       <div style={{ display: "flex", flexDirection: "column", gap: 24 }}>
         <Pill filled onDark>{`Honest switch guide · ${safePrice}`}</Pill>
-        <AccentBar />
+        <AccentBar onDark />
       </div>
     </CardFrame>
   );
@@ -344,7 +366,7 @@ export function BestCard({ title, aud, n }: { title: string; aud: string; n: str
       </div>
       <div style={{ display: "flex", flexDirection: "column", gap: 24 }}>
         <Pill filled onDark={false}>{`Top ${rank} · 2026`}</Pill>
-        <AccentBar />
+        <AccentBar onDark={false} />
       </div>
     </CardFrame>
   );
@@ -362,14 +384,80 @@ export function ToolCard({ name, hook }: { name: string; hook: string }): ReactE
           {safeName}
         </div>
         {safeHook ? (
-          <div style={{ display: "flex", fontSize: 40, fontWeight: 700, fontFamily: "Inter-Bold", color: OG_COLORS.green, lineHeight: 1.2 }}>
+          // paper, not green: since the forest rebrand green === dark, so
+          // green text on a dark card is invisible (the rebrand rule is
+          // forest on light surfaces, cream on dark ones).
+          <div style={{ display: "flex", fontSize: 40, fontWeight: 700, fontFamily: "Inter-Bold", color: OG_COLORS.paper, lineHeight: 1.2 }}>
             {safeHook}
           </div>
         ) : null}
       </div>
       <div style={{ display: "flex", flexDirection: "column", gap: 24 }}>
         <Pill filled onDark>{"Free · no signup"}</Pill>
-        <AccentBar />
+        <AccentBar onDark />
+      </div>
+    </CardFrame>
+  );
+}
+
+const AGENT_SHARE_NAME_MAX = 40;
+const AGENT_SHARE_STEP_MAX = 28;
+const AGENT_SHARE_STEP_CAP = 4;
+
+/** kind=agent-share — the static PNG variant of the celebration screen's
+ *  share card (agent setup mode slice, T5). `steps` is the pipe-separated,
+ *  ALREADY-SCRUBBED step-label string the public /a/[slug] page's metadata
+ *  builds from its own DB read — this route never queries the DB itself,
+ *  same convention as every other card here (clamped string params only). */
+export function AgentShareCard({ name, steps }: { name: string; steps: string }): ReactElement {
+  const safeName = clampEllipsis(name, AGENT_SHARE_NAME_MAX) || "An agent";
+  const stepList = steps
+    .split("|")
+    .map((s) => clampEllipsis(s, AGENT_SHARE_STEP_MAX))
+    .filter(Boolean)
+    .slice(0, AGENT_SHARE_STEP_CAP);
+
+  return (
+    <CardFrame background={OG_COLORS.dark} texture>
+      <BrandMark onDark />
+      <div style={{ display: "flex", flexDirection: "column", gap: 24 }}>
+        <div style={{ display: "flex", fontSize: 64, fontWeight: 800, fontFamily: "Inter-ExtraBold", color: OG_COLORS.paper, lineHeight: 1.1 }}>
+          {`${safeName} — built with SeldonFrame`}
+        </div>
+        {stepList.length > 0 ? (
+          <div style={{ display: "flex", flexWrap: "wrap", gap: 16 }}>
+            {stepList.map((step, i) => (
+              <div key={i} style={{ display: "flex", alignItems: "center", gap: 16 }}>
+                <div
+                  style={{
+                    display: "flex",
+                    alignItems: "center",
+                    padding: "12px 22px",
+                    borderRadius: 12,
+                    // Elevated dark surface (forest rebrand) — was the
+                    // pre-rebrand navy #1c2230/#3a4256, retired alongside
+                    // the emerald #2fd18d highlight.
+                    backgroundColor: "#1A1713",
+                    border: "2px solid #4A4032",
+                    fontSize: 26,
+                    fontWeight: 700,
+                    fontFamily: "Inter-Bold",
+                    color: OG_COLORS.paper,
+                  }}
+                >
+                  {step}
+                </div>
+                {i < stepList.length - 1 ? (
+                  <div style={{ display: "flex", fontSize: 30, color: OG_COLORS.sand }}>{"→"}</div>
+                ) : null}
+              </div>
+            ))}
+          </div>
+        ) : null}
+      </div>
+      <div style={{ display: "flex", flexDirection: "column", gap: 24 }}>
+        <Pill filled onDark>{"Built from a screen recording"}</Pill>
+        <AccentBar onDark />
       </div>
     </CardFrame>
   );
@@ -384,12 +472,14 @@ export function DefaultCard(): ReactElement {
         <div style={{ display: "flex", fontSize: 92, fontWeight: 800, fontFamily: "Inter-ExtraBold", color: OG_COLORS.paper, lineHeight: 1.02 }}>
           {"SeldonFrame"}
         </div>
-        <div style={{ display: "flex", fontSize: 52, fontWeight: 700, fontFamily: "Inter-Bold", color: OG_COLORS.green, lineHeight: 1.2 }}>
+        {/* sand, not green (green === dark): the tagline was drawn in
+            background-colored text on the live fallback card. */}
+        <div style={{ display: "flex", fontSize: 52, fontWeight: 700, fontFamily: "Inter-Bold", color: OG_COLORS.sand, lineHeight: 1.2 }}>
           {"The AI front office — $29/mo flat"}
         </div>
       </div>
       <div style={{ display: "flex", flexDirection: "column", gap: 24 }}>
-        <AccentBar />
+        <AccentBar onDark />
       </div>
     </CardFrame>
   );

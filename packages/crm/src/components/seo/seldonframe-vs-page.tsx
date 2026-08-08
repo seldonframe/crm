@@ -19,6 +19,7 @@ import { MarkdownPointer } from "@/components/seo/markdown-pointer";
 import { TldrBox } from "@/components/seo/tldr-box";
 import { FrontOfficeFlow } from "@/components/seo/front-office-flow";
 import { PricingSourceLine } from "@/components/seo/alternative-page";
+import { hasCompetitorPricing } from "@/components/seo/competitor-crosslinks";
 import { BuildWidget } from "@/components/seo/build-widget";
 import { AuthorByline, articleLd } from "@/components/seo/author-byline";
 import { monthYearToIso } from "@/lib/seo/month-iso";
@@ -30,6 +31,7 @@ import {
   SF_COLUMN,
   SHARED_FAQ,
   LAST_UPDATED,
+  sfPriceAnchor,
   type Competitor,
   type AltFaqItem,
 } from "@/lib/seo/alternative-pages";
@@ -48,7 +50,7 @@ import {
  *  hygiene). Pure + exported for the Markdown twin and unit tests. */
 export function composeSeldonframeVsIntro(c: Competitor): [string, string] {
   return [
-    `${c.name} and SeldonFrame usually end up on the same shortlist for different reasons. ${c.oneLiner} SeldonFrame comes at the same problem from the other direction: one flat $29/mo workspace where the AI receptionist, website, CRM, booking calendar and intake forms arrive pre-wired — generated from a single conversation in about 3 minutes.`,
+    `${c.name} and SeldonFrame usually end up on the same shortlist for different reasons. ${c.oneLiner} SeldonFrame comes at the same problem from the other direction: the AI receptionist, website, CRM, booking calendar and intake forms arrive pre-wired — ${sfPriceAnchor(c.audience)} — generated from a single conversation in about 3 minutes.`,
     `${c.whenTheyWin} SeldonFrame's case is the opposite one: when the outcome you're buying is answered calls, qualified leads and jobs booked into a CRM you own, that whole front office ships on day one and the economics stay flat as you grow. The rest of this page walks the differences row by row — pricing model, the AI receptionist, the business system behind it, whitelabel, and what switching actually takes.`,
   ];
 }
@@ -60,11 +62,11 @@ export function composeSeldonframeVsFaq(c: Competitor): AltFaqItem[] {
   return [
     {
       q: `Is SeldonFrame a good ${c.name} alternative?`,
-      a: `For most agencies and builders, yes — SeldonFrame replaces the AI-front-office job (answering, qualifying, booking, tracking in a CRM) at $29/mo flat instead of ${c.name}'s stacked pricing. See the full switching guide: /alternative-to-${c.slug}.`,
+      a: `For most agencies and builders, yes — SeldonFrame replaces the AI-front-office job (answering, qualifying, booking, tracking in a CRM) at ${sfPriceAnchor(c.audience)}, instead of ${c.name}'s stacked pricing. See the full switching guide: /alternative-to-${c.slug}.`,
     },
     {
       q: `How much does ${c.name} cost compared to SeldonFrame?`,
-      a: `${c.name}: ${c.them.pricingModel}. SeldonFrame: $29/mo flat, unlimited workspaces, first workspace free forever, with AI and telephony on your own keys at raw provider cost — no per-minute or per-credit meter.`,
+      a: `${c.name}: ${c.them.pricingModel}. SeldonFrame: ${sfPriceAnchor(c.audience)}, with AI and telephony on your own keys at raw provider cost — no per-minute or per-credit meter.`,
     },
   ];
 }
@@ -95,7 +97,7 @@ export function SeldonFrameVsPage({ competitor }: { competitor: Competitor }): R
     "@type": "SoftwareApplication",
     name: "SeldonFrame",
     applicationCategory: "BusinessApplication",
-    description: `SeldonFrame vs ${c.name}: AI receptionist, website, CRM and booking in one flat $29/mo platform, compared head to head.`,
+    description: `SeldonFrame builds the whole AI front office — website, CRM, booking, and an AI receptionist — ${sfPriceAnchor(c.audience)}.`,
     offers: { "@type": "Offer", price: "29", priceCurrency: "USD" },
     provider: { "@type": "Organization", name: "SeldonFrame", url: "https://seldonframe.com" },
   };
@@ -157,20 +159,93 @@ export function SeldonFrameVsPage({ competitor }: { competitor: Competitor }): R
           <TldrBox
             items={[
               { icon: "💰", label: `${c.name} pricing`, text: c.them.pricingModel },
-              { icon: "💰", label: "SeldonFrame pricing", text: "$29/mo flat, unlimited workspaces, first workspace free forever" },
+              { icon: "💰", label: "SeldonFrame pricing", text: sfPriceAnchor(c.audience) },
               { icon: "👍", label: `Pick ${c.name} if`, text: x.chooseThem[0] },
               { icon: "🏆", label: "Pick SeldonFrame if", text: x.chooseSf[0] },
             ]}
           />
         </section>
 
+        {/* ── EVIDENCE-ORDERED DEEP-DIVE SECTIONS (OPTIONAL — only present when
+            the competitor supplies evidenceSections; every other competitor
+            page is unaffected) ── */}
+        {c.evidenceSections && c.evidenceSections.length > 0 ? (
+          <section style={{ padding: "34px 0 8px" }}>
+            <h2 style={H2}>{`${c.name}, evidence first`}</h2>
+            {c.evidenceSections.map((sec) => (
+              <div key={sec.title} style={{ marginTop: 22, maxWidth: 760 }}>
+                <h3 style={{ margin: 0, fontSize: 18.5, fontWeight: 800 }}>{sec.title}</h3>
+                {sec.paragraphs.map((p, i) => (
+                  <p key={i} style={{ margin: "10px 0 0", fontSize: 15, lineHeight: 1.65, color: "rgba(34,29,23,0.78)" }}>
+                    {emphasize(p)}
+                  </p>
+                ))}
+                {sec.quote ? (
+                  <blockquote
+                    style={{
+                      margin: "12px 0 0",
+                      padding: "12px 18px",
+                      borderLeft: `3px solid ${MKT.green}`,
+                      background: MKT.green10,
+                      borderRadius: "0 10px 10px 0",
+                      fontSize: 14.5,
+                      lineHeight: 1.6,
+                      fontStyle: "italic",
+                      color: "rgba(34,29,23,0.82)",
+                    }}
+                  >
+                    {`"${sec.quote.text}"`}
+                    <div style={{ marginTop: 6, fontSize: 12.5, fontStyle: "normal", fontWeight: 600 }}>
+                      <a href={sec.quote.href} rel="nofollow noopener" className="sf-link" style={{ color: MKT.green, textDecoration: "underline" }}>
+                        {sec.quote.source}
+                      </a>
+                      {" — accessed July 2026"}
+                    </div>
+                  </blockquote>
+                ) : null}
+                {sec.contrast ? (
+                  <p style={{ margin: "10px 0 0", fontSize: 14.5, lineHeight: 1.6, color: "rgba(34,29,23,0.7)" }}>
+                    <strong style={{ color: MKT.green }}>SeldonFrame: </strong>
+                    {emphasize(sec.contrast)}
+                  </p>
+                ) : null}
+              </div>
+            ))}
+          </section>
+        ) : null}
+
+        {/* ── HONESTY BOX (OPTIONAL — the never-lies proof) ── */}
+        {c.honestyBox ? (
+          <section style={{ padding: "20px 0 8px" }}>
+            <div
+              style={{
+                border: `1.5px solid ${MKT.ink10}`,
+                borderRadius: 16,
+                padding: "20px 24px",
+                background: "rgba(255,255,255,0.6)",
+                maxWidth: 760,
+              }}
+            >
+              <h3 style={{ margin: 0, fontSize: 16.5, fontWeight: 800 }}>{c.honestyBox.title}</h3>
+              <ul style={{ margin: "12px 0 0", padding: 0, listStyle: "none" }}>
+                {c.honestyBox.items.map((item) => (
+                  <li key={item} style={{ fontSize: 14, lineHeight: 1.6, color: "rgba(34,29,23,0.75)", marginBottom: 8 }}>
+                    <span style={{ color: MKT.green, fontWeight: 800, marginRight: 8 }}>✓</span>
+                    {emphasize(item)}
+                  </li>
+                ))}
+              </ul>
+            </div>
+          </section>
+        ) : null}
+
         {/* ── THE TWO CONTENDERS ── */}
         <section className="sf-sfvs-cards" style={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: 16, padding: "10px 0 8px" }}>
-          <div style={{ border: "1.5px solid rgba(0,137,123,0.4)", borderRadius: 16, padding: "22px 24px", background: "rgba(0,137,123,0.05)" }}>
+          <div style={{ border: "1.5px solid rgba(31, 43, 36,0.4)", borderRadius: 16, padding: "22px 24px", background: "rgba(31, 43, 36,0.05)" }}>
             <span style={{ fontSize: 10.5, fontWeight: 800, letterSpacing: "0.1em", textTransform: "uppercase", color: MKT.green }}>★ SeldonFrame</span>
             <h2 style={{ margin: "6px 0 0", fontSize: 20, fontWeight: 800 }}>SeldonFrame</h2>
             <p style={{ margin: "8px 0 12px", fontSize: 14.5, lineHeight: 1.6, color: "rgba(34,29,23,0.75)" }}>
-              $29/mo flat · unlimited workspaces · first workspace free forever
+              {sfPriceAnchor(c.audience)}
             </p>
             <div style={{ margin: "12px 0 4px", fontSize: 11.5, fontWeight: 800, letterSpacing: "0.1em", color: MKT.green }}>TOP REASONS TO CHOOSE IT</div>
             <ul style={{ margin: 0, padding: 0, listStyle: "none" }}>
@@ -237,7 +312,7 @@ export function SeldonFrameVsPage({ competitor }: { competitor: Competitor }): R
                 {COMPARISON_LABELS.map((row) => (
                   <tr key={row.key}>
                     <td style={{ ...TD, fontWeight: 700 }}>{row.label}</td>
-                    <td style={{ ...TD, background: "rgba(0,137,123,0.05)", color: "rgba(34,29,23,0.85)", fontWeight: 500 }}>
+                    <td style={{ ...TD, background: "rgba(31, 43, 36,0.05)", color: "rgba(34,29,23,0.85)", fontWeight: 500 }}>
                       {emphasize(SF_COLUMN[row.key])}
                     </td>
                     <td style={{ ...TD, color: "rgba(34,29,23,0.66)" }}>{emphasize(c.them[row.key])}</td>
@@ -249,6 +324,12 @@ export function SeldonFrameVsPage({ competitor }: { competitor: Competitor }): R
           <CtaRow />
           <FrontOfficeFlow competitorName={c.name} competitorCategory={c.category} />
           <PricingSourceLine name={c.name} url={c.pricingSourceUrl} />
+          <p style={{ margin: "10px 0 0", fontSize: 13, lineHeight: 1.6, color: "rgba(34,29,23,0.55)" }}>
+            {`See how ${c.name} stacks up against 24 other platforms on the `}
+            <Link href="/charts/crm-pricing-index" className="sf-link" style={{ color: MKT.green, fontWeight: 600, textDecoration: "underline" }}>
+              interactive CRM Pricing Index →
+            </Link>
+          </p>
         </section>
 
         {/* ── WHERE THEY WIN ── */}
@@ -342,7 +423,12 @@ export function SeldonFrameVsPage({ competitor }: { competitor: Competitor }): R
           </h2>
           <p style={{ margin: "10px auto 0", fontSize: 15.5, lineHeight: 1.6, color: "rgba(246,242,234,0.75)", maxWidth: 560 }}>
             Paste a business's website and SeldonFrame builds the site, CRM, booking calendar and AI receptionist in about 3 minutes —
-            free, before you sign up. Then it&apos;s $29/mo flat for unlimited workspaces.
+            free, before you sign up. Then it&apos;s{" "}
+            {c.audience === "agency"
+              ? "$99/mo flat for white-label agency plans (or $29/mo solo)."
+              : c.audience === "mixed"
+                ? "$29/mo flat solo, or $99+/mo for agency whitelabel."
+                : "$29/mo flat for unlimited workspaces."}
           </p>
           <div style={{ display: "flex", flexWrap: "wrap", gap: 12, justifyContent: "center", marginTop: 22 }}>
             <a href={START_HREF} style={{ background: MKT.green, color: "#fff", padding: "13px 26px", borderRadius: 12, fontWeight: 700, fontSize: 15.5, textDecoration: "none" }}>
@@ -361,10 +447,19 @@ export function SeldonFrameVsPage({ competitor }: { competitor: Competitor }): R
             <Link
               href={`/alternative-to-${c.slug}`}
               className="sf-link"
-              style={{ fontSize: 13.5, fontWeight: 600, color: MKT.green, border: `1px solid rgba(0,137,123,0.35)`, borderRadius: 999, padding: "7px 14px", textDecoration: "none", background: "rgba(0,137,123,0.06)" }}
+              style={{ fontSize: 13.5, fontWeight: 600, color: MKT.green, border: `1px solid rgba(31, 43, 36,0.35)`, borderRadius: 999, padding: "7px 14px", textDecoration: "none", background: "rgba(31, 43, 36,0.06)" }}
             >
               {`Prefer the switching guide? Full ${c.name} alternative breakdown →`}
             </Link>
+            {hasCompetitorPricing(c.slug) ? (
+              <Link
+                href={`/${c.slug}-pricing`}
+                className="sf-link"
+                style={{ fontSize: 13.5, fontWeight: 600, color: MKT.green, border: `1px solid rgba(31, 43, 36,0.35)`, borderRadius: 999, padding: "7px 14px", textDecoration: "none", background: "rgba(31, 43, 36,0.06)" }}
+              >
+                {`${c.name} pricing breakdown →`}
+              </Link>
+            ) : null}
             {crossLinks.map((o) => (
               <Link
                 key={o.slug}
@@ -415,7 +510,7 @@ function CtaRow(): ReactElement {
 function ProsConsCard({ title, pros, cons, highlight }: { title: string; pros: string[]; cons: string[]; highlight?: boolean }): ReactElement {
   return (
     <div
-      style={{ border: `1px solid ${highlight ? "rgba(0,137,123,0.35)" : MKT.ink10}`, borderRadius: 16, padding: "20px 22px", background: highlight ? "rgba(0,137,123,0.05)" : "rgba(255,255,255,0.55)" }}
+      style={{ border: `1px solid ${highlight ? "rgba(31, 43, 36,0.35)" : MKT.ink10}`, borderRadius: 16, padding: "20px 22px", background: highlight ? "rgba(31, 43, 36,0.05)" : "rgba(255,255,255,0.55)" }}
     >
       <h3 style={{ margin: 0, fontSize: 18, fontWeight: 800 }}>{title}</h3>
       <div style={{ margin: "14px 0 6px", fontSize: 11.5, fontWeight: 800, letterSpacing: "0.1em", color: MKT.green }}>PROS</div>

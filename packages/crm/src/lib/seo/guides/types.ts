@@ -15,14 +15,50 @@ export type GuideCluster =
   | "ai-receptionist"
   | "service-faq"
   | "booking"
-  | "ai-visibility";
+  | "ai-visibility"
+  | "reviews"
+  | "ai-agents"
+  | "gohighlevel"
+  | "sell-agents";
 
 export type GuideIntent = "informational" | "commercial" | "transactional";
 
-/** One <h2> section. `body` is plain paragraphs separated by blank lines; the
- *  HTML template renders each as a <p>, the Markdown twin emits it verbatim.
- *  Keep prose plain (no raw HTML) — inline links live in `relatedTool`/sources. */
-export type GuideSection = { h2: string; body: string };
+/** Inline markup allowed in body/dek/FAQ answers: **bold**, *italic*,
+ *  [label](/internal-path). No raw HTML ever — the HTML template parses this
+ *  markdown-lite into React nodes and the Markdown twin passes it through
+ *  verbatim (it already is Markdown). */
+export type GuideCallout = { kind: "analogy" | "tip" | "warning"; text: string };
+
+/** One item in a diagram (a step, layer, or bar). `domain` (e.g. "twilio.com")
+ *  renders a small favicon logo next to the label. */
+export type GuideDiagramItem = { label: string; sub?: string; domain?: string };
+
+/** A typed, hand-authored SVG diagram rendered by <GuideDiagramView>. */
+export type GuideDiagram =
+  | { type: "flow"; title?: string; steps: GuideDiagramItem[] } // left→right workflow
+  | { type: "loop"; title?: string; steps: string[] } // circular cycle
+  | {
+      type: "compare";
+      title?: string;
+      left: { heading: string; items: string[] };
+      right: { heading: string; items: string[] };
+    }
+  | {
+      type: "bars";
+      title?: string;
+      unit?: string;
+      items: { label: string; value: number; display: string; domain?: string }[];
+      note?: string;
+    }
+  | { type: "stack"; title?: string; layers: GuideDiagramItem[] }; // top-down layers
+
+/** One <h2> section. `body` is markdown-lite paragraphs separated by blank
+ *  lines (supports **bold**, *italic*, [label](/internal-path)); the HTML
+ *  template renders each paragraph as a <p> with inline markup parsed, and
+ *  the Markdown twin emits it verbatim (it already is Markdown). Keep prose
+ *  free of raw HTML — inline links otherwise live in `relatedTool`/sources.
+ *  `diagram` and `callout` are optional, rendered after the section body. */
+export type GuideSection = { h2: string; body: string; diagram?: GuideDiagram; callout?: GuideCallout };
 
 export type GuideFaq = { q: string; a: string };
 
@@ -44,6 +80,9 @@ export type Guide = {
   relatedTool: string;
   /** Optional deeper link, e.g. "/best/ai-agent-for-small-business" or an /ai-agents page. */
   relatedBest?: string;
+  /** Optional link to a /charts data page whose story backs this guide's claims,
+   *  e.g. "/charts/missed-revenue-decay" or "/charts/ai-recommendation-index". */
+  relatedChart?: { href: string; label: string };
   /** One-paragraph intro rendered under the H1. */
   dek: string;
   /** >=3 body sections. */

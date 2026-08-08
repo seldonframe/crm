@@ -8,7 +8,7 @@
 
 import { getCompetitor, type Competitor } from "@/lib/seo/alternative-pages";
 
-export const START_HREF = "/signup";
+export const START_HREF = "/#hero-form";
 /** SeldonFrame-branded 15-min demo booking (bookings template row on the
  *  seldonframe workspace — see the booking_slug='default' template). */
 export const DEMO_HREF = "https://app.seldonframe.com/book/seldonframes-workspace-7798/default";
@@ -30,7 +30,7 @@ export const SF_PROS: string[] = [
   "An AI receptionist that answers calls, SMS, and web chat — and books real jobs into a real calendar and CRM",
   "The whole front office included: multi-page website, CRM, booking, intake forms, review automation",
   "$29/mo flat with unlimited workspaces — bring your own key and AI and phone service run at raw provider cost",
-  "Whitelabel built in: branded client portal, per-client workspaces, custom domains, one-click multi-client deploy",
+  "Whitelabel built in (agency plan, from $99/mo): branded client portal, per-client workspaces, custom domains, one-click multi-client deploy",
   "Build it free before you sign up — paste a URL, get a working workspace in about 3 minutes",
   "Open core and portable — your agents are plain, editable skill files, and your data lives in your workspace",
 ];
@@ -166,7 +166,7 @@ export const EXTRAS: Record<string, CompetitorExtras> = {
       "You can absorb the whitelabel add-on price at your scale",
     ],
     chooseSf: [
-      "You want the whitelabel agency layer at $29, not $2,000",
+      "You want the whitelabel agency layer from $99, not $2,000",
       "You want the receptionist to book into a system the client actually owns",
       "You want raw-cost AI and telephony (bring your own key) instead of stacked per-minute pricing",
       "You want the site, CRM, and booking built alongside the agent, not assembled around it",
@@ -250,7 +250,7 @@ export const EXTRAS: Record<string, CompetitorExtras> = {
       "You'd rather sell the whole front office ($300–800/mo retail) than a chatbot subscription",
       "You want the agent writing to a CRM and calendar the client actually owns",
       "You want your own margins instead of platform usage rates",
-      "$29 flat vs $197 plus usage changes your per-client math",
+      "$99 flat vs $197 plus usage changes your per-client math",
     ],
     switchNote:
       "Recreate each client agent from its prompt and FAQ (SeldonFrame builds most of it from the client's website), and re-point any embedded chat widgets to the new embed snippet.",
@@ -304,7 +304,7 @@ export const EXTRAS: Record<string, CompetitorExtras> = {
       "You want the AI receptionist as the core product, not a top-tier perk",
       "You want month-to-month flat pricing with no minimum spend",
       "You want clients live in minutes, not a 4–8 week onboarding",
-      "You want unlimited client workspaces included at $29",
+      "You want unlimited client workspaces included from $99",
     ],
     switchNote:
       "Your client list imports as contacts. Each client workspace rebuilds from their website in about 3 minutes — no marketplace product mapping needed.",
@@ -827,4 +827,26 @@ export function getVsPair(slug: string): { pair: VsPair; a: Competitor; b: Compe
   const pair = VS_PAIRS.find((p) => vsSlug(p) === slug);
   if (!pair) throw new Error(`Unknown vs pair: ${slug}`);
   return { pair, a: getCompetitor(pair.a), b: getCompetitor(pair.b) };
+}
+
+// ─── indexation consolidation (2026-07-17) ────────────────────────────────────
+// See docs/strategy/seo/2026-07-17-indexation-consolidation-plan.md — of the 30
+// third-party VS_PAIRS, 3 months of GSC data show clicks on only these 7; the
+// other ~23 have 0 clicks and Google treats a mismatched-topic 301 as a
+// soft-404, which is the intended outcome for them. The 26 seldonframe-vs-*
+// pages (COMPETITORS, alternative-pages.ts) are bottom-funnel and untouched —
+// this allowlist governs ONLY the third-party VS_PAIRS family.
+export const KEPT_VS_SLUGS: string[] = [
+  "chatbase-vs-voiceflow",
+  "chatbase-vs-botpress",
+  "gohighlevel-vs-linktree",
+  "gohighlevel-vs-klaviyo",
+  "keap-vs-activecampaign",
+  "klaviyo-vs-hubspot",
+  "vapi-vs-retell-ai",
+];
+
+/** Whether a third-party `/compare/<a>-vs-<b>` pair keeps its standalone page. */
+export function isKeptVsPair(slug: string): boolean {
+  return KEPT_VS_SLUGS.includes(slug);
 }

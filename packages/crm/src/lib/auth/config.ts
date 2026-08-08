@@ -5,6 +5,10 @@ import { db } from "@/db";
 import { accounts, organizations, users } from "@/db/schema";
 import { and, eq } from "drizzle-orm";
 import { sendNewSignupAlert } from "@/lib/notifications/ops-notifications";
+// funnel.ts (posthog-node) is imported lazily below, not statically here —
+// config.ts sits in the proxy/middleware module graph (config -> auth ->
+// src/proxy.ts), and a static import would pull posthog-node into that
+// bundle for every request, not just the rare createUser event.
 
 const BILLING_STATUSES = ["trialing", "active", "past_due", "canceled", "unpaid"] as const;
 const BILLING_PERIODS = ["monthly", "yearly"] as const;
@@ -68,7 +72,7 @@ function renderSeldonFrameSignInEmail({
   baseUrl: string;
 }): { subject: string; html: string; text: string } {
   const wordmark = `${baseUrl}/brand/seldonframe-wordmark.svg`;
-  const primary = "#14b8a6"; // matches --primary teal in the design system
+  const primary = "#059669"; // matches --primary teal in the design system
   const ink = "#0a0e1a";
   const bg = "#f6f7f9";
   const muted = "#6b7280";
@@ -194,6 +198,9 @@ if (resendApiKey) {
 
         if (!response.ok) {
           const detail = await response.text().catch(() => "<no-body>");
+          // contract:throw-ok: NextAuth catches provider errors and routes to
+          // its error page. Swallowing here would show "check your inbox" for
+          // an email that was never sent — the never-lies violation.
           throw new Error(
             `Failed to send sign-in email (${response.status}): ${detail.slice(0, 200)}`,
           );
@@ -408,6 +415,25 @@ export const authConfig = {
       } catch (err) {
         console.warn(
           `[auth][events.createUser] sendNewSignupAlert threw (swallowed): ${err instanceof Error ? err.message : String(err)}`,
+        );
+      }
+
+      // 2026-08-06 funnel observability — signed_up person-funnel event.
+      // Never let a capture failure affect signup: captureFunnelEvent is
+      // itself fire-and-forget/catch-swallowing, but events.createUser's
+      // own signature has no provider/account context to cheaply derive
+      // `method`, so it's omitted here (builder treats it as optional).
+      // orgId comes from the adapter's createUser `returning` (auth.ts) —
+      // NextAuth passes the adapter's return value through as `user`.
+      try {
+        const orgId = typeof (user as { orgId?: unknown }).orgId === "string" ? (user as { orgId: string }).orgId : null;
+        const userId = typeof user.id === "string" ? user.id : null;
+        const email = typeof user.email === "string" ? user.email : null;
+        const { buildSignedUpEvent, captureFunnelEvent } = await import("@/lib/analytics/funnel");
+        captureFunnelEvent(buildSignedUpEvent({ userId, orgId, email }));
+      } catch (err) {
+        console.warn(
+          `[auth][events.createUser] signed_up capture threw (swallowed): ${err instanceof Error ? err.message : String(err)}`,
         );
       }
     },

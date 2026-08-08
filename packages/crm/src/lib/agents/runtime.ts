@@ -47,16 +47,26 @@ import {
 } from "./tools";
 import { resolveTurnModel } from "./runtime/turn-model";
 import { createTtlPromiseCache } from "./runtime/capped-reply-cache";
+import {
+  cachedSystemBlocks,
+  cachedToolParams,
+  withMovingCacheBreakpoint,
+  serializeToolResultCapped,
+  capErrorText,
+  type LooseMessage,
+} from "./turn-token-economy";
 import type { CalendarBinding } from "@/lib/agents/booking/calendar-backend";
 import type { BookingPolicy } from "@/lib/agents/booking/booking-policy";
 import { bindingToCtxBooking } from "@/lib/agents/booking/binding-ctx";
 import { captureLlmGeneration } from "@/lib/analytics/llm-capture";
+import { VOICE_PROFILE_NOTE_PATH } from "@/lib/agents/voice-profile/ingest-sent-mail";
+import { buildTurnMessages, type TurnMessage } from "@/lib/agents/turn-messages";
 
 const MODEL = process.env.ANTHROPIC_AGENT_MODEL?.trim() || "claude-sonnet-4-5-20250929";
 const MAX_TURN_ITERATIONS = 6; // tool-call cap per single turn (catches loops)
-// v1.26.1 — these are SF's internal accounting markup for
+// v1.26.1 — these are Seldon's internal accounting markup for
 // billing-the-operator-for-agent-platform-usage. The OPERATOR pays
-// the LLM bill directly via their BYOK Anthropic key; SF makes money
+// the LLM bill directly via their BYOK Anthropic key; Seldon makes money
 // per agent turn (separate billing line). Numbers are deliberately
 // rough — the operator's exact LLM cost lives on their Anthropic
 // dashboard; ours is platform-usage metering.
@@ -107,8 +117,33 @@ export async function executeTurn(input: {
    *  prompt is composed from the agent's own blueprint/soul, byte-for-byte
    *  unchanged. */
   persona?: DeploymentPromptPersona;
+  /** Ephemeral-turn flag (Never-Lies L2b, 2026-07-06). Default true (normal,
+   *  persisted turn). Set to false for SYNTHETIC turns that must never
+   *  appear as prior USER context in a future turn's history — e.g. the
+   *  copilot route's vision-retry coaching instruction (route.ts). When
+   *  false:
+   *    - the user turn is NOT inserted into agentTurns
+   *    - the assistant reply is NOT inserted into agentTurns (this includes
+   *      the capped-usage holding-reply insert)
+   *    - ONLY lastTurnAt and turnCount are withheld on agentConversations —
+   *      they exist to record that a TURN happened, and a synthetic retry
+   *      turn must not move them
+   *    - token/cost aggregates (tokensIn, tokensOut, llmCostCents) on
+   *      agentConversations STILL accrue, because the LLM call behind a
+   *      persist:false turn is real and billed regardless of persist —
+   *      un-recording it would silently undercount org spend for every
+   *      reader that sums llmCostCents. agentConversations.tokensIn may by
+   *      design exceed sum(agentTurns.tokensIn): "tokens spent on this
+   *      conversation" vs. "tokens attributable to recorded turns"
+   *    - the in-memory Anthropic messages array still includes the turn (see
+   *      buildTurnMessages in ./turn-messages) so the model has full
+   *      context, and tool EXECUTION side effects still run unchanged
+   *  Net effect: a persist:false turn writes ZERO agentTurns rows, but its
+   *  real token/cost spend is still counted. */
+  persist?: boolean;
 }): Promise<ExecuteTurnResult> {
   const t0 = Date.now();
+  const persist = input.persist !== false;
 
   // 1. Load conversation + agent + org + soul
   const [conv] = await db
@@ -157,7 +192,7 @@ export async function executeTurn(input: {
   }
 
   // v1.27.9 — daily token budget removed. Under BYOK the operator pays
-  // Anthropic directly; SF has no cost exposure to cap. Operators manage
+  // Anthropic directly; Seldon has no cost exposure to cap. Operators manage
   // spend in their own Anthropic billing dashboard. The artificial budget
   // halt was breaking valid conversations on busy days for no reason.
   // The agents.tokensUsedToday + dailyTokenBudget columns stay in the
@@ -173,12 +208,17 @@ export async function executeTurn(input: {
     .limit(1);
   const nextTurnIndex = (lastTurn?.turnIndex ?? -1) + 1;
 
-  await db.insert(agentTurns).values({
-    conversationId: input.conversationId,
-    turnIndex: nextTurnIndex,
-    role: "user",
-    content: input.userMessage,
-  });
+  if (persist) {
+    await db.insert(agentTurns).values({
+      conversationId: input.conversationId,
+      turnIndex: nextTurnIndex,
+      role: "user",
+      content: input.userMessage,
+    });
+  }
+  // persist:false — skip the insert. The DB-derived `history` selected below
+  // will therefore NOT include this turn; buildTurnMessages appends it in
+  // memory instead (see below), so the model still sees it.
 
   // 4. Build messages array from conversation history
   const history = await db
@@ -192,21 +232,15 @@ export async function executeTurn(input: {
     .where(eq(agentTurns.conversationId, input.conversationId))
     .orderBy(asc(agentTurns.turnIndex));
 
-  // Convert SF turn shape → Anthropic Messages API shape.
-  type AnthropicMessage = {
-    role: "user" | "assistant";
-    content:
-      | string
-      | Array<
-          | { type: "text"; text: string }
-          | { type: "tool_use"; id: string; name: string; input: unknown }
-          | { type: "tool_result"; tool_use_id: string; content: string; is_error?: boolean }
-        >;
-  };
-  const messages: AnthropicMessage[] = [];
+  // Convert Seldon turn shape → Anthropic Messages API shape.
+  // TurnMessage (imported) is the same shape as the old locally-defined
+  // AnthropicMessage — kept as an alias so the rest of this function reads
+  // unchanged.
+  type AnthropicMessage = TurnMessage;
+  const historyMessages: AnthropicMessage[] = [];
   for (const turn of history) {
     if (turn.role === "user") {
-      messages.push({ role: "user", content: turn.content ?? "" });
+      historyMessages.push({ role: "user", content: turn.content ?? "" });
     } else if (turn.role === "assistant") {
       const blocks: Array<
         | { type: "text"; text: string }
@@ -218,23 +252,34 @@ export async function executeTurn(input: {
           blocks.push({ type: "tool_use", id: tc.id, name: tc.name, input: tc.input });
         }
       }
-      messages.push({ role: "assistant", content: blocks });
-      // Tool results from previous turns ride as a user message.
+      historyMessages.push({ role: "assistant", content: blocks });
+      // Tool results from previous turns ride as a user message. Capped at
+      // rebuild time (token economy, 2026-07-16): the FULL output is persisted
+      // on the turn row, but every later turn of the conversation re-sends
+      // this history — an unbounded historical payload would tax every turn
+      // that follows it, forever.
       if (turn.toolResults && turn.toolResults.length > 0) {
-        messages.push({
+        historyMessages.push({
           role: "user",
           content: turn.toolResults.map((tr) => ({
             type: "tool_result" as const,
             tool_use_id: tr.toolCallId,
             content: tr.ok
-              ? JSON.stringify(tr.output ?? null)
-              : `Error: ${tr.error ?? "unknown"}`,
+              ? serializeToolResultCapped(tr.output)
+              : `Error: ${capErrorText(tr.error ?? "unknown")}`,
             is_error: !tr.ok,
           })),
         });
       }
     }
   }
+
+  // persist:true — the DB insert above already happened before this select,
+  // so `historyMessages` already ends with the current user turn; unchanged.
+  // persist:false — no such row exists, so the current user turn is missing
+  // from `historyMessages`; append it in memory so the model still sees it
+  // (pure, unit-tested in turn-messages.spec.ts).
+  const messages: AnthropicMessage[] = buildTurnMessages(historyMessages, input.userMessage, persist);
 
   // 5. System prompt + tools
   // blueprintOverride is set by the eval runner for fixture-injection scenarios
@@ -256,6 +301,30 @@ export async function executeTurn(input: {
     soul: baseSoul,
     persona: input.persona ?? null,
   });
+  // Email-agent slice (Part A2) — for an email-channel agent, read the
+  // operator's sent-mail voice profile by EXACT path (no widening of the
+  // generic brain-notes recall) and splice it as its own prompt section. A
+  // missing note (never ingested yet) or a read error is a no-op — this must
+  // never block a turn. One indexed readBrainNote call, only for email.
+  let voiceProfileNote: string | null = null;
+  if (agent.channel === "email") {
+    try {
+      const { readBrainNote } = await import("@/lib/brain/store");
+      const note = await readBrainNote({
+        orgId: agent.orgId,
+        scope: "workspace",
+        path: VOICE_PROFILE_NOTE_PATH,
+      });
+      voiceProfileNote = note?.body ?? null;
+    } catch (err) {
+      console.warn(
+        `[runtime] voice-profile note read failed for org ${agent.orgId}:`,
+        err instanceof Error ? err.message : String(err),
+      );
+      voiceProfileNote = null;
+    }
+  }
+
   const systemPrompt = await composeSystemPrompt({
     orgName: orgRow.name,
     soul: personaSoul,
@@ -269,6 +338,7 @@ export async function executeTurn(input: {
     timezone: orgRow.timezone ?? "UTC",
     // Per-deployment opener (P2) — null on the workspace path → no opener section.
     greetingPrefix,
+    voiceProfileNote,
   });
   // The seam: native (capability-filtered) tools PLUS any bound MCP connector
   // tools (blueprint.connectors), wrapped to look native. With no connectors
@@ -281,9 +351,9 @@ export async function executeTurn(input: {
 
   // v1.26.1 — BYOK. Resolve the LLM client from the workspace's
   // configured key (organizations.integrations.anthropic.apiKey,
-  // encrypted at rest). Operator pays Anthropic directly; SF charges
+  // encrypted at rest). Operator pays Anthropic directly; Seldon charges
   // separately per agent turn. If no BYOK key is set AND no platform
-  // key is available (e.g. SF env not configured), gracefully degrade.
+  // key is available (e.g. Seldon env not configured), gracefully degrade.
   // 2026-07-08 pricing ladder — agency key inheritance (flag
   // SF_AGENCY_KEY_INHERIT): sub-account workspaces with no BYOK key of
   // their own inherit the owning agency's key instead of silently
@@ -303,30 +373,36 @@ export async function executeTurn(input: {
     const holdingReply = await resolveCappedUsageReply(agent.orgId);
     const latencyMs = Date.now() - t0;
 
-    await db.insert(agentTurns).values({
-      conversationId: input.conversationId,
-      turnIndex: nextTurnIndex + 1,
-      role: "assistant",
-      content: holdingReply,
-      toolCalls: null,
-      toolResults: null,
-      validatorsPassed: [],
-      latencyMs,
-      tokensIn: 0,
-      tokensOut: 0,
-      model: "usage_capped",
-    });
+    if (persist) {
+      await db.insert(agentTurns).values({
+        conversationId: input.conversationId,
+        turnIndex: nextTurnIndex + 1,
+        role: "assistant",
+        content: holdingReply,
+        toolCalls: null,
+        toolResults: null,
+        validatorsPassed: [],
+        latencyMs,
+        tokensIn: 0,
+        tokensOut: 0,
+        model: "usage_capped",
+      });
 
-    await db
-      .update(agentConversations)
-      .set({ lastTurnAt: new Date(), turnCount: sql`${agentConversations.turnCount} + 2` })
-      .where(eq(agentConversations.id, input.conversationId));
+      await db
+        .update(agentConversations)
+        .set({ lastTurnAt: new Date(), turnCount: sql`${agentConversations.turnCount} + 2` })
+        .where(eq(agentConversations.id, input.conversationId));
+    }
+    // persist:false — no agentTurns row for the holding reply, and the
+    // conversation's turnCount/lastTurnAt (which record that a turn
+    // happened) stay untouched. The holding reply text is still returned to
+    // the caller below.
 
     console.warn(
       `[agent-runtime] usage_capped agentId=${agent.id} convId=${conv.id} orgId=${agent.orgId}`,
     );
 
-    if (nextTurnIndex === 0 && conv.status !== "test") {
+    if (persist && nextTurnIndex === 0 && conv.status !== "test") {
       await writeFirstTurnActivity(agent, orgRow.id, conv.id, input.userMessage);
     }
 
@@ -386,16 +462,25 @@ export async function executeTurn(input: {
     let response: Anthropic.Messages.Message;
     const llmCallStartedAt = Date.now();
     try {
+      // Token economy (2026-07-16): system + tools are static across the loop
+      // AND across every turn of this conversation → one cache breakpoint
+      // each; the moving breakpoint on the last message block makes both the
+      // next loop iteration and the NEXT TURN's history rebuild a cache READ
+      // instead of full-price input. Three markers total (≤ the API's 4).
       response = await anthropic.messages.create({
         model: turnModel,
         max_tokens: 1024,
-        system: systemPrompt,
-        tools: tools.map((t) => ({
-          name: t.name,
-          description: t.description,
-          input_schema: t.jsonSchema as Anthropic.Messages.Tool.InputSchema,
-        })),
-        messages: messages as Anthropic.Messages.MessageParam[],
+        system: cachedSystemBlocks(systemPrompt) as Anthropic.Messages.MessageCreateParams["system"],
+        tools: cachedToolParams(
+          tools.map((t) => ({
+            name: t.name,
+            description: t.description,
+            input_schema: t.jsonSchema as Anthropic.Messages.Tool.InputSchema,
+          })),
+        ) as Anthropic.Messages.ToolUnion[],
+        messages: withMovingCacheBreakpoint(
+          messages as LooseMessage[],
+        ) as Anthropic.Messages.MessageParam[],
       });
     } catch (err) {
       const detail = err instanceof Error ? err.message : String(err);
@@ -406,7 +491,7 @@ export async function executeTurn(input: {
       return {
         ok: false,
         reason: errClass.reason,
-        // Test-mode = SF client testing in sandbox → return real diagnostic.
+        // Test-mode = Seldon client testing in sandbox → return real diagnostic.
         // Live/active = end customer talking to agent → return gentle fallback.
         fallbackMessage:
           conv.status === "test"
@@ -532,7 +617,11 @@ export async function executeTurn(input: {
         toolResultsForThisIter.push({
           type: "tool_result",
           tool_use_id: tu.id,
-          content: JSON.stringify(output ?? null),
+          // Hard-capped (token economy, 2026-07-16): an unbounded connector
+          // payload must never ride the loop at full size — it gets re-sent
+          // every remaining iteration AND every later turn's history rebuild.
+          // The FULL output still persists on the turn row (allToolResults).
+          content: serializeToolResultCapped(output),
         });
       } catch (err) {
         const result: AgentToolResult = {
@@ -544,7 +633,8 @@ export async function executeTurn(input: {
         toolResultsForThisIter.push({
           type: "tool_result",
           tool_use_id: tu.id,
-          content: `Error: ${err instanceof Error ? err.message : String(err)}`,
+          // Capped: connector errors can embed whole upstream response bodies.
+          content: `Error: ${capErrorText(err instanceof Error ? err.message : String(err))}`,
           is_error: true,
         });
       }
@@ -663,6 +753,10 @@ export async function executeTurn(input: {
       const regenResponse = await anthropic.messages.create({
         model: regenModel,
         max_tokens: 512,
+        // Deliberately UNCACHED (token economy): this call has no tools, so
+        // its prefix can never match the loop's cached [tools, system, …]
+        // prefix — a marker here would pay the cache-write premium with no
+        // possible reader (regen fires at most once per turn).
         system: systemPrompt,
         // No tools on regeneration — we want a clean text response, not
         // another tool-loop iteration. The original turn already
@@ -726,34 +820,57 @@ export async function executeTurn(input: {
   const latencyMs = Date.now() - t0;
   const costCents = computeCostCents(totalTokensIn, totalTokensOut);
 
-  await db.insert(agentTurns).values({
-    conversationId: input.conversationId,
-    turnIndex: nextTurnIndex + 1,
-    role: "assistant",
-    content: finalText,
-    toolCalls: allToolCalls.length > 0 ? allToolCalls : null,
-    toolResults: allToolResults.length > 0 ? allToolResults : null,
-    validatorsPassed: validatorResults,
-    latencyMs,
-    tokensIn: totalTokensIn,
-    tokensOut: totalTokensOut,
-    // Record the model ACTUALLY used for the final call this turn (adaptive
-    // selection may have escalated a hard turn to the premium model), not the
-    // static default — so cost/observability reflect real spend.
-    model: lastModelUsed,
-  });
+  if (persist) {
+    await db.insert(agentTurns).values({
+      conversationId: input.conversationId,
+      turnIndex: nextTurnIndex + 1,
+      role: "assistant",
+      content: finalText,
+      toolCalls: allToolCalls.length > 0 ? allToolCalls : null,
+      toolResults: allToolResults.length > 0 ? allToolResults : null,
+      validatorsPassed: validatorResults,
+      latencyMs,
+      tokensIn: totalTokensIn,
+      tokensOut: totalTokensOut,
+      // Record the model ACTUALLY used for the final call this turn (adaptive
+      // selection may have escalated a hard turn to the premium model), not the
+      // static default — so cost/observability reflect real spend.
+      model: lastModelUsed,
+    });
+  }
 
-  // 9. Update conversation aggregates
+  // 9. Update conversation aggregates. Money and turn-existence are split:
+  // tokensIn/tokensOut/llmCostCents accrue UNCONDITIONALLY, because the LLM
+  // call that produced totalTokensIn/totalTokensOut/costCents was real and
+  // billed regardless of persist — a persist:false retry still makes a real
+  // Anthropic call (up to MAX_TURN_ITERATIONS with tools) and those tokens
+  // must never be un-recorded. sum(agentConversations.llmCostCents) is read
+  // as org spend by the usage-cap gate (src/lib/ai/client.ts), the usage-cap
+  // cron/lib (usage-cap.ts, cron/usage-caps/route.ts), the agency billing
+  // rollup (usage-rollup.ts), super-admin workspace stats, and the
+  // conversations dashboard cost column — none of those must silently lose
+  // tokens because a turn was ephemeral.
+  // lastTurnAt/turnCount stay gated on `persist`: they exist to record that a
+  // TURN happened (and turnCount is read as a user-visible "N turns" count
+  // and as an abandonment signal — turnCount <= 2 → "abandoned" in
+  // improve/source-conversations.ts), so a synthetic retry turn must not
+  // move them. Net effect: agentConversations.tokensIn/tokensOut may exceed
+  // sum(agentTurns.tokensIn/tokensOut) by design — "tokens spent on this
+  // conversation" vs. "tokens attributable to recorded turns".
   await db
     .update(agentConversations)
     .set({
-      lastTurnAt: new Date(),
       tokensIn: sql`${agentConversations.tokensIn} + ${totalTokensIn}`,
       tokensOut: sql`${agentConversations.tokensOut} + ${totalTokensOut}`,
       llmCostCents: sql`${agentConversations.llmCostCents} + ${costCents}`,
-      turnCount: sql`${agentConversations.turnCount} + 2`,
+      ...(persist
+        ? { lastTurnAt: new Date(), turnCount: sql`${agentConversations.turnCount} + 2` }
+        : {}),
     })
     .where(eq(agentConversations.id, input.conversationId));
+  // persist:false — zero agentTurns rows written for this turn (neither the
+  // user turn above nor the assistant reply here). See the aggregate-update
+  // comment above for what still accrues vs. what stays untouched.
 
   // v1.27.9 — agents.tokensUsedToday increment removed (see budget note
   // above). Per-turn tokens still persist on agent_turns rows for
@@ -766,8 +883,11 @@ export async function executeTurn(input: {
 
   // 10. Activity bridge — first user turn → activity row on contact's
   // timeline. Subsequent turns are aggregated for the operator review
-  // surface (v1.26.1).
-  if (nextTurnIndex === 0 && conv.status !== "test") {
+  // surface (v1.26.1). Gated on `persist`: a persist:false turn writes no
+  // agentTurns row, so an activity row referencing it would dangle. Not
+  // reachable today (the retry always follows an already-persisted first
+  // turn), but cheap to close off.
+  if (persist && nextTurnIndex === 0 && conv.status !== "test") {
     await writeFirstTurnActivity(agent, orgRow.id, conv.id, input.userMessage);
   }
 
@@ -853,7 +973,7 @@ async function writeFirstTurnActivity(
 //   - operatorHint (specific guidance shown in test-mode sandbox)
 //
 // In live/active conversations the gentle fallback fires regardless;
-// only the test-mode sandbox surfaces these hints to the SF client.
+// only the test-mode sandbox surfaces these hints to the Seldon client.
 
 type AnthropicErrorClass = {
   reason:
@@ -906,7 +1026,7 @@ function classifyAnthropicError(detail: string): AnthropicErrorClass {
       reason: "llm_model_unavailable",
       operatorHint:
         "The configured Claude model isn't available on your account tier. " +
-        "Contact SF support if this persists (model is platform-controlled).",
+        "Contact Seldon support if this persists (model is platform-controlled).",
     };
   }
   if (lower.includes("overloaded_error") || lower.includes("529")) {

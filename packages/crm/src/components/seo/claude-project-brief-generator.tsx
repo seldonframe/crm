@@ -9,7 +9,7 @@
 import { useMemo, useState, type ReactElement, type CSSProperties } from "react";
 
 const INK = "#221D17";
-const GREEN = "#00897B";
+const GREEN = "#1F2B24";
 const INK10 = "rgba(34,29,23,0.10)";
 const INK55 = "rgba(34,29,23,0.55)";
 
@@ -129,14 +129,14 @@ export function ClaudeProjectBriefGenerator(): ReactElement {
         </p>
       </div>
 
-      <div style={{ marginTop: 24, border: `1px solid rgba(0,137,123,0.35)`, background: "rgba(0,137,123,0.05)", borderRadius: 14, padding: "18px 20px" }}>
+      <div style={{ marginTop: 24, border: `1px solid rgba(31, 43, 36,0.35)`, background: "rgba(31, 43, 36,0.05)", borderRadius: 14, padding: "18px 20px" }}>
         <p style={{ margin: 0, fontSize: 14.5, lineHeight: 1.6, color: "rgba(34,29,23,0.8)" }}>
           <strong>Doing this once is a good afternoon. Doing it per client, forever, is a job.</strong> SeldonFrame builds and
           maintains this automatically for every client — the standing brief, the grounded knowledge, the retrieval tests —
           plus the website, CRM, booking calendar and AI receptionist the brief can only describe.
         </p>
         <div style={{ display: "flex", flexWrap: "wrap", gap: 12, marginTop: 14 }}>
-          <a href="/signup" style={{ background: INK, color: "#F6F2EA", padding: "12px 24px", borderRadius: 12, fontWeight: 700, fontSize: 14.5, textDecoration: "none" }}>
+          <a href="/#hero-form" style={{ background: INK, color: "#F6F2EA", padding: "12px 24px", borderRadius: 12, fontWeight: 700, fontSize: 14.5, textDecoration: "none" }}>
             Build it free in 3 minutes
           </a>
           <a

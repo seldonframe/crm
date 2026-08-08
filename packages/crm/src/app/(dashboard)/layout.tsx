@@ -16,8 +16,10 @@ import { AgencyKeyBanner } from "@/components/dashboard/agency-key-banner";
 import { DashboardTopbar } from "@/components/layout/dashboard-topbar";
 import { HelpButton } from "@/components/layout/help-button";
 import { SeldonChat } from "@/components/seldon-chat";
+import { IdentifyOnAuth } from "@/components/analytics/identify-on-auth";
 import { CommandBar } from "@/components/command-bar";
 import { isWinLadderOn, isSimpleHomeOn } from "@/lib/web-build/policy";
+import { isDraftApprovalsOn } from "@/lib/agent-drafts/policy";
 import { readEnabledModules } from "@/lib/workspace/surface";
 import { hasLiveSms } from "@/lib/telephony/config";
 import { buildWorkspaceUrls } from "@/lib/billing/anonymous-workspace";
@@ -27,12 +29,6 @@ import { canSeldonIt, resolvePlanFromPlanId } from "@/lib/billing/entitlements";
 import { listManagedOrganizations, setActiveOrgAction } from "@/lib/billing/orgs";
 import { getHiddenBlocks } from "@/lib/blocks/visibility-actions";
 import { getNotificationFeed } from "@/lib/notifications/feed";
-// 2026-05-17 — pulls the workspace's brand color / accent / radius
-// into the admin chrome so theme settings actually affect the
-// operator's own dashboard (not just public pages). Previously the
-// provider existed but wasn't mounted anywhere — saved themes only
-// applied to /l/, /book/, /forms/ surfaces.
-import { AdminThemeProvider } from "@/components/theme/admin-theme-provider";
 import { getThemeSettings } from "@/lib/theme/actions";
 import { db } from "@/db";
 import { activities, contacts, deals, landingPages, organizations, users } from "@/db/schema";
@@ -112,10 +108,10 @@ export default async function DashboardLayout({
     ? await getNotificationFeed(user.id, user.orgId ?? null)
     : [];
 
-  // 2026-05-17 — fetch the workspace theme so the AdminThemeProvider
-  // can override --primary / --ring / --accent / --radius in admin
-  // chrome. Best-effort: failures just skip the override (chrome falls
-  // back to default shadcn tokens).
+  // 2026-07-15 — the admin theme bridge is gone: the dashboard always
+  // wears the SF brand tokens from design-tokens.css. This fetch
+  // survives only for theme.logoUrl (workspace switcher tile below).
+  // Best-effort: failures just drop the logo.
   const adminThemeSettings = orgId
     ? await getThemeSettings().catch(() => null)
     : null;
@@ -286,7 +282,12 @@ export default async function DashboardLayout({
 
   return (
     <SoulProvider soul={soul} personality={personality}>
-      <AdminThemeProvider theme={adminThemeSettings?.theme ?? null}>
+      <IdentifyOnAuth
+        userId={user?.id ?? null}
+        email={user?.email ?? null}
+        orgId={user?.orgId ?? null}
+        activeOrgId={isSwitchedOrg ? orgId : null}
+      />
       <div className="min-h-screen w-full lg:p-3">
         <div className="flex min-h-screen w-full flex-col items-center justify-start bg-background/95 lg:rounded-2xl lg:border lg:border-border/80 lg:shadow-(--shadow-card)">
           <div className="animate-page-enter flex min-h-screen w-full flex-col md:flex-row">
@@ -295,7 +296,7 @@ export default async function DashboardLayout({
               canAccessSeldon={canAccessSeldon}
               hiddenBlocks={hiddenBlocks}
               workspaceName={activeOrg?.name || "SeldonFrame"}
-              // 2026-05-18 — workspace logo from /settings/theme. The
+              // 2026-05-18 — workspace logo from theme.logoUrl. The
               // workspace SWITCHER tile shows the client's own per-
               // workspace logo (theme.logoUrl) — falling back to the
               // agency logo when the workspace hasn't uploaded its own,
@@ -340,6 +341,7 @@ export default async function DashboardLayout({
               primaryOrgId={user?.orgId ?? null}
               enabledModules={enabledModules}
               smsLive={smsLive}
+              draftApprovalsOn={isDraftApprovalsOn({ SF_DRAFT_APPROVALS: process.env.SF_DRAFT_APPROVALS })}
             />
             {/* overflow-x-clip (not overflow-x-hidden): overflow-y-auto here
                 also computes overflow-x to `auto` per CSS's overflow
@@ -414,7 +416,6 @@ export default async function DashboardLayout({
           {!isOperatorSession ? <HelpButton /> : null}
         </div>
       </div>
-      </AdminThemeProvider>
     </SoulProvider>
   );
 }

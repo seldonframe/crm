@@ -35,6 +35,7 @@
 
 import { createSseStream, SSE_RESPONSE_HEADERS } from "./sse";
 import { validateCreateFromUrlInput } from "./url-validator";
+import { CREDITS_EXHAUSTED_UI_MESSAGE } from "./anthropic-error-map";
 import type { CreateFullWorkspaceInput, CreateFullWorkspaceResult } from "@/lib/workspace/create-full";
 import type { LimitDecision } from "@/lib/billing/limits";
 import type { ExtractedBusinessFacts } from "./extraction-prompt";
@@ -55,7 +56,9 @@ import { logEvent } from "@/lib/observability/log";
 
 export type RunDeps = {
   enforceWorkspaceLimit: (args: { primaryOrgId: string | null; ownedWorkspaceCount: number }) => Promise<LimitDecision>;
-  getOwnedWorkspaceCount: (userId: string) => Promise<number>;
+  /** excludeOrgId: the caller's own primary/agency org — never counted
+   *  against their tenant-workspace cap. See owned-workspace-count.ts. */
+  getOwnedWorkspaceCount: (userId: string, excludeOrgId?: string | null) => Promise<number>;
   /**
    * 2026-06-18 — MANAGED AI (BYOK gate removed). Resolves the Anthropic
    * key used for URL extraction: the operator's own BYOK key if they've
@@ -215,7 +218,10 @@ export async function runCreateFromUrl(input: RunInput): Promise<RunResult> {
       //    own per-IP rate limit (resolveWebBuildGate) is the guardrail
       //    for that path instead, so this whole step is skipped.
       if (input.sessionUser) {
-        const ownedCount = await input.deps.getOwnedWorkspaceCount(input.sessionUser.id);
+        const ownedCount = await input.deps.getOwnedWorkspaceCount(
+          input.sessionUser.id,
+          input.sessionUser.primaryOrgId,
+        );
         const decision = await input.deps.enforceWorkspaceLimit({
           primaryOrgId: input.sessionUser.primaryOrgId,
           ownedWorkspaceCount: ownedCount,
@@ -257,7 +263,30 @@ export async function runCreateFromUrl(input: RunInput): Promise<RunResult> {
         facts = await input.deps.extractBusinessFactsFromUrl({ url: validation.url, byokKey: extraction.key });
       } catch (err: unknown) {
         const reason = (err as { reason?: string }).reason ?? "extraction_failed";
-        sse.error(422, { reason });
+        // 2026-07-14 — extraction-failed honesty fix. extraction_failed is a
+        // PERMANENT condition for that URL (no phone/name/location found
+        // anywhere on the site) — retrying can never succeed. Without a
+        // `message`, the UI falls back to "Something broke on our end. Give
+        // it another try." and shows a Try again button, which burns the
+        // visitor's rate limit on a build that will fail identically every
+        // time.
+        // 2026-07-16 — same honesty rule for credits_exhausted: the Anthropic
+        // account funding the extraction is out of credits, so no retry can
+        // succeed until credits are added. Remaining reasons
+        // (anthropic_unauthorized, internal_error) are untouched — those ARE
+        // sometimes transient.
+        sse.error(
+          422,
+          reason === "extraction_failed"
+            ? {
+                reason,
+                message:
+                  "We read that site but couldn't find the basics we need — a business name, location, and phone number. Try a different URL, or describe your business instead.",
+              }
+            : reason === "credits_exhausted"
+              ? { reason, message: CREDITS_EXHAUSTED_UI_MESSAGE }
+              : { reason },
+        );
         sse.close();
         return;
       }

@@ -12,11 +12,13 @@
 // env override (NEXT_PUBLIC_SITE_URL) wins for non-prod deploys.
 
 import type { MetadataRoute } from "next";
-import { AGENT_JOBS, allJobVerticalPairs } from "@/lib/seo/agent-pages";
+import { isRecordToAgentOn } from "@/lib/recordings/policy";
+import { AGENT_JOBS, KEPT_PAIRS } from "@/lib/seo/agent-pages";
 import { COMPETITORS } from "@/lib/seo/alternative-pages";
-import { VS_PAIRS, vsSlug } from "@/lib/seo/alternative-pages-extras";
+import { VS_PAIRS, vsSlug, isKeptVsPair } from "@/lib/seo/alternative-pages-extras";
 import { allBestSlugs } from "@/lib/seo/best-pages";
 import { allGuideSlugs } from "@/lib/seo/guides";
+import { allBlogSlugs } from "@/lib/seo/blog";
 import { allPricingSlugs } from "@/lib/seo/competitor-pricing";
 import { listMarketplaceAgentsFromDb } from "@/lib/marketplace/agent-listings";
 import { MARKETPLACE_SEED } from "@/components/marketplace/marketplace-seed";
@@ -62,8 +64,9 @@ export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
     });
   }
 
-  // Tier-2: job × vertical (the long tail).
-  for (const { job, vertical } of allJobVerticalPairs()) {
+  // Tier-2: job × vertical (the long tail) — only the kept pairs (indexation
+  // consolidation, 2026-07-17); folded pairs 301 and must not be sitemapped.
+  for (const { job, vertical } of KEPT_PAIRS) {
     entries.push({
       url: `${base}/ai-agents/${job}/for/${vertical}`,
       lastModified: now,
@@ -71,6 +74,28 @@ export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
       priority: 0.6,
     });
   }
+
+  // /record — indexable only when the record-to-agent flow is on (a 404ing
+  // route must never be sitemapped). 2026-07-15 — claim-flow origin fix moved
+  // /record's canonical to the app host (page.tsx now host-pins www → app), so
+  // the sitemap entry is emitted against the app origin explicitly rather than
+  // `base` (which stays the marketing host for every other entry).
+  if (isRecordToAgentOn({ SF_RECORD_TO_AGENT: process.env.SF_RECORD_TO_AGENT })) {
+    entries.push({
+      url: "https://app.seldonframe.com/record",
+      lastModified: now,
+      changeFrequency: "monthly",
+      priority: 0.8,
+    });
+  }
+
+  // The sell-agents hub (targets "sell ai agents").
+  entries.push({
+    url: `${base}/sell`,
+    lastModified: now,
+    changeFrequency: "weekly",
+    priority: 0.8,
+  });
 
   // Marketplace browse + listings (so the cross-links resolve for crawlers).
   entries.push({
@@ -126,10 +151,14 @@ export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
     });
   }
 
-  // Head-to-head comparison pages (/compare/<a>-vs-<b>).
+  // Head-to-head comparison pages (/compare/<a>-vs-<b>) — only the kept
+  // third-party pairs (indexation consolidation, 2026-07-17); folded pairs
+  // 301 to /alternatives and must not be sitemapped.
   for (const pair of VS_PAIRS) {
+    const slug = vsSlug(pair);
+    if (!isKeptVsPair(slug)) continue;
     entries.push({
-      url: `${base}/compare/${vsSlug(pair)}`,
+      url: `${base}/compare/${slug}`,
       lastModified: now,
       changeFrequency: "monthly",
       priority: 0.7,
@@ -167,6 +196,9 @@ export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
     "voice-ai-cost-calculator",
     "klaviyo-cost-calculator",
     "agency-margin-calculator",
+    "ai-website-generator",
+    "free-booking-page",
+    "website-grader",
   ]) {
     entries.push({
       url: `${base}/tools/${tool}`,
@@ -180,6 +212,18 @@ export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
   entries.push({ url: `${base}/guides`, lastModified: now, changeFrequency: "weekly", priority: 0.7 });
   for (const slug of allGuideSlugs()) {
     entries.push({ url: `${base}/guides/${slug}`, lastModified: now, changeFrequency: "monthly", priority: 0.6 });
+  }
+
+  // Blog (original, sourced articles — the data-driven /blog engine).
+  entries.push({ url: `${base}/blog`, lastModified: now, changeFrequency: "weekly", priority: 0.6 });
+  for (const slug of allBlogSlugs()) {
+    entries.push({ url: `${base}/blog/${slug}`, lastModified: now, changeFrequency: "monthly", priority: 0.6 });
+  }
+
+  // Interactive data charts (/charts hub + the 4 flagship pages).
+  entries.push({ url: `${base}/charts`, lastModified: now, changeFrequency: "weekly", priority: 0.8 });
+  for (const slug of ["crm-pricing-index", "ai-front-office-trends", "missed-revenue-decay", "ai-recommendation-index"]) {
+    entries.push({ url: `${base}/charts/${slug}`, lastModified: now, changeFrequency: "monthly", priority: 0.8 });
   }
 
   return entries;

@@ -1,8 +1,9 @@
 // packages/crm/tests/unit/web-onboarding/upgrade-modal.spec.tsx
 //
-// Bootstrap: run with `node --import tsx --import ./tests/setup-dom.ts --test ...`
-// (see packages/crm/tests/setup-dom.ts) — jsdom is mounted before React imports
-// so the Dialog/Card/Button shadcn primitives render into a real DOM.
+// Bootstrap: the setup-dom import below MUST stay first — it mounts jsdom
+// before React imports so the Dialog/Card/Button shadcn primitives render
+// into a real DOM (the CI runner passes no --import flag, so the spec pulls
+// the bootstrap in itself).
 //
 // Query discipline: base-ui's Dialog mirrors title/description into both the
 // visible content and a screen-reader-only node, so plain `getByText` matches
@@ -24,6 +25,8 @@
 // never reaches the tier-comparison view) — its copy assertions were
 // already drifted from the live component before this branch; fixed
 // here to match the real strings.
+import "../../setup-dom";
+
 import { describe, test, beforeEach, afterEach } from "node:test";
 import assert from "node:assert/strict";
 import { render, screen, fireEvent, cleanup } from "@testing-library/react";
@@ -55,16 +58,97 @@ function setTierLadderEnv(value: "1" | undefined) {
 describe("UpgradeModal — free tier (add-a-card branch, flag-independent)", () => {
   beforeEach(() => setTierLadderEnv(undefined));
 
-  test("renders the add-a-card title and subtitle", () => {
+  test("renders the choose-a-plan title and subtitle", () => {
+    // 2026-08-07: retitled from "Add a card to unlock more workspaces" —
+    // saving a card never raises the inactive tier's cap, only choosing
+    // a plan does (see upgrade-modal.tsx's freeTitle/freeDestination
+    // comments for the infinite-loop bug this fixed).
     render(<UpgradeModal open={true} onOpenChange={() => {}} tier="free" used={1} limit={1} />);
     assert.ok(
-      screen.queryAllByText(/add a card to unlock more workspaces/i).length > 0,
-      "Add-a-card title missing",
+      screen.queryAllByText(/choose a plan to add more workspaces/i).length > 0,
+      "Choose-a-plan title missing",
     );
     assert.ok(
       screen.queryAllByText(/you've used 1\/1 workspace/i).length > 0,
       "used-N/N subtitle missing",
     );
+  });
+
+  test("never renders '0/0' in the subtitle when limit is 0 (stale/legacy caller)", () => {
+    render(<UpgradeModal open={true} onOpenChange={() => {}} tier="inactive" used={0} limit={0} />);
+    assert.equal(screen.queryAllByText(/0\/0/).length, 0, "must never render 0/0");
+    assert.ok(
+      screen.queryAllByText(/your first workspace is free/i).length > 0,
+      "limit-0 fallback copy missing",
+    );
+  });
+
+  test("routes the free/inactive CTA to /settings/billing, not the card-capture page", () => {
+    // Regression test for the infinite billing loop: /signup/billing's
+    // early-return for a user who already has a card on file just
+    // bounces to `next`, which re-402s on the inactive tier (saving a
+    // card never raises the cap) — an unbreakable loop. The at-cap
+    // modal must send visitors to the real upgrade surface instead.
+    //
+    // This must actually observe the navigation target, not just that
+    // the button renders — a button-existence check passes unchanged
+    // even if the CTA's handler is reverted to send visitors back into
+    // /signup/billing. The component navigates via a hard
+    // `window.location.href = ...` assignment (not a link/href), so the
+    // only observable signal is that assignment.
+    //
+    // `window.location` itself can't be stubbed directly: per the HTML
+    // spec it's an "unforgeable" own property (configurable: false),
+    // and jsdom enforces that, so `Object.defineProperty(window,
+    // "location", ...)` throws "Cannot redefine property: location".
+    // Real navigation is also a no-op in jsdom ("Not implemented:
+    // navigation to another Document") and never updates
+    // `location.href`, so reading it back afterward wouldn't work
+    // either. Instead, swap the global `window` binding itself (which
+    // IS configurable — see tests/setup-dom.ts) for a Proxy that
+    // forwards everything to the real jsdom window except `location`,
+    // where it hands back a stub object that records the assignment.
+    // The component's bare `window` reference resolves against
+    // globalThis at call time, so it picks up the proxy.
+    const realWindow = window;
+    let assignedHref: string | undefined;
+    const locationStub = {
+      get href() {
+        return assignedHref ?? "";
+      },
+      set href(value: string) {
+        assignedHref = value;
+      },
+    };
+    const proxyWindow = new Proxy(realWindow, {
+      get(target, prop, _receiver) {
+        if (prop === "location") return locationStub;
+        return Reflect.get(target, prop, target);
+      },
+    });
+    Object.defineProperty(globalThis, "window", {
+      value: proxyWindow,
+      configurable: true,
+      writable: true,
+      enumerable: false,
+    });
+    try {
+      render(<UpgradeModal open={true} onOpenChange={() => {}} tier="inactive" used={1} limit={1} />);
+      const cta = screen.getByRole("button", { name: /choose a plan/i });
+      fireEvent.click(cta);
+      assert.equal(
+        assignedHref,
+        "/settings/billing",
+        "Choose-a-plan CTA must navigate to /settings/billing, not /signup/billing",
+      );
+    } finally {
+      Object.defineProperty(globalThis, "window", {
+        value: realWindow,
+        configurable: true,
+        writable: true,
+        enumerable: false,
+      });
+    }
   });
 
   test("does NOT render any tier cards on free", () => {

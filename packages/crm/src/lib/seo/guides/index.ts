@@ -42,6 +42,66 @@ import { guide as howToShowUpInAiSearch } from "./how-to-show-up-in-ai-search";
 import { guide as localSeoVsGeo } from "./local-seo-vs-geo";
 import { guide as whatIsAnswerEngineOptimization } from "./what-is-answer-engine-optimization";
 import { guide as whatIsGenerativeEngineOptimization } from "./what-is-generative-engine-optimization";
+import { guide as isYourWebsiteLosingYouJobs } from "./is-your-website-losing-you-jobs";
+import { guide as howToMakeAWebsiteForAServiceBusiness } from "./how-to-make-a-website-for-a-service-business";
+import { guide as onlineBookingOptionsForServiceBusinesses } from "./online-booking-options-for-service-businesses";
+import { guide as howToGetMoreGoogleReviews } from "./how-to-get-more-google-reviews";
+import { guide as howToRespondToANegativeReview } from "./how-to-respond-to-a-negative-review";
+import { guide as missedCallTextBack } from "./missed-call-text-back";
+import { guide as howToAskForAGoogleReview } from "./how-to-ask-for-a-google-review";
+import { guide as reviewResponseTemplates } from "./review-response-templates";
+import { guide as howToChooseAnAiPhoneAnsweringService } from "./how-to-choose-an-ai-phone-answering-service";
+import { guide as onePersonCompanyOs } from "./one-person-company-os";
+import { guide as howMuchDoesGohighlevelCost } from "./how-much-does-gohighlevel-cost";
+import { guide as gohighlevelPricingPlansExplained } from "./gohighlevel-pricing-plans-explained";
+import { guide as hiddenGohighlevelFees } from "./hidden-gohighlevel-fees";
+import { guide as isGohighlevelAiEmployeeWorthIt } from "./is-gohighlevel-ai-employee-worth-it";
+import { guide as bestGohighlevelAlternatives } from "./best-gohighlevel-alternatives";
+import { guide as gohighlevelVsSeldonframe } from "./gohighlevel-vs-seldonframe";
+import { guide as bestGohighlevelAlternativeForSolopreneurs } from "./best-gohighlevel-alternative-for-solopreneurs";
+import { guide as gohighlevelVsHubspot } from "./gohighlevel-vs-hubspot";
+import { guide as whyAgenciesLeaveGohighlevel } from "./why-agencies-leave-gohighlevel";
+import { guide as isGohighlevelWorthItForSmallBusiness } from "./is-gohighlevel-worth-it-for-small-business";
+import { guide as isGohighlevelHardToLearn } from "./is-gohighlevel-hard-to-learn";
+import { guide as doINeedGohighlevel } from "./do-i-need-gohighlevel";
+import { guide as howToSwitchFromGohighlevel } from "./how-to-switch-from-gohighlevel";
+import { guide as howToReplaceGohighlevel } from "./how-to-replace-gohighlevel";
+import { guide as howToPriceAnAiReceptionistService } from "./how-to-price-an-ai-receptionist-service";
+import { guide as runClientAiOnYourOwnKeys } from "./run-client-ai-on-your-own-keys";
+import { guide as gohighlevelSaasModeVsFlatPricing } from "./gohighlevel-saas-mode-vs-flat-pricing";
+import { guide as whiteLabelAiFrontOfficeWithoutAgencyPro } from "./white-label-ai-front-office-without-agency-pro";
+import { guide as howToMakeMoneySellingAiAgents } from "./how-to-make-money-selling-ai-agents";
+import { guide as howMuchToChargeForAnAiAgent } from "./how-much-to-charge-for-an-ai-agent";
+import { guide as aiAgentBusinessIdeas } from "./ai-agent-business-ideas";
+import { guide as howToStartAnAiAutomationAgency } from "./how-to-start-an-ai-automation-agency";
+import { guide as bestAiAgentMarketplaces } from "./best-ai-agent-marketplaces";
+import { guide as whatIsAnMcpMarketplace } from "./what-is-an-mcp-marketplace";
+import { guide as howToSellAiAgentsToLocalBusinesses } from "./how-to-sell-ai-agents-to-local-businesses";
+import { guide as whiteLabelAiAgents } from "./white-label-ai-agents";
+import { guide as howToBuildAndSellAnAiReceptionist } from "./how-to-build-and-sell-an-ai-receptionist";
+import { guide as howToBuildAMissedCallTextBackAgent } from "./how-to-build-a-missed-call-text-back-agent";
+import { guide as howToBuildAndSellASpeedToLeadAgent } from "./how-to-build-and-sell-a-speed-to-lead-agent";
+import { guide as howToBuildAReviewRequestAgent } from "./how-to-build-a-review-request-agent";
+import { guide as howToBuildAndSellAnAiBookingAgent } from "./how-to-build-and-sell-an-ai-booking-agent";
+import { guide as howToBuildAWebsiteChatbotForClients } from "./how-to-build-a-website-chatbot-for-clients";
+import { guide as howToBuildAnAiLeadQualifier } from "./how-to-build-an-ai-lead-qualifier";
+import { guide as howToBuildAnAfterHoursAnsweringAgent } from "./how-to-build-an-after-hours-answering-agent";
+import { guide as aiAgencyPricingModels } from "./ai-agency-pricing-models";
+import { guide as howToGetAiAgencyClients } from "./how-to-get-ai-agency-clients";
+import { guide as productizedAiServices } from "./productized-ai-services";
+import { guide as clientPortalsForAiAgencies } from "./client-portals-for-ai-agencies";
+import { guide as smmaToAiAgency } from "./smma-to-ai-agency";
+import { guide as whatToIncludeInAnAiFrontOfficePackage } from "./what-to-include-in-an-ai-front-office-package";
+import { guide as gptStoreAlternativeForDevelopers } from "./gpt-store-alternative-for-developers";
+import { guide as whereToSellAiAgents } from "./where-to-sell-ai-agents";
+import { guide as sellingAiServicesOnFiverrVsOwningYourAgent } from "./selling-ai-services-on-fiverr-vs-owning-your-agent";
+import { guide as aiMarketplaceFeesCompared } from "./ai-marketplace-fees-compared";
+import { guide as voiceAiResellerPrograms } from "./voice-ai-reseller-programs";
+import { guide as howToRentOutAnAiAgentViaMcp } from "./how-to-rent-out-an-ai-agent-via-mcp";
+import { guide as whatIsByokAi } from "./what-is-byok-ai";
+import { guide as howDoAiAgentsGetPaid } from "./how-do-ai-agents-get-paid";
+import { guide as howToMakeAnAiAgentReliable } from "./how-to-make-an-ai-agent-reliable";
+import { guide as aiAgentStatistics } from "./ai-agent-statistics";
 
 export { LAST_UPDATED };
 export type { Guide, GuideCluster, GuideSection, GuideFaq, GuideSource, GuideIntent } from "./types";
@@ -54,6 +114,10 @@ export const CLUSTER_LABELS: Record<GuideCluster, string> = {
   "service-faq": "FAQs & customer questions",
   booking: "Online booking",
   "ai-visibility": "AI visibility & GEO",
+  reviews: "Reviews & reputation",
+  "ai-agents": "Running your business with AI agents",
+  gohighlevel: "GoHighLevel alternatives & pricing",
+  "sell-agents": "Building & selling AI agents",
 };
 
 export const GUIDES: Guide[] = [
@@ -92,6 +156,66 @@ export const GUIDES: Guide[] = [
   localSeoVsGeo,
   whatIsAnswerEngineOptimization,
   whatIsGenerativeEngineOptimization,
+  isYourWebsiteLosingYouJobs,
+  howToMakeAWebsiteForAServiceBusiness,
+  onlineBookingOptionsForServiceBusinesses,
+  howToGetMoreGoogleReviews,
+  howToRespondToANegativeReview,
+  missedCallTextBack,
+  onePersonCompanyOs,
+  howMuchDoesGohighlevelCost,
+  gohighlevelPricingPlansExplained,
+  hiddenGohighlevelFees,
+  isGohighlevelAiEmployeeWorthIt,
+  bestGohighlevelAlternatives,
+  gohighlevelVsSeldonframe,
+  bestGohighlevelAlternativeForSolopreneurs,
+  gohighlevelVsHubspot,
+  whyAgenciesLeaveGohighlevel,
+  isGohighlevelWorthItForSmallBusiness,
+  isGohighlevelHardToLearn,
+  doINeedGohighlevel,
+  howToSwitchFromGohighlevel,
+  howToReplaceGohighlevel,
+  howToPriceAnAiReceptionistService,
+  runClientAiOnYourOwnKeys,
+  gohighlevelSaasModeVsFlatPricing,
+  whiteLabelAiFrontOfficeWithoutAgencyPro,
+  howToMakeMoneySellingAiAgents,
+  howMuchToChargeForAnAiAgent,
+  aiAgentBusinessIdeas,
+  howToStartAnAiAutomationAgency,
+  bestAiAgentMarketplaces,
+  whatIsAnMcpMarketplace,
+  howToSellAiAgentsToLocalBusinesses,
+  whiteLabelAiAgents,
+  howToBuildAndSellAnAiReceptionist,
+  howToBuildAMissedCallTextBackAgent,
+  howToBuildAndSellASpeedToLeadAgent,
+  howToBuildAReviewRequestAgent,
+  howToBuildAndSellAnAiBookingAgent,
+  howToBuildAWebsiteChatbotForClients,
+  howToBuildAnAiLeadQualifier,
+  howToBuildAnAfterHoursAnsweringAgent,
+  aiAgencyPricingModels,
+  howToGetAiAgencyClients,
+  productizedAiServices,
+  clientPortalsForAiAgencies,
+  smmaToAiAgency,
+  whatToIncludeInAnAiFrontOfficePackage,
+  gptStoreAlternativeForDevelopers,
+  whereToSellAiAgents,
+  sellingAiServicesOnFiverrVsOwningYourAgent,
+  aiMarketplaceFeesCompared,
+  voiceAiResellerPrograms,
+  howToRentOutAnAiAgentViaMcp,
+  whatIsByokAi,
+  howDoAiAgentsGetPaid,
+  howToMakeAnAiAgentReliable,
+  aiAgentStatistics,
+  howToChooseAnAiPhoneAnsweringService,
+  howToAskForAGoogleReview,
+  reviewResponseTemplates,
 ];
 
 export function getGuide(slug: string): Guide {

@@ -99,6 +99,21 @@ const TOOLS = [
     name: "Claude Project Brief Generator",
     blurb: "Generate the complete standing-instructions block (role, tasks, tone, never-list) for a Claude Project — ready to paste.",
   },
+  {
+    href: "/tools/ai-website-generator",
+    name: "AI Website Generator",
+    blurb: "Paste your Google Business Profile or describe your business — get a real hosted website, booking page, intake form and CRM in 3 minutes. Free.",
+  },
+  {
+    href: "/tools/free-booking-page",
+    name: "Free Booking Page",
+    blurb: "A real online booking page on your own subdomain — appointment types, intake form, and CRM sync. Live in 3 minutes, free.",
+  },
+  {
+    href: "/tools/website-grader",
+    name: "Local Business Website Grader",
+    blurb: "Score your website on the 7 things that actually win local jobs — speed, booking, trust signals, and more.",
+  },
 ];
 
 export default function ToolsHubPage(): ReactElement {
@@ -110,6 +125,12 @@ export default function ToolsHubPage(): ReactElement {
         <h1 style={{ margin: 0, fontSize: 38, fontWeight: 800, letterSpacing: "-0.03em" }}>Free tools</h1>
         <p style={{ margin: "14px 0 0", fontSize: 17, lineHeight: 1.55, color: "rgba(34,29,23,0.7)", maxWidth: 640 }}>
           Free calculators for local service businesses and the agencies that serve them. No signup required.
+        </p>
+        <p style={{ margin: "10px 0 0", fontSize: 14, lineHeight: 1.6, color: "rgba(34,29,23,0.6)", maxWidth: 640 }}>
+          Prefer the big picture?{" "}
+          <Link href="/charts" className="sf-link" style={{ color: MKT.green, fontWeight: 700 }}>
+            Explore our live charts →
+          </Link>
         </p>
         <div style={{ display: "grid", gridTemplateColumns: "repeat(auto-fill, minmax(280px, 1fr))", gap: 14, marginTop: 30 }}>
           {TOOLS.map((t) => (

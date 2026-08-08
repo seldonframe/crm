@@ -9,7 +9,7 @@
 import { useState, type ReactElement } from "react";
 
 const INK = "#221D17";
-const GREEN = "#00897B";
+const GREEN = "#1F2B24";
 const INK10 = "rgba(34,29,23,0.10)";
 const AMBER = "#B8860B";
 const RED = "#C0392B";
@@ -192,7 +192,7 @@ export function BookingFrictionGrader(): ReactElement {
                       padding: "8px 16px",
                       borderRadius: 10,
                       border: `1.5px solid ${active ? GREEN : INK10}`,
-                      background: active ? "rgba(0,137,123,0.12)" : "#fff",
+                      background: active ? "rgba(31, 43, 36,0.12)" : "#fff",
                       color: active ? GREEN : INK,
                       fontWeight: 700,
                       fontSize: 13.5,

@@ -18,8 +18,14 @@ You are the weekly content-loop agent for SeldonFrame. Repo root = the current w
 - DataForSEO spend under ~$0.20/run.
 - No sub-agents.
 
+## Step 0 — Commissioned queue (check FIRST)
+Read `docs/ops/agents/content-queue.md`. Any entry with `status: queued` is a strategic commission: it bypasses Step 1's keyword-volume threshold but MUST pass every drafting rule (Step 3) and the full quality gate (Step 4) — commissions get no quality exemption. Max 2 commissioned pieces per run; they count toward the 15-article cap. After publishing one, flip its `status:` to `shipped: <date> <slug>` in the same PR. Then continue to Step 1 for the researched remainder.
+
 ## Step 1 — Research (measure, don't guess)
-Auth: `DATAFORSEO_AUTH_B64` from `packages/crm/.env.local`, as `Authorization: Basic <value>` against https://api.dataforseo.com/v3. Prefer reusing the latest `docs/strategy/keyword-recon/*.md` build queue if fresh (< 8 days). Otherwise seed `/v3/dataforseo_labs/google/keyword_ideas/live` from the existing tool + cluster topics (speed-to-lead, no-shows, AI receptionist, service FAQ, online booking, AI visibility/GEO) and the query patterns: `how to…`, `how do I…`, `best X for Y`, `alternative to…`, `why…`. Keep only terms with real volume AND attainable difficulty for a young domain. Never fabricate a volume — if a call fails, say so and work from the keyword-recon queue.
+Auth: `DATAFORSEO_AUTH_B64` from `packages/crm/.env.local`, as `Authorization: Basic <value>` against https://api.dataforseo.com/v3. Prefer reusing the latest `docs/strategy/keyword-recon/*.md` build queue if fresh (< 8 days). Otherwise seed `/v3/dataforseo_labs/google/keyword_ideas/live` from the existing tool + cluster topics (speed-to-lead, no-shows, AI receptionist, service FAQ, online booking, AI visibility/GEO) and the query patterns (LEARNED 2026-07-09 run 1: bias hard toward genuinely informational how-to/why/cost-question phrasings — category terms like *X software for small business* keep landing on intent the /best pages already own; the easy informational keywords are saturated at 34 guides, so go a level deeper into specific operational questions): `how to…`, `how do I…`, `best X for Y`, `alternative to…`, `why…`. Keep only terms with real volume AND attainable difficulty for a young domain. Never fabricate a volume — if a call fails, say so and work from the keyword-recon queue.
+
+## Step 1.5 — Information gain (non-commodity source material)
+For any surviving keyword whose live SERP is wall-to-wall listicles / commodity restatement (check it), invoke the **`information-gain` skill** (`.claude/skills/information-gain`) with the topic BEFORE drafting. It mines niche YouTube transcripts (`node scripts/youtube-transcript.mjs <url>`, fail-soft) into cited source briefs — founder stories, real numbers, and failures that exist nowhere else in writing, which is the *information gain* Google's helpful-content system rewards over the 400th rewrite. Each usable brief becomes (a) a real `GuideSource` (the video URL) and (b) an original passage woven into Step 3's draft. Honesty is inherited from the never-lies rule below: never a fabricated number, always cite + embed the source video, only claim what the transcript actually says. A topic that yields no transcript-backed material simply gets none — never invent filler to fill the section.
 
 ## Step 2 — Dedupe + plan
 Load every existing slug: `allGuideSlugs()` (import from `packages/crm/src/lib/seo/guides`), plus the tool/best/alternative slugs. **Drop any candidate whose intent is already covered** — one page per intent, no near-duplicates. Cluster the survivors under the correct pillar tool and pick the top ≤15 by volume × intent × winnability. Each article MUST map to a `relatedTool` (an existing `/tools/...` page).
@@ -30,7 +36,19 @@ For each chosen article, create `packages/crm/src/lib/seo/guides/<slug>.ts` expo
 - create the twin route `packages/crm/src/app/guides/<slug>.md/route.ts` (copy an existing one, swap the slug).
 Sitemap + llms.txt auto-derive — do not touch them.
 
+**Practitioner quotes (optional, high-value):** check `~/agents/quotes-library.md` (harvested daily by leads-recon). Where a quote GENUINELY fits an article's topic, weave in 1–2 as "what real owners say" — exact words, attributed (u/name on r/sub), linked to the permalink, dated. Never alter a quote, never use one to claim something its author didn't mean, max 2 per article, skip entirely when nothing fits. Real practitioner voice is the experience signal AI engines reward — but a forced quote reads as decoration and fails the machine-spun check.
+
 **never-lies (non-negotiable):** every factual/statistical claim is hedged or backed by a real entry in `sources`. Verify each source URL with WebFetch before citing it — if it doesn't resolve or doesn't say what you claim, drop the claim. NEVER fabricate a URL, a statistic, or a study. Plain-paragraph bodies, no raw HTML. Each article: ≥3 sections, ≥2 FAQ, ≥1 verified https source.
+
+**Style contract (2026-07-10):** applies to every new guide from this point on.
+- Paragraphs ≤3 sentences — split anything longer.
+- Write at roughly a 16-year-old reading level: short sentences, everyday words. Facts, numbers, hedges, and attributions are FROZEN — simplify wording, never soften or strengthen a claim.
+- Markdown-lite only, inside `body`/`dek`/FAQ answers: `**bold**` 3-5 load-bearing phrases per section (sparingly), `*italic*` jargon on first use. Still no raw HTML, ever.
+- One `callout: { kind: "analogy" | "tip" | "warning", text }` per niche concept, phrased "kind of like…" for analogies.
+- 1-2 `diagram`s per guide, picked from the 5 typed primitives in `guides/types.ts`: `flow` (left→right steps), `loop` (a repeating cycle), `compare` (two-column pros/cons or before/after), `bars` (a labeled magnitude comparison — only from numbers already stated in the article), `stack` (top-down layers). Attach via `section.diagram`.
+- Never use a bare `*` in prose (write `×`) — a stray asterisk becomes italics.
+- Analogy callout text must NOT itself start with "kind of like" — the label already says it.
+- Sources/hedges/never-lies rules above are unchanged — the style contract only touches presentation.
 
 ## Step 4 — Quality gate (the safety net — be adversarial)
 For each drafted article, run a self-critique pass and DROP (don't ship) any that fail: (a) a claim that can't be cited; (b) thin/generic filler that doesn't answer the query better than page 1 already does; (c) duplicate intent; (d) reads as machine-spun. Then run the mechanical gate:

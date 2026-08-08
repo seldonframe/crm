@@ -9,6 +9,7 @@ import { MarketplaceStyles } from "@/components/marketplace/marketplace-styles";
 import { MKT } from "@/components/marketplace/marketplace-data";
 import { GohighlevelCostCalculator } from "@/components/seo/gohighlevel-cost-calculator";
 import { BuildWidget } from "@/components/seo/build-widget";
+import { ChatGptCtaCard } from "@/components/seo/chatgpt-cta";
 import { buildOgUrl } from "@/lib/seo/og-card";
 import { isWebUngatedBuildOn } from "@/lib/web-build/policy";
 
@@ -127,11 +128,15 @@ export default function GohighlevelCostCalculatorPage(): ReactElement {
             <Link href="/compare/seldonframe-vs-gohighlevel" className="sf-link" style={{ color: MKT.green, fontWeight: 700 }}>
               SeldonFrame vs GoHighLevel
             </Link>
-            .
+            . Zoom out: see the full market on one chart —{" "}
+            <Link href="/charts/crm-pricing-index" className="sf-link" style={{ color: MKT.green, fontWeight: 700 }}>
+              CRM Pricing Index →
+            </Link>
           </p>
         </section>
 
         <BuildWidget ungatedBuildEnabled={isWebUngatedBuildOn({ SF_WEB_UNGATED_BUILD: process.env.SF_WEB_UNGATED_BUILD })} />
+        <ChatGptCtaCard />
       </main>
       <MarketplaceFooter />
     </div>

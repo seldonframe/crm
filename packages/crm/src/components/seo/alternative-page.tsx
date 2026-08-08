@@ -15,6 +15,7 @@ import { MarketplaceNav, MarketplaceFooter, SeldonFrameMark } from "@/components
 import { MarketplaceStyles } from "@/components/marketplace/marketplace-styles";
 import { MKT } from "@/components/marketplace/marketplace-data";
 import { MarkdownPointer } from "@/components/seo/markdown-pointer";
+import { CompetitorCrossLinks } from "@/components/seo/competitor-crosslinks";
 import { TldrBox } from "@/components/seo/tldr-box";
 import { FrontOfficeFlow } from "@/components/seo/front-office-flow";
 import { BuildWidget } from "@/components/seo/build-widget";
@@ -28,6 +29,7 @@ import {
   SF_COLUMN,
   SHARED_FAQ,
   LAST_UPDATED,
+  sfPriceAnchor,
   type Competitor,
 } from "@/lib/seo/alternative-pages";
 import {
@@ -82,7 +84,7 @@ export function AlternativePage({ competitor }: { competitor: Competitor }): Rea
     "@type": "SoftwareApplication",
     name: "SeldonFrame",
     applicationCategory: "BusinessApplication",
-    description: `SeldonFrame — ${c.name} alternative for agencies & builders: AI receptionist, website, CRM and booking in one flat $29/mo platform.`,
+    description: `SeldonFrame — ${c.name} alternative for agencies & builders: AI receptionist, website, CRM and booking, at ${sfPriceAnchor(c.audience)}.`,
     offers: { "@type": "Offer", price: "29", priceCurrency: "USD" },
     provider: { "@type": "Organization", name: "SeldonFrame", url: "https://seldonframe.com" },
   };
@@ -151,7 +153,7 @@ export function AlternativePage({ competitor }: { competitor: Competitor }): Rea
           <TldrBox
             items={[
               { icon: "💰", label: `${c.name} pricing`, text: c.them.pricingModel },
-              { icon: "💰", label: "SeldonFrame pricing", text: "$29/mo flat, unlimited workspaces, first workspace free forever" },
+              { icon: "💰", label: "SeldonFrame pricing", text: sfPriceAnchor(c.audience) },
               { icon: "👍", label: `Pick ${c.name} if`, text: x.chooseThem[0] },
               { icon: "🏆", label: "Pick SeldonFrame if", text: x.chooseSf[0] },
             ]}
@@ -183,7 +185,7 @@ export function AlternativePage({ competitor }: { competitor: Competitor }): Rea
                   <tr key={row.key}>
                     <td style={{ ...TD, fontWeight: 700 }}>{row.label}</td>
                     <td style={{ ...TD, color: "rgba(34,29,23,0.66)" }}>{emphasize(c.them[row.key])}</td>
-                    <td style={{ ...TD, background: "rgba(0,137,123,0.05)", color: "rgba(34,29,23,0.85)", fontWeight: 500 }}>
+                    <td style={{ ...TD, background: "rgba(31, 43, 36,0.05)", color: "rgba(34,29,23,0.85)", fontWeight: 500 }}>
                       {emphasize(SF_COLUMN[row.key])}
                     </td>
                   </tr>
@@ -194,6 +196,12 @@ export function AlternativePage({ competitor }: { competitor: Competitor }): Rea
           <CtaRow />
           <FrontOfficeFlow competitorName={c.name} competitorCategory={c.category} />
           <PricingSourceLine name={c.name} url={c.pricingSourceUrl} />
+          <p style={{ margin: "10px 0 0", fontSize: 13, lineHeight: 1.6, color: "rgba(34,29,23,0.55)" }}>
+            {`Want to see ${c.name} against the rest of the market? `}
+            <Link href="/charts/crm-pricing-index" className="sf-link" style={{ color: MKT.green, fontWeight: 600, textDecoration: "underline" }}>
+              Explore the CRM Pricing Index →
+            </Link>
+          </p>
         </section>
 
         {/* ── PROS & CONS ── */}
@@ -272,6 +280,12 @@ export function AlternativePage({ competitor }: { competitor: Competitor }): Rea
           ))}
         </section>
 
+        {/* ── THIS COMPETITOR, EVERYWHERE (the pricing/compare triangle) ── */}
+        <section style={{ padding: "30px 0 8px" }}>
+          <h2 style={{ margin: "0 0 14px", fontSize: 20, fontWeight: 800, letterSpacing: "-0.01em" }}>{`More on ${c.name}`}</h2>
+          <CompetitorCrossLinks slug={c.slug} current="alternative" />
+        </section>
+
         {/* ── MORE COMPARISONS (flywheel) ── */}
         <section style={{ padding: "30px 0 8px" }}>
           <h2 style={{ margin: "0 0 14px", fontSize: 20, fontWeight: 800, letterSpacing: "-0.01em" }}>More comparisons</h2>
@@ -300,7 +314,12 @@ export function AlternativePage({ competitor }: { competitor: Competitor }): Rea
           </h2>
           <p style={{ margin: "10px auto 0", fontSize: 15.5, lineHeight: 1.6, color: "rgba(246,242,234,0.75)", maxWidth: 560 }}>
             Paste a business&apos;s website and SeldonFrame builds the site, CRM, booking calendar and AI receptionist in about 3 minutes —
-            free, before you sign up. Then it&apos;s $29/mo flat for unlimited workspaces.
+            free, before you sign up. Then it&apos;s{" "}
+            {c.audience === "agency"
+              ? "$99/mo flat for white-label agency plans (or $29/mo solo)."
+              : c.audience === "mixed"
+                ? "$29/mo flat solo, or $99+/mo for agency whitelabel."
+                : "$29/mo flat for unlimited workspaces."}
           </p>
           <div style={{ display: "flex", flexWrap: "wrap", gap: 12, justifyContent: "center", marginTop: 22 }}>
             <a href={START_HREF} style={{ background: MKT.green, color: "#fff", padding: "13px 26px", borderRadius: 12, fontWeight: 700, fontSize: 15.5, textDecoration: "none" }}>
@@ -384,7 +403,7 @@ function CtaButtons(): ReactElement {
 function ProsConsCard({ title, pros, cons, highlight }: { title: string; pros: string[]; cons: string[]; highlight?: boolean }): ReactElement {
   return (
     <div
-      style={{ border: `1px solid ${highlight ? "rgba(0,137,123,0.35)" : MKT.ink10}`, borderRadius: 16, padding: "20px 22px", background: highlight ? "rgba(0,137,123,0.05)" : "rgba(255,255,255,0.55)" }}
+      style={{ border: `1px solid ${highlight ? "rgba(31, 43, 36,0.35)" : MKT.ink10}`, borderRadius: 16, padding: "20px 22px", background: highlight ? "rgba(31, 43, 36,0.05)" : "rgba(255,255,255,0.55)" }}
     >
       <h3 style={{ margin: 0, fontSize: 18, fontWeight: 800 }}>{title}</h3>
       <div style={{ margin: "14px 0 6px", fontSize: 11.5, fontWeight: 800, letterSpacing: "0.1em", color: MKT.green }}>PROS</div>
@@ -412,7 +431,7 @@ function ProsConsCard({ title, pros, cons, highlight }: { title: string; pros: s
 function WhoCard({ title, items, highlight }: { title: string; items: string[]; highlight?: boolean }): ReactElement {
   return (
     <div
-      style={{ border: `1px solid ${highlight ? "rgba(0,137,123,0.35)" : MKT.ink10}`, borderRadius: 16, padding: "20px 22px", background: highlight ? "rgba(0,137,123,0.05)" : "rgba(255,255,255,0.55)" }}
+      style={{ border: `1px solid ${highlight ? "rgba(31, 43, 36,0.35)" : MKT.ink10}`, borderRadius: 16, padding: "20px 22px", background: highlight ? "rgba(31, 43, 36,0.05)" : "rgba(255,255,255,0.55)" }}
     >
       <h3 style={{ margin: "0 0 12px", fontSize: 17, fontWeight: 800 }}>{title}</h3>
       <ol style={{ margin: 0, padding: 0, listStyle: "none" }}>
