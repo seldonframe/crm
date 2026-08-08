@@ -90,7 +90,7 @@ describe("computeDeployReadiness — Tier-0-available telephony", () => {
     assert.ok(telephonyReq, "telephony should be in missing");
     assert.equal(
       telephonyReq!.label,
-      "Top up your wallet for an instant SF number, or connect your own Twilio.",
+      "Top up your wallet for an instant Seldon number, or connect your own Twilio.",
     );
   });
 

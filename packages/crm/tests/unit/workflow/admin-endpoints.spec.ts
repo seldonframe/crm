@@ -17,7 +17,7 @@ import assert from "node:assert/strict";
 import type { AgentSpec } from "../../../src/lib/agents/validator";
 import { resumeWait, startRun } from "../../../src/lib/workflow/runtime";
 import type { RuntimeContext, StoredWait } from "../../../src/lib/workflow/types";
-import { InMemoryRuntimeStorage } from "./storage-memory";
+import { InMemoryRuntimeStorage, testLoadRunContext } from "./storage-memory";
 
 const ORG_ID = "org_admin_ops";
 
@@ -26,6 +26,8 @@ function makeContext(): RuntimeContext {
     storage: new InMemoryRuntimeStorage(),
     invokeTool: async () => ({ data: { ok: true } }),
     now: () => new Date(),
+    // DI seam (types.ts) — see runtime.spec.ts for why this is needed.
+    loadRunContext: testLoadRunContext,
   };
 }
 
