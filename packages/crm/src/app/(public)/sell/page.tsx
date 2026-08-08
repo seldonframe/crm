@@ -12,6 +12,7 @@ import { MarketplaceNav, MarketplaceFooter } from "@/components/marketplace/mark
 import { MarketplaceStyles } from "@/components/marketplace/marketplace-styles";
 import { MKT } from "@/components/marketplace/marketplace-data";
 import { guidesInCluster } from "@/lib/seo/guides";
+import { ChatGptCtaButton } from "@/components/seo/chatgpt-cta";
 
 export const metadata: Metadata = {
   title: "Sell AI Agents: Direct, White-Label, Marketplace, or MCP | SeldonFrame",
@@ -40,7 +41,7 @@ const PATHS: Path[] = [
   {
     n: "02",
     title: "White-label across clients as an agency",
-    body: "Run unlimited client workspaces under your own brand for one flat $29/mo — no per-client license fee. Package the agent, the CRM, and the booking flow as your own AI front-office product.",
+    body: "Run client workspaces under your own brand on the Agency plan (from $99/mo, 0% GMV) — white-label, branded client portal, 10 sub-accounts included. Package the agent, the CRM, and the booking flow as your own AI front-office product.",
     links: [
       { href: "/guides/white-label-ai-agents", label: "White-label AI agents" },
       { href: "/agencies", label: "For agencies" },
@@ -49,7 +50,7 @@ const PATHS: Path[] = [
   {
     n: "03",
     title: "List it on the marketplace",
-    body: "Publish the agent you built to the SeldonFrame marketplace so other builders and businesses can find and install it. SeldonFrame only takes a cut (a GMV fee stepping down from 5% to 2%) when it's the sales channel.",
+    body: "Publish the agent you built to the SeldonFrame marketplace so other builders and businesses can find and install it. SeldonFrame takes a flat 5% marketplace fee on marketplace sales — direct sales through your own site/CRM aren't touched (a flat 2% GMV fee applies only on solo Builder/Managed plans when SeldonFrame is the sales channel; agency plans pay 0%).",
     links: [
       { href: "/marketplace/build", label: "Build to list" },
       { href: "/guides/best-ai-agent-marketplaces", label: "Best AI agent marketplaces" },
@@ -105,6 +106,7 @@ export default function SellHubPage(): ReactElement {
           <Link href="/guides" className="sf-link" style={{ border: `1.5px solid ${MKT.ink10}`, color: MKT.ink, padding: "11px 22px", borderRadius: 12, fontWeight: 700, fontSize: 15, textDecoration: "none", background: "rgba(255,255,255,0.5)" }}>
             Browse all guides
           </Link>
+          <ChatGptCtaButton />
         </div>
 
         <section style={{ marginTop: 44 }}>

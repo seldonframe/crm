@@ -50,6 +50,14 @@ export * from "./block-subscription-deliveries";
 export * from "./message-triggers";
 // SLICE 10 PR 1 C2 — request_approval persistence.
 export * from "./workflow-approvals";
+export * from "./agent-action-drafts";
+export * from "./agent-run-receipts";
+// Deterministic replay — Reelier phase 2c slice 1 (observe mode only).
+export * from "./agent-workflow-traces";
+// Deterministic replay — Reelier phase 2c slice 2 (compile + L0 replay).
+export * from "./replay-skills";
+// Replay gate v2 — idempotent-send claim ledger (migration 0077).
+export * from "./replay-send-claims";
 // May 1, 2026 — Measurement Layers 2 + 3.
 export * from "./seldonframe-events";
 export * from "./brain-outcomes";

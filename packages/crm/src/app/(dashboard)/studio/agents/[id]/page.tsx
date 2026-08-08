@@ -13,7 +13,7 @@ import { and, desc, eq } from "drizzle-orm";
 import { ArrowLeft } from "lucide-react";
 import { db } from "@/db";
 import { organizations } from "@/db/schema";
-import { getOrgId } from "@/lib/auth/helpers";
+import { getCurrentUser, getOrgId } from "@/lib/auth/helpers";
 import {
   getAgentTemplate,
   updateAgentTemplate,
@@ -25,6 +25,7 @@ import {
 import { fillAllBindingTools } from "@/lib/agents/mcp/discover-vetted-tools";
 import { resolveAgentTrigger } from "@/lib/agents/triggers/agent-trigger";
 import { getSellerListingContextAction } from "@/lib/marketplace/seller-actions";
+import { shouldWarnPersonalDetails } from "@/lib/agent-templates/generalize";
 import { VETTED_CONNECTORS, getVettedConnector } from "@/lib/agents/mcp/connectors";
 import { findSessionByTemplateId } from "@/lib/recordings/session-store";
 import type { FlowModel } from "@/lib/recordings/trace-schema";
@@ -32,9 +33,10 @@ import type { EvalScenario } from "@/lib/agents/evals/eval-types";
 import type { AgentBlueprint } from "@/db/schema";
 import { AgentTemplateEditor } from "./editor-client";
 import { ListOnMarketplace } from "./list-on-marketplace";
+import { GeneralizeTemplateCard } from "@/components/marketplace/generalize-template-panel";
 import { RunEvalsCard } from "./run-evals";
 import { EditorSection, EditorSectionDivider } from "./editor-section";
-import { TemplateStatusBadge, formatTemplateType } from "../status-badge";
+import { TemplateStatusBadge, formatTemplateType, marketplaceListingCopy } from "../status-badge";
 import { DeployButton } from "../deploy-button";
 import { DeployToClientsButton } from "../deploy-to-clients-button";
 import { TestButton } from "../test-button";
@@ -45,6 +47,8 @@ import { supervisedRuns, type SupervisedRun } from "@/db/schema/agent-lifecycle"
 import { composioForOrg, listConnections } from "@/lib/integrations/composio/client";
 import { getComposioToolkit } from "@/lib/integrations/composio/catalog";
 import { listDeployments } from "@/lib/deployments/store";
+import { getDeploymentLiveStatus } from "@/lib/agent-receipts/store";
+import { DeploymentLiveBanner } from "@/components/agent-receipts/live-banner";
 import {
   deriveLifecycleStages,
   defaultOpenStageId,
@@ -162,6 +166,18 @@ export default async function AgentTemplatePage({
   const sellerConnect = listingCtx.ok ? listingCtx.connect : { ready: false, pending: false };
   const builderName = orgRow[0]?.name ?? "A SeldonFrame builder";
 
+  // "Make it fit anybody" nudge (Sell stage, design item 5) — a cheap,
+  // NEVER-blocking heuristic: does this template's persona script still
+  // contain the operator's OWN account email, and has it never been
+  // generalized? Best-effort (getCurrentUser() failing just means no
+  // warning — never blocks the editor).
+  const currentUser = await getCurrentUser();
+  const showPersonalDetailsWarning = shouldWarnPersonalDetails({
+    customSkillMd: blueprint.customSkillMd,
+    templateVariables: blueprint.templateVariables,
+    operatorContactLiterals: [currentUser?.email],
+  });
+
   // "Born from your recording" provenance panel — only the templates
   // compiled via /record set recordingSessions.agentTemplateId, so this is
   // null (and the panel renders nothing) for every ordinary template.
@@ -188,12 +204,27 @@ export default async function AgentTemplatePage({
       })()
     : null;
 
-  // Agent lifecycle slice — flag off is BYTE-FOR-BYTE the existing page
-  // below (early return, no extra queries run). Flag on renders the
-  // five-stage ladder instead.
+  // Agent lifecycle slice — flag off is otherwise BYTE-FOR-BYTE the existing
+  // page below (early return). Flag on renders the five-stage ladder
+  // instead. Agent receipts slice (Task 3) adds ONE extra query here (this
+  // template's most relevant deployment + its LIVE status) so the banner
+  // below can render — the only query this early-return path now runs
+  // beyond what was already loaded above.
   const lifecycleEnabled = isAgentLifecycleEnabled({ SF_AGENT_LIFECYCLE: process.env.SF_AGENT_LIFECYCLE });
 
   if (!lifecycleEnabled) {
+  const templateDeployments = await listDeployments(orgId);
+  const templateDeploymentCount = templateDeployments.filter(
+    (d) => d.agentTemplateId === template.id,
+  ).length;
+  const primaryDeployment =
+    templateDeployments.find((d) => d.agentTemplateId === template.id && d.status === "active") ??
+    templateDeployments.find((d) => d.agentTemplateId === template.id) ??
+    null;
+  const liveStatus = primaryDeployment
+    ? await getDeploymentLiveStatus(primaryDeployment.id, orgId)
+    : null;
+
   return (
     <section className="animate-page-enter">
       {/* ── Sticky header (Claude Design, direction A) ──────────────────────
@@ -225,7 +256,12 @@ export default async function AgentTemplatePage({
             <h1 className="truncate text-base font-semibold tracking-tight text-foreground sm:text-[17px]">
               {template.name}
             </h1>
-            <TemplateStatusBadge status={template.status} />
+            {/* Agent truth slice (Task 2) — deployment TRUTH overrides the
+                marketplace tri-state here: a template with ≥1 deployment
+                shows "● Live · N deployment(s)" instead of a stale "draft"
+                chip (the tri-state's meaning moves to the Sell section
+                below). */}
+            <TemplateStatusBadge status={template.status} deploymentCount={templateDeploymentCount} />
           </div>
           <div className="ml-auto flex shrink-0 items-center gap-2">
             <DeployToClientsButton templateId={template.id} variant="secondary" />
@@ -275,6 +311,11 @@ export default async function AgentTemplatePage({
           {formatTemplateType(template.type)} template. Configure it once here,
           test it in the sandbox, then deploy it to as many clients as you like.
         </p>
+
+        {/* Agent receipts slice (Task 3) — LIVE status for this template's
+            deployment (renders nothing when there's no deployment, or it's
+            not active — see DeploymentLiveBanner). */}
+        <DeploymentLiveBanner status={liveStatus} />
 
         <div className="pt-6">
           {/* Sections 01–04 + Save live inside the editor island (they need
@@ -346,6 +387,17 @@ export default async function AgentTemplatePage({
           anchor="publish"
           description="Sell this template on the marketplace so other businesses can deploy it."
         >
+          {/* Agent truth slice (Task 2) — the marketplace tri-state's
+              meaning, moved here from the title badge (which now shows
+              deployment truth instead). `tested` keeps its existing
+              meaning wherever it appears — no override copy for it. */}
+          {marketplaceListingCopy(template.status) ? (
+            <p className="text-xs text-muted-foreground">{marketplaceListingCopy(template.status)}</p>
+          ) : null}
+          <GeneralizeTemplateCard
+            templateId={template.id}
+            showPersonalDetailsWarning={showPersonalDetailsWarning}
+          />
           <ListOnMarketplace
             templateId={template.id}
             templateName={template.name}
@@ -570,6 +622,7 @@ export default async function AgentTemplatePage({
         supervisedRunExempt={gate.supervisedRunExempt}
         actionCount={runActionCount}
         verdict={runVerdict}
+        showPersonalDetailsWarning={showPersonalDetailsWarning}
       />
     ) : (
       <RunStage
@@ -590,6 +643,7 @@ export default async function AgentTemplatePage({
         evalPass={gate.evalPass}
         supervisedRunSucceeded={gate.supervisedRun}
         supervisedRunExempt={gate.supervisedRunExempt}
+        showPersonalDetailsWarning={showPersonalDetailsWarning}
       />
     ),
   };

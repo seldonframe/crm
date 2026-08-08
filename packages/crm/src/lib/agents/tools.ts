@@ -32,6 +32,7 @@ import {
   slotFitsFreeWindows,
 } from "@/lib/agents/booking/booking-policy";
 import { COPILOT_CAPABILITY } from "@/lib/agents/copilot/tools";
+import { DRAFT_FOR_APPROVAL_CAPABILITY } from "@/lib/agent-drafts/policy";
 
 export type ToolExecuteContext = {
   orgId: string;
@@ -348,6 +349,10 @@ export type LookUpAvailabilityDeps = {
     },
   ) => CalendarBackend;
   listSlots?: NativeBackendListSlots;
+  /** Clock seam for the lead-time cutoff in generateCandidateSlots. Tests pin
+   *  a frozen date so frozen fixtures never slide into the past; production
+   *  passes nothing and gets the real clock. */
+  now?: () => Date;
 };
 
 export const lookUpAvailability: AgentTool<
@@ -387,6 +392,7 @@ export const lookUpAvailability: AgentTool<
   },
   execute: async (input, ctx, deps: LookUpAvailabilityDeps = {}) => {
     const listSlots = deps.listSlots ?? ((a) => listPublicBookingSlotsAction(a));
+    const now = deps.now ?? (() => new Date());
     // ── booking-mode branch (ICP-3, deployed agents only) ──
     // Workspace/operator agents never set ctx.booking → mode is 'native' and the
     // existing availability chain below runs byte-for-byte unchanged. A deployed
@@ -465,7 +471,7 @@ export const lookUpAvailability: AgentTool<
           )
             .toISOString()
             .slice(0, 10);
-          const dayCandidates = generateCandidateSlots(policy, dayISO, new Date());
+          const dayCandidates = generateCandidateSlots(policy, dayISO, now());
           if (dayCandidates.length === 0) continue; // off-policy weekday / all past
 
           // Prefer the explicit free-windows surface (P1); fall back to deriving
@@ -573,7 +579,7 @@ export const lookUpAvailability: AgentTool<
         // that day (weekday window + duration cadence + lead time).
         if (!hasPolicy) return result.slots;
         const dayCandidates = new Set(
-          generateCandidateSlots(policy, dayISO, new Date()),
+          generateCandidateSlots(policy, dayISO, now()),
         );
         return result.slots.filter((iso) => dayCandidates.has(iso));
       },
@@ -591,7 +597,7 @@ export const lookUpAvailability: AgentTool<
     // booking config (the action returned empty everywhere) should still offer
     // its policy window for the requested day — the candidates, capped at
     // maxPerDay. Workspace agents skip this (they have no policy window to offer).
-    const fallbackCandidates = generateCandidateSlots(policy, input.date, new Date());
+    const fallbackCandidates = generateCandidateSlots(policy, input.date, now());
     if (
       hasPolicy &&
       slots.length === 0 &&
@@ -1841,6 +1847,90 @@ export const getQuoteRange: AgentTool<
   execute: (input, ctx) => runGetQuoteRange(input, ctx),
 };
 
+// ─── draft_for_approval ────────────────────────────────────────────────────
+// Never-fail-compile slice: the honest floor for red/yellow recorded steps.
+// The agent PREPARES the complete work product and files it for a human to
+// approve from /approvals. Filing is NOT doing — the tool description and
+// the compiled skill-md both say so, and the never-lies fallback regex
+// treats an unapproved claim of completion as a violation.
+
+// Canonical const now lives in lib/agent-drafts/policy.ts (a pure, DB-free
+// module — imported above) so non-tools-runtime code doesn't need to
+// value-import this whole file just for the constant. Re-exported here so
+// existing `import { DRAFT_FOR_APPROVAL_CAPABILITY } from "@/lib/agents/
+// tools"` call sites keep working unchanged.
+export { DRAFT_FOR_APPROVAL_CAPABILITY };
+
+const draftForApprovalInput = z.object({
+  stepAction: z.string().min(3),
+  kind: z.enum(["email", "message", "invoice", "data_entry", "other"]),
+  title: z.string().min(3),
+  body: z.string().min(1),
+  fields: z.record(z.string(), z.string()).optional(),
+});
+
+export const draftForApproval: AgentTool<
+  z.infer<typeof draftForApprovalInput>,
+  { ok: boolean; draftId?: string; deduped?: boolean; error?: string }
+> = {
+  name: "draft_for_approval",
+  description:
+    "File a prepared piece of work for human approval. Use for any workflow step you are NOT allowed to execute yourself. Put the COMPLETE work product in body — ready to send/paste as-is (the full email text, the full invoice lines, the exact data to enter). Filing a draft is NOT doing the action: afterwards, tell the user it has been prepared and sent for approval — never that it is done.",
+  inputSchema: draftForApprovalInput,
+  jsonSchema: {
+    type: "object",
+    properties: {
+      stepAction: {
+        type: "string",
+        description: "The workflow step this draft fulfills, e.g. 'Send the invoice'",
+      },
+      kind: {
+        type: "string",
+        enum: ["email", "message", "invoice", "data_entry", "other"],
+      },
+      title: { type: "string", description: "Short inbox line, e.g. 'Invoice for ACME — $450'" },
+      body: {
+        type: "string",
+        description: "The COMPLETE work product, ready to use as-is",
+      },
+      fields: {
+        type: "object",
+        additionalProperties: { type: "string" },
+        description: "Structured values (amount, recipient, due date, ...)",
+      },
+    },
+    required: ["stepAction", "kind", "title", "body"],
+  },
+  execute: async (input, ctx) => {
+    if (ctx.testMode) {
+      return { ok: true, draftId: `test-draft-${Date.now()}` };
+    }
+    const { createDrizzleDraftStore } = await import("@/lib/agent-drafts/storage-drizzle");
+    const store = createDrizzleDraftStore();
+    const result = await store.fileDraft({
+      orgId: ctx.orgId,
+      agentId: ctx.agentId,
+      conversationId: ctx.conversationId,
+      stepAction: input.stepAction,
+      kind: input.kind,
+      title: input.title,
+      content: { body: input.body, fields: input.fields },
+      // Tier is informational on the row; the tool can't see coverage at run
+      // time, so file as "red" (the conservative bucket) — the inbox renders
+      // both identically in v1.
+      tier: "red",
+    });
+    if (result.outcome === "capped") {
+      return {
+        ok: false,
+        error:
+          "draft cap reached for this conversation — use escalate_to_human instead",
+      };
+    }
+    return { ok: true, draftId: result.draftId, deduped: result.outcome === "deduped" };
+  },
+};
+
 // ─── allowlist ─────────────────────────────────────────────────────────────
 
 export const ALL_TOOLS: AgentTool[] = [
@@ -1975,6 +2065,14 @@ export async function getToolsForCapabilities(
   if (capabilities?.includes(COPILOT_CAPABILITY)) {
     const { buildCopilotTools } = await import("./copilot/tools");
     native = [...native, ...buildCopilotTools()];
+  }
+
+  // Never-fail-compile: draft_for_approval is opt-in only — it is NOT in
+  // ALL_TOOLS, so empty-capabilities agents (which get the full native list)
+  // never see it. Same pattern + same spread-into-new-array reason as the
+  // copilot block above.
+  if (capabilities?.includes(DRAFT_FOR_APPROVAL_CAPABILITY)) {
+    native = [...native, draftForApproval as AgentTool];
   }
 
   const connectors = opts?.connectors;

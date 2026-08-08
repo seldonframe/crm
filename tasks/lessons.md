@@ -2244,3 +2244,175 @@ C4 close-out with empirical SLICE 11 data.
   once — audit `overflowX` across `components/seo/*` and kill the ones on
   diagram/sequence wrappers. Keep the fix responsive (compare grids → 1 column
   below ~520px) and reduced-motion aware.
+
+## L-43 — Never delta-check a baseline with `git checkout <ref> -- .` in the working repo; it STAGES the ref's content
+
+- **Trigger:** To prove 10 landing-spec failures were pre-existing, I ran
+  `git checkout origin/main -- .` → ran the specs → `git checkout -- .` →
+  `git stash pop`. Two traps fired at once: (1) `checkout <ref> -- <path>`
+  updates the INDEX as well as the worktree, so the follow-up `checkout -- .`
+  restored from the index (still main's content) and silently left the branch's
+  own commit reverted-but-staged; (2) the earlier `git stash` had nothing to
+  save (post-rebase tree was clean), so `stash pop` grabbed an UNRELATED
+  months-old stash entry. Recovery needed `git restore --source=HEAD --staged
+  --worktree .` plus verifying the old stash list was untouched.
+- **Rule:** For "does this test fail on main too?" use a THROWAWAY checkout —
+  `git worktree add <tmp> origin/main`, run the spec there, `git worktree
+  remove <tmp>` — never mutate the working repo's index. If you must stash,
+  first confirm `git stash` actually created an entry (clean trees make the
+  later `pop` land on someone else's stash). Cheapest of all when the specs
+  don't import your changed files: prove isolation by grepping the failing
+  specs' imports against your diff, and skip the baseline run entirely.
+
+- **2026-07-10 — read the error, not the test name, before "updating stale tests."** 16 of ~30 CI failures briefed as "stale UI expectations" were `document is not defined` — a DOM bootstrap (tests/setup-dom.ts) existed but was never wired into the CI runner, so the fix was `import "../../setup-dom"` first-line in the affected specs, not assertion rewrites. Classify by error type (ReferenceError/MODULE_NOT_FOUND = harness bug; AssertionError value-diff = candidate stale expectation, confirm intent via git/in-code comments first). See docs/learnings/2026-07-10-diagnose-before-updating-tests.md.
+- **2026-07-10 — an invariant captured after the event it guards cannot fail.** Snapshotting registry keys at module top to detect import-time leakage is tautological when the import happens above the snapshot; assert named absence (leak) + named presence (baselines) instead, and litmus-test every invariant with "what code change makes this fire?" See docs/learnings/2026-07-10-guard-assertions-that-cannot-fail.md.
+- **2026-07-15 — grep the target branch for the PR's load-bearing artifact before calling it superseded.** A memory note claimed PRs #49/#54's key fixes were "re-landed on main by other work"; four greps for the artifacts themselves (the `deps.now` seam, the matchMedia stub, the `contract:throw-ok` markers) showed none had landed — only a base file with the same NAME pre-existed. File existence and session notes both lie; rebase + generator-re-run + stash-delta decide what survives. See docs/learnings/2026-07-15-stale-pr-triage-grep-the-seam.md.
+- **2026-07-15 — commit before mutation-testing; `git checkout -- <file>` restores HEAD, not "one edit ago."** Used sed to point one OG-card accent back at the broken color to prove the new visibility invariant fails, then `git checkout -- <file>` to undo the mutation — which wiped ALL uncommitted fix edits in the file and forced a full re-apply. Either commit the fix first and mutate on top, or undo the mutation with the inverse sed. See docs/learnings/2026-07-15-og-card-green-on-dark-blanket-invariant.md.
+
+---
+
+## L-33 — Model-invoked filing/write tools need atomic idempotency + a volume cap AT SPEC TIME, and twin/SQL store pairs need ordering-pinning contract tests
+
+- **Trigger:** never-fail-compile slice (2026-07-15). The draft_for_approval
+  spec initially shipped without dedupe; Max's reflect loop caught it and
+  amended (pending-only unique partial index + per-conversation cap). Then
+  the Opus review caught the twin/SQL divergence the amendment created: the
+  memory store checked dedupe-before-cap, the drizzle store checked
+  cap-before-dedupe — so at the cap, a retry of an already-pending step got
+  told "failed" while the draft existed (exactly what the spec forbade). The
+  contract suite ran only against the twin, so nothing could catch it.
+- **Rule:** (1) Any tool a MODEL can invoke that writes rows (drafts, claims,
+  messages, tickets) specs its idempotency key (usually a pending-only
+  partial unique index) and a volume cap in the same section as the tool —
+  models retry, and a retry must be idempotent-success, never a duplicate
+  and never a false failure. (2) When a store ships as memory-twin + SQL
+  pair, every RESULT-ORDERING decision (which check wins when two conditions
+  are both true: dedupe vs cap, not-found vs conflict) gets a contract test
+  that encodes the winner — passing on the twin is NOT evidence the SQL
+  store agrees; the SQL path's branch order must be read side-by-side
+  against the twin's at review time.
+
+---
+
+## L-34 — Scouts dispatched into a worktree must echo `pwd` + `git rev-parse HEAD` first; cross-check one known fact before using any scout report
+
+- **Trigger:** Same slice. The plan-grounding scout was told to work in the
+  never-fail-compile worktree but read the stale primary checkout
+  (feat/guides-rewrite-all, which predates the record feature) and returned
+  five false claims — "recap-panel.tsx doesn't exist", "no gate.ts", "no
+  SF_RECORD_TO_AGENT flag", "compile route missing", journal idx 43 (real:
+  48). All five contradicted facts already verified firsthand, which is the
+  only reason the report was caught and discarded instead of encoded into
+  the plan (L-16's exact failure mode, worktree edition).
+- **Rule:** Every scout/subagent prompt that targets a worktree opens with a
+  mandatory first step: run `pwd` and `git rev-parse HEAD` and include both
+  in the report; the controller checks the sha against the intended branch
+  before reading further. Additionally, before USING any scout report, the
+  controller verifies ONE load-bearing claim it already knows the answer to
+  — a report that fails its canary is discarded wholesale, not partially
+  trusted.
+- 2026-07-15 — Pricing changes drift: when the pricing catalog (plans.ts) changes, grep the WHOLE content surface (lib/seo/**, marketing components, docs) for the OLD numbers and price+capability collocations — per-page review missed 41 stale claims. (docs/learnings/2026-07-15-pricing-claims-drift-audit.md)
+- 2026-07-15 — Route CTAs by their label's promise: 'Build it free' → the build surface, 'Start for free' → signup. A label that promises less friction than it delivers is a small lie. (docs/learnings/2026-07-15-route-by-promise-ctas.md)
+- 2026-07-15 — Never share one working tree between two active sessions: a concurrent session clobbered in-flight edits mid-stream. Branch work goes in a git worktree; commit early to pin.
+- 2026-07-15: NEVER run implementer agents in the main checkout — another live session may own it (branch switched mid-task, stashes interleaved). Worktree-first for every build; a stash found in a shared checkout is presumed someone else's work (verify diff shape against the task's known scope before applying).
+
+---
+
+## L-35 — Every page that participates in an auth round-trip must be in SAFE_REDIRECT_PREFIXES
+
+- **Trigger:** The /record claim loop (record → /signup?callbackUrl=/record?… →
+  return) silently collapsed to /dashboard for EVERY claimer since the feature
+  shipped, because /record was never added to the shared open-redirect
+  allowlist (lib/auth/signup-redirect.ts). Log-proven via Max's 401 +
+  dashboard-dump run, 2026-07-15.
+- **Rule:** Any new page whose flow passes through /signup or /login with a
+  callbackUrl MUST add its path to SAFE_REDIRECT_PREFIXES in the same PR, with
+  a dated comment, plus allowlist tests (accept the path + query; reject
+  lookalikes). Design-time checklist item for every claim-like flow. Related:
+  host-only cookies are the house pattern — pin pages to the app host via
+  lib/auth/app-host-redirect.ts, NEVER propose cookie-domain widening (two
+  documented prod incidents).
+
+---
+
+## L-36 — Vision gates must render the REAL page CSS context, and "readable" needs an invariant test, not a fixture pass
+
+- **Trigger:** The question-card slice passed its vision gate round 1 on a
+  fixture render; Max's real browser showed the Yes/No chips as blank cream
+  pills. Two stacked causes: (1) the maker had seen the invisible-text symptom
+  in its own fixture, "fixed" the fixture, and concluded artifact — a real
+  component bug explained away; (2) the actual mechanism (Tailwind Preflight
+  `appearance: button` + transparent background paints a native face on some
+  engines) only reproduces on some browser/OS combos, so a Chromium-only
+  fixture screenshot could never catch it.
+- **Rule:** (1) When a rendering artifact appears in a test fixture, the
+  DEFAULT assumption is component bug until proven otherwise — never "fix" the
+  fixture to make the symptom go away. (2) Vision-verify renders must load the
+  real page CSS chain (route-level imports included), not a bare component
+  shell. (3) Interactive elements on brand surfaces get a visibility invariant
+  test: explicit background AND text color present and differing (the OG-card
+  "test visibility not presence" lesson, generalized to buttons). (4) Buttons
+  styled with transparent backgrounds require `appearance-none` — Preflight
+  does not guarantee it.
+- 2026-07-16 — When rewriting a component, grep the test dir for the COMPONENT/MODULE NAME (marketing-faq) and run every spec that imports it — grepping for copy strings missed a stale spec that asserted concept regexes, not literals. The reviewer caught it; the grep should have.
+
+---
+
+## L-37 — Windows junction removal must be unlink-only; recursive deletes FOLLOW junctions into the target
+
+- **Trigger:** Share-card slice (2026-07-16). Cleaning up a node_modules test
+  junction with PowerShell `.Delete($true)` recursed THROUGH the junction and
+  wiped the guardian worktree's real packages/crm/node_modules (an unrelated
+  worktree). Restored via `pnpm install --filter ./packages/crm` (100%
+  store-reuse, 85s) + parity verification; no lasting damage, but only because
+  the pnpm store made restoration cheap.
+- **Rule:** Junctions/symlinks on Windows are removed with `cmd /c rmdir
+  <path>` (unlink-only — never deletes contents) — NEVER
+  `Remove-Item -Recurse`, PowerShell `.Delete($true)`, or `rm -rf`, all of
+  which traverse into the link target. Before ANY recursive delete of a path
+  under a worktree, check `(Get-Item $p).LinkType` (or `fsutil reparsepoint
+  query`) — reparse point ⇒ unlink-only. This is the destructive twin of the
+  worktree-junction setup memory: junctions are cheap to make and catastrophic
+  to delete wrong.
+
+## L-38 — never `git stash`/`git stash pop` in a worktree (shared .git stash stack)
+
+Worktrees share ONE stash stack with the main repo and every other worktree.
+`git stash` with no local tracked changes says "No local changes to save" and
+does nothing useful (untracked new files are never stashed by default) — but
+a subsequent `git stash pop` still pops whatever ELSE is sitting at
+`stash@{0}`, which may be a stale WIP from a totally unrelated branch/session
+(seen: a `feature/crm-engine` stash from 2026-07-08 landed a `packages/core`
++ `packages/payments` deletion and a CLAUDE.md edit into an unrelated
+`marketplace-generalize` worktree, with merge conflicts). Recovery: `git
+reset --hard HEAD` restores tracked files (leaves untracked files alone,
+including whatever you were mid-edit on) and the stray stash entry is simply
+left in the stack — never touch/drop a stash you didn't push yourself.
+Prevention: to diff/typecheck a "before my change" baseline in a worktree,
+use `git worktree add` against a specific commit, or `git show <sha>:<path>`,
+or just re-run the same check on the parent repo path — never stash.
+- 2026-07-16 — Quote disputes (reviewer vs implementer) are settled by re-fetching the SOURCE, never the plan doc both relied on: the 'misquote' block was a false positive — both quotes were verbatim substrings of different sentences. (docs/learnings/2026-07-16-adjudicate-at-the-source.md)
+- 2026-07-16 — verify-runner EDITED code to fix type errors it found (checker must never write): its uncommitted worktree edits were half-lost at commit time and the broken half shipped. Rule: gate agents report, orchestrator fixes; run `git status` before AND after any gate dispatch and treat unexpected dirt as a gate violation.
+- 2026-07-16 — 'First price the reader meets' includes META DESCRIPTION and JSON-LD, not just body copy — the smoke caught $29 at byte 2761 (the <meta>) after all body anchors were fixed. Band/truth sweeps must include heroSub/metadata fields and word-form prices ('29 dollars'), which dodge $-greps.
+- 2026-07-16 — Worktree creation is a 3-step ritual: add + BOTH node_modules junctions. Skipping junctions makes every spec fail with ERR_MODULE_NOT_FOUND 'tsx' — 18 phantom failures before the real one.
+- 2026-07-16 — Booking intake questions must classify from the SOUL (business vertical), never from theme.aestheticArchetype (a look pick): the design picker stamped B2B questions on an HVAC company. When a creation-time seed and a render-time lazy resolver must agree, they call ONE shared function — the first cut diverged and would have permanently seeded contractor fields on physios. (docs/learnings/2026-07-16-intake-semantics-from-soul-not-look.md)
+- 2026-07-16 — Anthropic's out-of-credits error is HTTP 400 invalid_request_error, NOT 402/429 — a status-only error mapping shipped a retryable "Something broke" lie for a non-retryable condition. Rule: never map provider errors by status alone; keep ONE shared mapper per provider (the copy-pasted catch block in paste-extractor is exactly how mappings drift) and give every non-retryable reason honest copy + suppressed retry affordance. (docs/learnings/2026-07-16-credits-exhausted-400-mapping.md)
+- 2026-07-16 — In an agentic loop, every byte entering the conversation is a RECURRING cost (re-billed each iteration + every later turn's history rebuild): cap tool results at the entry seam, cache-mark the static prefix (system + last tool + moving message breakpoint, ≤4 markers), and never cache-mark a call whose prefix has no possible reader (the no-tools regen call). Diagnosis method: bracket the spend window with your own ok/error receipts (first-ok→last-ok), not the provider dashboard. (docs/learnings/2026-07-16-llm-credit-drain-diagnosis-and-token-economy.md)
+
+## L-39 — Batched dep failures: bisect with one-variable branches on the failing CI itself; hold via bot config
+
+- **Trigger (2026-07-18):** dependabot's 37-bump group PR #123 failed Vercel with
+  "Server Actions must be async functions" in the GENERATED workflow step route.
+  Local builds are unreliable in worktrees, so the isolation ran as two pushed
+  branches with Vercel preview as the oracle: workflow-pair-only → FAIL (#133),
+  everything-else → GREEN (#134). Culprit = workflow 4.6.0/@workflow/next 4.1.0
+  bundling "use server" files into sync __esm() closures (vercel/workflow#817).
+- **Rules:** (a) when the failing gate is reachable, use IT as the test harness —
+  don't approximate it locally; (b) `@dependabot ignore` comment-commands do NOT
+  work on grouped PRs — encode holds as `ignore:` entries in dependabot.yml with
+  the tracking issue + removal condition; (c) a dependabot branch can be based on
+  stale main — rebuild splits from origin/main, never cherry-pick its tree;
+  (d) SDK bumps can't change wire-level API behavior (stop_reason values, usage
+  shape, provider error text) — compat-review only the SDK-owned surface (type
+  exports, deep import paths, error classes).
+- Full note: docs/learnings/2026-07-18-dependabot-batch-isolation-by-preview-build.md

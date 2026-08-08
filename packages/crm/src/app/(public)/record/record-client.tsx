@@ -88,6 +88,7 @@ export function RecordClient({
   claimed,
   isAuthed,
   sharedFlag = null,
+  draftApprovals = false,
 }: {
   claimedSessionId: string | null;
   claimed: boolean;
@@ -97,6 +98,9 @@ export function RecordClient({
    *  the no-service-worker fallback route (share-target/route.ts) redirected
    *  here instead, null on an ordinary page load. */
   sharedFlag?: "1" | "miss" | null;
+  /** SF_DRAFT_APPROVALS — read server-side (page.tsx) and threaded down
+   *  since this is a client component (L-18). */
+  draftApprovals?: boolean;
 }) {
   const [state, dispatch] = useReducer(recorderReducer, undefined, initialRecorderState);
   const [message, setMessage] = useState<string | null>(null);
@@ -105,8 +109,27 @@ export function RecordClient({
   const [interviewPending, setInterviewPending] = useState(false);
   const [interviewError, setInterviewError] = useState<string | null>(null);
   const lastInterviewMessage = useRef<string | null>(null);
+  // interview-one-question — question texts the operator has locally
+  // skipped. Presentation-only state (like interviewInput above), not
+  // reducer state: the reducer's openQuestions array is the sole source of
+  // truth for WHICH questions exist. This is deliberately NOT an index —
+  // review fix (2026-07-16): an applied interview turn returns openQuestions
+  // with the answered question PRUNED server-side (interview.ts), so a
+  // synchronous "+1" advance would skip whatever took the pruned question's
+  // slot; on applied:false the list is UNCHANGED, so "+1" would skip an
+  // uncaptured question instead of leaving it visible. The only honest
+  // "what's next" rule is the queue selector in question-card.tsx
+  // (selectVisibleQuestion): the first entry of the CURRENT openQuestions
+  // that isn't in this set. No clamping needed — there's no index to go
+  // stale.
+  const [skippedQuestions, setSkippedQuestions] = useState<Set<string>>(() => new Set());
   const [fallbackText, setFallbackText] = useState<Record<number, string>>({});
   const [compiling, setCompiling] = useState(false);
+  // 2026-07-15 — claim-flow origin fix (Task 3 audit): a compile failure gets
+  // its own state, rendered by RecapPanel right next to the CTA, distinct from
+  // the top-of-page `message` (which stays for session-mint failures, where
+  // it's the only content on screen). Never-lies at the funnel's money moment.
+  const [compileError, setCompileError] = useState<string | null>(null);
   const [compiledTemplateId, setCompiledTemplateId] = useState<string | null>(null);
   const captureHandles = useRef<Record<number, CaptureHandle>>({});
 
@@ -556,9 +579,41 @@ export function RecordClient({
     await sendInterviewMessage(text);
   }
 
+  // interview-one-question — a chip ("Yes"/"No") or the question card's
+  // free-text Send. Reuses the SAME /api/v1/recordings/interview turn as the
+  // Ask Seldon chat below (no new endpoint, no schema change) — the
+  // `Q: <question>\nA: <answer>` framing is purely a merge-reliability aid
+  // for interviewTurn's decompose path (interview.ts), not a new contract.
+  // No local advance: on an applied turn, sendInterviewMessage's
+  // INTERVIEW_REPLY/MODEL_UPDATED dispatch refreshes state.openQuestions
+  // with the answered question already pruned server-side, which is what
+  // reveals the next question via question-card.tsx's queue selector. On
+  // applied:false, openQuestions is unchanged and the SAME question stays
+  // visible — honest, since it wasn't actually captured.
+  function handleQuestionAnswer(question: string, answer: string) {
+    if (!state.token || interviewPending) return;
+    const framed = `Q: ${question}\nA: ${answer}`;
+    dispatch({ type: "INTERVIEW_USER_SENT", user: framed });
+    void sendInterviewMessage(framed);
+  }
+
+  // Adds `question` to the local skip set — no merge attempted, nothing sent
+  // to the server, so nothing about the FlowModel changes. Guarded by
+  // interviewPending the same as handleQuestionAnswer (not just the UI's
+  // disabled attribute) so a skip can't race a turn that's still resolving.
+  function handleQuestionSkip(question: string) {
+    if (interviewPending) return;
+    setSkippedQuestions((prev) => {
+      const next = new Set(prev);
+      next.add(question);
+      return next;
+    });
+  }
+
   async function handleCompileAgent() {
     if (!state.sessionId || !state.token) return;
     setCompiling(true);
+    setCompileError(null);
     try {
       const res = await fetch("/api/v1/recordings/compile-agent", {
         method: "POST",
@@ -569,7 +624,7 @@ export function RecordClient({
       const data = (await res.json()) as { template_id: string };
       setCompiledTemplateId(data.template_id);
     } catch (err) {
-      setMessage(err instanceof Error ? err.message : "Could not compile your agent yet.");
+      setCompileError(err instanceof Error ? err.message : "Could not compile your agent yet.");
     } finally {
       setCompiling(false);
     }
@@ -722,15 +777,20 @@ export function RecordClient({
               interviewError={interviewError}
               isAuthed={isAuthed}
               compiling={compiling}
+              compileError={compileError}
               compiledTemplateId={compiledTemplateId}
               claimHref={claimHref}
+              skippedQuestions={skippedQuestions}
               onInterviewInputChange={setInterviewInput}
               onInterviewSend={() => void handleInterviewSend()}
               onInterviewRetry={() => void handleInterviewRetry()}
               onCompileNow={() => void handleCompileNow()}
               onCompileAgent={() => void handleCompileAgent()}
               onApprove={() => dispatch({ type: "APPROVED" })}
+              onQuestionAnswer={handleQuestionAnswer}
+              onQuestionSkip={handleQuestionSkip}
               edgeCasePrompt={edgeCasePrompt}
+              draftApprovals={draftApprovals}
             />
           ) : null}
         </div>

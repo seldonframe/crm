@@ -16,7 +16,6 @@ import { MarketingBuildSteps } from "@/components/landing/marketing-build-steps"
 import { MarketingIdeStrip } from "@/components/landing/marketing-ide-strip";
 import { MarketingAgentOrbit } from "@/components/landing/marketing-agent-orbit";
 import { MarketingModules, MarketingAgents } from "@/components/landing/marketing-modules";
-import { MarketingSmbCta } from "@/components/landing/marketing-smb-cta";
 import { LandingMarketingPricingSection } from "@/components/landing/marketing-pricing-section";
 import { LandingMarketingFaqSection } from "@/components/landing/marketing-faq-section";
 import { MarketingFinalCta } from "@/components/landing/marketing-final-cta";
@@ -32,6 +31,10 @@ export type RecordSurfaceProps = {
   claimed: boolean;
   isAuthed: boolean;
   sharedFlag?: "1" | "miss" | null;
+  /** SF_DRAFT_APPROVALS (never-fail-compile) — recap-panel is a client
+   *  component, so the flag must arrive as a prop from this server
+   *  boundary (L-18). Absent/false → today's recap output, unchanged. */
+  draftApprovals?: boolean;
 };
 
 export function UnifiedLanding({
@@ -72,7 +75,9 @@ export function UnifiedLanding({
           <MarketingBuildSteps />
           <MarketingModules />
           <MarketingAgents />
-          <MarketingSmbCta />
+          {/* "Get paid" (2% GMV) section REMOVED 2026-07-16 (Max's call) —
+              agency plans pay 0% GMV, so the 2% story is /pricing + FAQ
+              material, not a homepage section. */}
           <LandingMarketingPricingSection tierLadderOn={tierLadderOn} />
           <MarketingProofStrip />
           <LandingMarketingFaqSection />

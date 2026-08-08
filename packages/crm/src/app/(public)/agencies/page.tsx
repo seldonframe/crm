@@ -12,12 +12,17 @@ import type { Metadata } from "next";
 import Link from "next/link";
 import { MarketingNav } from "@/components/landing/marketing-nav";
 import { MarketingAgencyMath } from "@/components/landing/marketing-agency-math";
+import { MarketingAgencyOwnership } from "@/components/landing/marketing-agency-ownership";
 import { MarketingFooter } from "@/components/landing/marketing-footer";
 
 export const metadata: Metadata = {
   title: "For builders & agencies — SeldonFrame",
+  // Pricing-truth fix 2026-07-15: white-label client sub-accounts are the
+  // agency tiers ($99/$199/$299), not the $29 Builder tier — the old
+  // "unlimited client workspaces under your own brand for $29" claim
+  // described the retired grandfathered agency tier.
   description:
-    "Build an AI agent once, list it on the marketplace, or run unlimited client workspaces under your own brand — all for one flat $29/mo.",
+    "Build an AI agent once, list it on the marketplace, or run client front offices. Build from $29/mo; white-label client workspaces + branded portals on agency plans from $99/mo with 0% GMV.",
 };
 
 export default function AgenciesPage() {
@@ -26,6 +31,7 @@ export default function AgenciesPage() {
       <MarketingNav />
       <main id="main-content" className="pt-[100px]">
         <MarketingAgencyMath />
+        <MarketingAgencyOwnership />
 
         {/* Guides for agency builders — cross-links into the supply-side content library. */}
         <section aria-label="Guides for agency builders" className="border-t border-[rgba(34,29,23,.08)] px-5 py-16 md:px-8 lg:px-12">

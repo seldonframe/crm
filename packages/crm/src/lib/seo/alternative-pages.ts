@@ -16,12 +16,48 @@ export const LAST_UPDATED = "July 2026";
 export type AltFaqItem = { q: string; a: string };
 export type SwitchReason = { title: string; body: string };
 
+/** A single evidence-ordered section on the /compare/seldonframe-vs-<slug>
+ *  page — OPTIONAL, competitor-specific, and rendered by
+ *  components/seo/seldonframe-vs-page.tsx only when a competitor supplies
+ *  `evidenceSections`. Every claim must trace to a primary/attributed source
+ *  (see docs/strategy/ghl-pain-messaging-plan-2026-07-16.md for the pattern);
+ *  no competitor other than the one populating this field is affected. */
+export type EvidenceSection = {
+  /** Section heading, e.g. "The lock-in: no supported export". */
+  title: string;
+  /** Body paragraphs, rendered in order. */
+  paragraphs: string[];
+  /** Optional short, attributed verbatim quote from the competitor's own
+   *  material (kept under 15 words per copyright/never-lies discipline). */
+  quote?: { text: string; source: string; href: string };
+  /** The honest SF contrast sentence closing out the section. */
+  contrast?: string;
+};
+
+/** The visually distinct "what they get right / what's true for everyone"
+ *  callout — the never-lies proof. OPTIONAL; renders only when present. */
+export type HonestyBox = {
+  title: string;
+  items: string[];
+};
+
+/** Which buyer this competitor is chiefly compared against — drives which
+ *  SeldonFrame price tier anchors the page (see `sfPriceAnchor` below).
+ *  "agency" = competitor's core deliverable is agency/whitelabel reselling;
+ *  "solo" = competitor is a single-operator/DIY tool with no agency layer;
+ *  "mixed" = genuinely serves both (or the split is ambiguous) — anchor
+ *  mentions both tiers without leading with either. Classified 2026-07-16,
+ *  see docs/superpowers/plans/2026-07-16-agency-price-anchor.md. */
+export type CompetitorAudience = "agency" | "solo" | "mixed";
+
 export type Competitor = {
   /** URL slug: /alternative-to-<slug> */
   slug: string;
   name: string;
   /** Short category kicker, e.g. "agency platform". */
   category: string;
+  /** Buyer audience this comparison targets — see `CompetitorAudience`. */
+  audience: CompetitorAudience;
   /** The competitor's canonical public pricing page — cited on every page that
    *  shows their price, so readers (and LLMs) can verify it themselves.
    *  Researched 2026-07-08; see docs/superpowers/specs/2026-07-08-competitor-pricing-facts.md. */
@@ -47,6 +83,13 @@ export type Competitor = {
   /** Honest "choose them if…" sentence. */
   whenTheyWin: string;
   faq: AltFaqItem[];
+  /** OPTIONAL — evidence-ordered deep-dive sections for the vs-page (used
+   *  only by gohighlevel as of 2026-07-16; every other competitor omits this
+   *  and renders byte-identically to before). Order in the array is render
+   *  order — strongest evidence first. */
+  evidenceSections?: EvidenceSection[];
+  /** OPTIONAL — the honesty-box callout (used only by gohighlevel). */
+  honestyBox?: HonestyBox;
 };
 
 /** SeldonFrame's side of the comparison table — identical on every page. */
@@ -55,7 +98,7 @@ export const SF_COLUMN = {
   pricingModel: "From $29/mo flat — unlimited workspaces (agency whitelabel from $99/mo)",
   aiReceptionist: "Native — AI receptionist answers, qualifies & books across voice, SMS & web chat",
   frontOffice: "Included — multi-page website, CRM, booking calendar, intake forms, review requests in every workspace",
-  whitelabel: "Included — whitelabel client portal, per-client workspaces, custom domains, one-click multi-client deploy",
+  whitelabel: "Agency add-on from $99/mo — whitelabel client portal, per-client workspaces, custom domains, one-click multi-client deploy",
   aiCosts: "BYOK — bring your own AI (and Twilio) keys and pay providers at raw cost, zero markup",
   resale: "Built in — publish agents to the marketplace or rent them via MCP (5% marketplace fee)",
 } as const;
@@ -70,6 +113,32 @@ export const COMPARISON_LABELS: { key: keyof typeof SF_COLUMN; label: string }[]
   { key: "resale", label: "Sell / resell what you build" },
 ];
 
+/** The SeldonFrame price-anchor sentence fragment, banded by buyer audience
+ *  (Max, 2026-07-16): on agency-audience comparison surfaces the anchor is
+ *  the agency ladder — $29 is a demoted solo aside, never the lead. Solo
+ *  surfaces keep "$29/mo flat" as the anchor. Mixed surfaces carry both,
+ *  neither leading. See CompetitorAudience for how a competitor is banded. */
+/** Band resolution for two-competitor pages: an agency-audience competitor
+ *  anywhere in the pair makes the page an agency surface (Max 2026-07-16 —
+ *  never lead an agency-intercept page with the $29 solo anchor); mixed
+ *  beats solo for the same reason. */
+export function pairAudience(a: CompetitorAudience, b: CompetitorAudience): CompetitorAudience {
+  if (a === "agency" || b === "agency") return "agency";
+  if (a === "mixed" || b === "mixed") return "mixed";
+  return "solo";
+}
+
+export function sfPriceAnchor(audience: CompetitorAudience): string {
+  switch (audience) {
+    case "agency":
+      return "white-label agency plans from $99/mo ($99–$299, client sub-accounts included, 0% GMV) — solo builders from $29/mo flat";
+    case "solo":
+      return "$29/mo flat, unlimited workspaces, first workspace free forever";
+    case "mixed":
+      return "from $29/mo flat solo, or $99–$299/mo agency plans with white-label + client sub-accounts (0% GMV)";
+  }
+}
+
 /** FAQ items every page shares (appended after the competitor-specific ones). */
 export const SHARED_FAQ: AltFaqItem[] = [
   {
@@ -78,7 +147,7 @@ export const SHARED_FAQ: AltFaqItem[] = [
   },
   {
     q: "Do you take a cut of what I charge my clients?",
-    a: "SeldonFrame works like Shopify: $29/mo flat, plus 2% on sales made through SeldonFrame checkout, plus 5% when you sell agents on the SeldonFrame marketplace. Client retainers you bill outside SeldonFrame cost nothing extra.",
+    a: "SeldonFrame works like Shopify: Builder is $29/mo flat, and agency plans run $99–$299/mo with white-label and client sub-accounts included. Solo plans add a flat 2% only on sales made through SeldonFrame checkout — agency plans pay 0%. Selling agents on the marketplace carries 5%. Client retainers you bill outside SeldonFrame cost nothing extra.",
   },
   {
     q: "How fast can I see it working?",
@@ -91,11 +160,12 @@ export const COMPETITORS: Competitor[] = [
     slug: "gohighlevel",
     name: "GoHighLevel",
     category: "agency platform",
+    audience: "agency",
     pricingSourceUrl: "https://www.gohighlevel.com/pricing",
     oneLiner:
       "GoHighLevel is an all-in-one white-label CRM and marketing-automation platform. Agencies use it to run funnels, email/SMS, and pipelines for local-business clients.",
     heroSub:
-      "Stop paying extra fees for AI that's just an add-on. SeldonFrame gives every client a complete AI front office — receptionist, website, CRM, booking — for $29/mo flat, on your own AI keys.",
+      "Stop paying extra fees for AI that's just an add-on. SeldonFrame gives every client a complete AI front office — receptionist, website, CRM, booking — white-label agency plans from $99/mo (0% GMV); solo builders from $29/mo flat.",
     intro: [
       "Most people looking for a GoHighLevel alternative hit the same wall: the AI isn't the platform, it's an add-on. Plans run $97–$497/mo. The AI Employee costs another $50–$97/mo per location. Outbound Voice AI is still billed per minute on top. Users say it takes 2–4 weeks to learn before the platform earns its keep. The costs are real, and they add up — for every single client.",
       "That said, GoHighLevel is impressive. It's the most complete agency toolbox ever built, with funnels, email, courses, a huge template library, and true white-label reselling. If your business is funnels and email campaigns, it's hard to beat. But if your clients just need an AI that answers the phone, qualifies the lead, and books the job into a real calendar and CRM, you're buying a whole toolbox to get one receptionist.",
@@ -136,14 +206,65 @@ export const COMPETITORS: Competitor[] = [
       },
       {
         q: "Can I white-label SeldonFrame for my clients like GHL's SaaS mode?",
-        a: "Yes. Client workspaces, a branded client portal, and custom domains are all included at $29/mo — not locked behind a $497/mo tier.",
+        a: "Yes. Client workspaces, a branded client portal, and custom domains are included starting at $99/mo — not locked behind a $497/mo tier.",
       },
     ],
+    evidenceSections: [
+      {
+        title: "The lock-in: no supported export",
+        paragraphs: [
+          "GoHighLevel's own help center is explicit about what happens if you ever want to leave: your funnel and website pages don't come with you. The article's own words:",
+          "Sub-account transfers off an agency's master account are agency-initiated only, and white-label sub-accounts can't transfer at all — integrations, phone numbers, and email senders sever the moment a sub-account moves.",
+        ],
+        quote: {
+          text: "does not provide tools, guidance, or support for copying, hosting, or maintaining",
+          source: "GoHighLevel help center, article 155000007342",
+          href: "https://help.gohighlevel.com/support/solutions/articles/155000007342",
+        },
+        contrast:
+          "SeldonFrame is AGPL-3.0 open source and self-hostable — every workspace exports as JSON, and nothing about leaving requires the vendor's help.",
+      },
+      {
+        title: "The complexity: a real learning curve",
+        paragraphs: [
+          "GoHighLevel's own G2 review base tells a consistent story: Learning Curve (141 mentions), Steep Learning Curve (90), and Not Intuitive (56) — 287 grouped mentions in G2's AI-tallied cons summary as of July 2026 (directional, since categories can overlap). Capterra's aggregate ease-of-use sub-score sits at 3.7/5, the lowest of its rated categories. Reviewers report implementations commonly taking 2–4 weeks to get running.",
+        ],
+        contrast:
+          "A SeldonFrame workspace — site, CRM, booking calendar, intake, and the AI agent — is generated from one conversation in about 3 minutes.",
+      },
+      {
+        title: "The pricing stack",
+        paragraphs: [
+          "GoHighLevel's published pricing page (per GoHighLevel's pricing page, July 2026) lists a $97/$297/$497 monthly ladder. SaaS Mode — reselling the platform under your own brand — requires the $497/mo tier, and white-label mobile branding is a separate $497/mo add-on on any tier. On top of the subscription, usage is metered by default: $0.675 per 1,000 LC emails, per-segment SMS, and per-minute voice, drawn from an auto-refilling wallet on the agency's card. Add-ons stack further: $97/mo per sub-account for the AI Employee, $297/mo for HIPAA (which can't be disabled once purchased), and $500/mo for premium support.",
+          "These numbers are published in GoHighLevel's own support docs — they're just absent from the top-level marketing pages. To GoHighLevel's credit, there are real mitigations: agencies can bring their own SMTP to cut email costs, and usage rebilling with markup becomes available on the $497 tier.",
+        ],
+        contrast:
+          "SeldonFrame's agency tiers are flat — $99/$199/$299/mo, whitelabel and client portal included, 0% GMV fee on agency tiers, and AI/telephony run on your own keys at provider cost. The marketplace's 5% fee only ever applies to marketplace transactions, never to the subscription tier.",
+      },
+      {
+        title: "Reliability, as reviewers report it",
+        paragraphs: [
+          "Individual reviewers report real incidents: a 30–45-day phone outage described in a G2 review dated 2026-06-29; misfired workflow emails sent to the wrong recipients; and a status-page feature request that's stayed open on GoHighLevel's own community board since April 2023. These are reviewer reports, not a claim that GoHighLevel is broadly unreliable — see the honesty box below for the aggregate rating.",
+        ],
+        contrast:
+          "Rather than generalize from anyone's outages, SeldonFrame sells its own never-lies machinery directly: grounded responses, an enforced read-back before anything is booked, guardrails, and automatic evals on every agent.",
+      },
+    ],
+    honestyBox: {
+      title: "What GoHighLevel gets right — and what's true for everyone",
+      items: [
+        "GoHighLevel rates 4.2/5 on Capterra and 4.6/5 on G2 in aggregate — the complaints above are real but are the minority voice, not the average experience.",
+        "Its fees are published in its own support documentation; nothing here is a hidden or secret charge.",
+        "A2P 10DLC carrier registration delays apply to every SMS platform, SeldonFrame included — this isn't a GoHighLevel-specific problem.",
+        "For a large team that wants one all-in-one platform with a huge template ecosystem and is willing to invest the ramp-up time, GoHighLevel is a legitimate, well-reviewed choice.",
+      ],
+    },
   },
   {
     slug: "vapi",
     name: "Vapi",
     category: "voice AI API",
+    audience: "solo",
     pricingSourceUrl: "https://vapi.ai/pricing",
     oneLiner:
       "Vapi is a developer-first API platform for building custom voice AI agents. You assemble and host your own voice stack.",
@@ -189,7 +310,7 @@ export const COMPETITORS: Competitor[] = [
       },
       {
         q: "I already built agents on Vapi — why switch?",
-        a: "If what you're delivering to clients is a working receptionist plus the business system behind it, SeldonFrame replaces the agent AND the CRM/calendar/website you'd otherwise stitch together yourself — all in one $29/mo platform you can whitelabel.",
+        a: "If what you're delivering to clients is a working receptionist plus the business system behind it, SeldonFrame replaces the agent AND the CRM/calendar/website you'd otherwise stitch together yourself — one platform, with agency whitelabel from $99/mo.",
       },
     ],
   },
@@ -197,11 +318,12 @@ export const COMPETITORS: Competitor[] = [
     slug: "retell-ai",
     name: "Retell AI",
     category: "voice AI API",
+    audience: "solo",
     pricingSourceUrl: "https://www.retellai.com/pricing",
     oneLiner:
       "Retell AI is developer infrastructure for building voice and chat AI agents. It's priced per minute, built from separate pieces you assemble yourself.",
     heroSub:
-      "A whole industry of 'white-label Retell wrappers' exists because agencies need what Retell doesn't ship. SeldonFrame ships it: whitelabel client workspaces, CRM, booking, and the receptionist — $29/mo flat.",
+      "A whole industry of 'white-label Retell wrappers' exists because agencies need what Retell doesn't ship. SeldonFrame ships it: whitelabel client workspaces, CRM, booking, and the receptionist — from $99/mo.",
     intro: [
       "Most people looking for a Retell AI alternative hit the same wall: it's excellent infrastructure with nothing built around it. Calls run $0.07–$0.31/min all-in, and the extras add up — knowledge base, denoising, guardrails, PII removal, and QA each bill per minute on top. There's no built-in whitelabel dashboard, no CRM, and no client management. A whole industry of third-party 'Retell wrapper' products exists just to bolt on the agency layer Retell doesn't ship.",
       "That said, Retell is impressive. Its pricing is refreshingly clear and itemized, it starts free with no contract, and technical teams love how deeply you can configure each piece. If you're building your own voice product on solid rails, it's a strong choice. But if you're an agency, buying infrastructure plus a wrapper plus a CRM plus a calendar to deliver one receptionist is the long way around.",
@@ -250,11 +372,12 @@ export const COMPETITORS: Competitor[] = [
     slug: "synthflow",
     name: "Synthflow AI",
     category: "no-code voice AI",
+    audience: "mixed",
     pricingSourceUrl: "https://synthflow.ai/pricing",
     oneLiner:
       "Synthflow AI is a no-code voice-agent builder for phone receptionists and appointment booking.",
     heroSub:
-      "Whitelabel shouldn't cost $2,000/mo. SeldonFrame includes the whitelabel agency layer — plus the website, CRM, and booking system behind every agent — for $29/mo flat.",
+      "Whitelabel shouldn't cost $2,000/mo. SeldonFrame's whitelabel agency layer — plus the website, CRM, and booking system behind every agent — starts at $99/mo.",
     intro: [
       "Most people looking for a Synthflow alternative hit the same wall: the agency story has a steep price tag. The white-label dashboard, custom domain, and reseller toolkit are listed as a $2,000/month add-on (or bundled into enterprise contracts starting around $30k/year). Per-minute costs stack too — base engine, LLM, and telephony — so a busy client's bill is hard to predict. Cost is the single most common complaint in public reviews.",
       "That said, Synthflow is impressive. It's genuinely no-code, ships useful templates for specific industries, and — unlike most voice platforms — actually built out the agency side with sub-accounts and client pricing controls. But it's still just a voice agent: no website, no CRM, no booking system underneath. You pay voice-platform prices and still have to build the rest of the client's front office somewhere else.",
@@ -270,8 +393,8 @@ export const COMPETITORS: Competitor[] = [
     },
     switchReasons: [
       {
-        title: "Whitelabel at $29, not $2,000",
-        body: "SeldonFrame's agency layer — client workspaces, branded portal, one-click multi-client deploy — is part of the flat $29/mo plan. It's not a four-figure add-on.",
+        title: "Whitelabel from $99, not $2,000",
+        body: "SeldonFrame's agency layer — client workspaces, branded portal, one-click multi-client deploy — starts at $99/mo. It's not a four-figure add-on.",
       },
       {
         title: "Costs you can actually predict",
@@ -303,6 +426,7 @@ export const COMPETITORS: Competitor[] = [
     slug: "chatbase",
     name: "Chatbase",
     category: "AI chatbot builder",
+    audience: "solo",
     pricingSourceUrl: "https://www.chatbase.co/pricing",
     oneLiner:
       "Chatbase is a no-code platform for building AI chatbots trained on your own data and putting them on a website.",
@@ -336,7 +460,7 @@ export const COMPETITORS: Competitor[] = [
       },
       {
         title: "Whitelabel isn't an enterprise privilege",
-        body: "Client workspaces, your branding, and custom domains are included at $29/mo — not locked behind a custom Enterprise contract or a $1,188/yr branding fee.",
+        body: "Client workspaces, your branding, and custom domains start at $99/mo — not locked behind a custom Enterprise contract or a $1,188/yr branding fee.",
       },
     ],
     whenTheyWin:
@@ -356,6 +480,7 @@ export const COMPETITORS: Competitor[] = [
     slug: "botpress",
     name: "Botpress",
     category: "agent platform",
+    audience: "solo",
     pricingSourceUrl: "https://botpress.com/pricing",
     oneLiner:
       "Botpress is an open-source-rooted, developer-focused platform for building and running AI chatbots and agents.",
@@ -409,11 +534,12 @@ export const COMPETITORS: Competitor[] = [
     slug: "stammer-ai",
     name: "Stammer.ai",
     category: "whitelabel agent platform",
+    audience: "agency",
     pricingSourceUrl: "https://www.stammer.ai/pricing",
     oneLiner:
       "Stammer.ai is a white-label AI chat and voice agent platform. Agencies use it to resell agents under their own brand.",
     heroSub:
-      "Stammer sells you the agent — you still have to stitch together the CRM, website, and calendar for each client. SeldonFrame is the whole whitelabel front office in one $29/mo platform.",
+      "Stammer sells you the agent — you still have to stitch together the CRM, website, and calendar for each client. SeldonFrame is the whole whitelabel front office, with agency whitelabel from $99/mo.",
     intro: [
       "Most people looking for a Stammer.ai alternative hit the same wall: the agent is only one piece of what you need to deliver. The $197/mo agency tier covers whitelabel chat and voice agents, but there's no CRM, no website builder, and no booking calendar behind them. So every client still means connecting Stammer to a separate stack yourself. Usage fees (roughly $0.11–$0.17/min for voice, plus per-message chat) stack on top of the subscription, and regulated industries are out — there's no HIPAA option.",
       "That said, Stammer is impressive. It took agency reselling seriously before almost anyone else: unlimited client resale, agencies keep their full markup, and a real white-label dashboard at a price small agencies can afford. If agents are your whole offer, it works well. But agencies win local clients by delivering results — answered calls, booked jobs, a working site — not just a chatbot subscription.",
@@ -441,8 +567,8 @@ export const COMPETITORS: Competitor[] = [
         body: "SeldonFrame's receptionist writes straight to the client's own calendar and CRM — no separate integration project between the agent and the rest of the business.",
       },
       {
-        title: "$29 flat vs $197 plus usage",
-        body: "The whole whitelabel platform — unlimited client workspaces included — costs less than a sixth of the comparable Stammer tier, before usage fees.",
+        title: "$99 flat vs $197 plus usage",
+        body: "The whole whitelabel platform — unlimited client workspaces included — costs about half of the comparable Stammer tier, before usage fees.",
       },
     ],
     whenTheyWin:
@@ -450,7 +576,7 @@ export const COMPETITORS: Competitor[] = [
     faq: [
       {
         q: "Does SeldonFrame let me resell like Stammer does?",
-        a: "Yes. Deploy agents (and whole front offices) to unlimited client workspaces under your own brand, charge what you like, and keep it — there's no cut taken on client work you sell yourself.",
+        a: "Yes, on the agency plan (from $99/mo). Deploy agents (and whole front offices) to unlimited client workspaces under your own brand, charge what you like, and keep it — there's no cut taken on client work you sell yourself.",
       },
       {
         q: "Can I deploy one agent to many clients?",
@@ -462,6 +588,9 @@ export const COMPETITORS: Competitor[] = [
     slug: "podium",
     name: "Podium",
     category: "SMB messaging & reviews",
+    // Reband 2026-07-16 review: Podium sells TO local businesses (solo reader),
+    // not to agencies — the band follows the READER, not the price point.
+    audience: "solo",
     pricingSourceUrl: "https://www.podium.com/pricing",
     oneLiner:
       "Podium is a messaging, reviews, and AI-employee platform for local businesses, sold through a sales-quote process.",
@@ -515,11 +644,12 @@ export const COMPETITORS: Competitor[] = [
     slug: "vendasta",
     name: "Vendasta",
     category: "agency platform",
+    audience: "agency",
     pricingSourceUrl: "https://www.vendasta.com/pricing/",
     oneLiner:
       "Vendasta is a white-label platform and product marketplace. Agencies use it to resell digital services to local-business clients.",
     heroSub:
-      "No minimum spend, no 12-month contract, no $999 tier just for the AI receptionist. SeldonFrame is the whitelabel AI front office for $29/mo flat.",
+      "No minimum spend, no 12-month contract, no $999 tier just for the AI receptionist. SeldonFrame is the whitelabel AI front office, with agency whitelabel from $99/mo.",
     intro: [
       "Most people looking for a Vendasta alternative hit the same wall: the sticker price isn't the real price. Plans are minimum-spend commitments ($99–$999/mo), not flat fees. The tiers most agencies need come with 12-month contracts. Onboarding reportedly takes 4–8 weeks. And the AI Voice Receptionist only comes with the Premium tier (a $999/mo minimum), with capped minutes. Agencies report real costs running well above the advertised starting price once seats and reports get added.",
       "That said, Vendasta is impressive. The white-label product marketplace runs deep, the multi-location portal is mature, and the prospecting reports are genuinely good sales tools. For agencies whose whole model is reselling a wide catalog of digital products, it fits well. But if what your clients actually want in 2026 is an AI that answers their phone and books their jobs, it shouldn't sit behind a $999/mo minimum.",
@@ -535,8 +665,8 @@ export const COMPETITORS: Competitor[] = [
     },
     switchReasons: [
       {
-        title: "Flat $29 vs minimum-spend math",
-        body: "Vendasta's pricing is a spend commitment you have to fill, and real bills run above the sticker price. SeldonFrame is a flat subscription with unlimited client workspaces.",
+        title: "Flat pricing vs minimum-spend math",
+        body: "Vendasta's pricing is a spend commitment you have to fill, and real bills run above the sticker price. SeldonFrame is a flat subscription — unlimited workspaces from $29/mo, agency client workspaces from $99/mo.",
       },
       {
         title: "AI receptionist for everyone, not just the top tier",
@@ -556,7 +686,7 @@ export const COMPETITORS: Competitor[] = [
     faq: [
       {
         q: "Can I run all my clients under my brand like Vendasta?",
-        a: "Yes. Per-client workspaces, a branded client portal, and custom domains are all included, and you can deploy an agent template to every client in one click.",
+        a: "Yes, on the agency plan (from $99/mo). Per-client workspaces, a branded client portal, and custom domains are all included, and you can deploy an agent template to every client in one click.",
       },
       {
         q: "Is there a contract?",
@@ -568,6 +698,7 @@ export const COMPETITORS: Competitor[] = [
     slug: "goodcall",
     name: "Goodcall",
     category: "AI phone agent",
+    audience: "solo",
     pricingSourceUrl: "https://www.goodcall.com/pricing",
     oneLiner:
       "Goodcall is a no-code AI phone agent for small businesses. It answers FAQs and takes appointments, billed per unique monthly caller.",
@@ -621,6 +752,7 @@ export const COMPETITORS: Competitor[] = [
     slug: "voiceflow",
     name: "Voiceflow",
     category: "conversation-design platform",
+    audience: "solo",
     pricingSourceUrl: "https://www.voiceflow.com/pricing",
     oneLiner:
       "Voiceflow is a visual conversation-design platform. Technical teams use it to build and run voice and chat AI agents.",
@@ -646,7 +778,7 @@ export const COMPETITORS: Competitor[] = [
       },
       {
         title: "No per-seat tax on your team",
-        body: "Every Voiceflow editor costs $50–$150/mo. SeldonFrame is $29/mo flat for the whole platform — your whole team, unlimited client workspaces.",
+        body: "Every Voiceflow editor costs $50–$150/mo. SeldonFrame is $29/mo flat for the whole platform, unlimited workspaces — agency client workspaces from $99/mo.",
       },
       {
         title: "One conversation replaces the flow diagram",
@@ -674,11 +806,12 @@ export const COMPETITORS: Competitor[] = [
     slug: "lindy",
     name: "Lindy",
     category: "AI employee builder",
+    audience: "solo",
     pricingSourceUrl: "https://www.lindy.ai/pricing",
     oneLiner:
       "Lindy is a general-purpose AI agent builder for automating internal work like email triage, research, and scheduling.",
     heroSub:
-      "Lindy automates your inbox. SeldonFrame runs your clients' front office — receptionist, website, CRM, and booking — whitelabeled, for $29/mo flat.",
+      "Lindy automates your inbox. SeldonFrame runs your clients' front office — receptionist, website, CRM, and booking — whitelabeled, from $99/mo.",
     intro: [
       "Most people looking for a Lindy alternative hit the same wall: it's built for your own internal work, not for delivering to clients. There's no free tier. Plans run $49.99–$199.99/mo on credits that burn unpredictably — a simple step costs 1 credit, but email parsing or web research can cost 5–10. And there's no agency, whitelabel, or reseller model at all. Voice is just a bolt-on step inside a workflow, with the delay to match.",
       "That said, Lindy is impressive. As a personal 'AI employee' for your own work, it's genuinely versatile, with a big template library and real multi-step ability. But you can't hand a Lindy to a plumbing company as their branded receptionist, and you can't run twenty clients on it.",
@@ -727,6 +860,7 @@ export const COMPETITORS: Competitor[] = [
     slug: "durable",
     name: "Durable",
     category: "AI website builder",
+    audience: "solo",
     pricingSourceUrl: "https://durable.com/pricing",
     oneLiner:
       "Durable is an AI website builder with a light CRM and invoicing, aimed at solo operators who want a fast, cheap site.",
@@ -752,7 +886,7 @@ export const COMPETITORS: Competitor[] = [
       },
       {
         title: "Built for a client roster, not 5 businesses",
-        body: "Durable's top plan caps at 5 businesses with no whitelabel option. SeldonFrame gives you unlimited client workspaces with a branded agency portal at $29/mo.",
+        body: "Durable's top plan caps at 5 businesses with no whitelabel option. SeldonFrame gives you unlimited client workspaces with a branded agency portal from $99/mo.",
       },
       {
         title: "A CRM that closes the loop",
@@ -780,6 +914,7 @@ export const COMPETITORS: Competitor[] = [
     slug: "my-ai-front-desk",
     name: "My AI Front Desk",
     category: "AI receptionist",
+    audience: "mixed",
     pricingSourceUrl: "https://www.myaifrontdesk.com/pricing",
     oneLiner:
       "My AI Front Desk (rebranding to Frontdesk) is an AI receptionist for phone, SMS, and chat, aimed at small local businesses.",
@@ -809,7 +944,7 @@ export const COMPETITORS: Competitor[] = [
       },
       {
         title: "Agency pricing you can actually plan around",
-        body: "Their Partner tier is quote-only. SeldonFrame's agency pricing is public: $29/mo flat, unlimited client workspaces, whitelabel included.",
+        body: "Their Partner tier is quote-only. SeldonFrame's agency pricing is public: from $99/mo, unlimited client workspaces, whitelabel included.",
       },
       {
         title: "A stable platform, not a rebrand in progress",
@@ -833,6 +968,9 @@ export const COMPETITORS: Competitor[] = [
     slug: "smith-ai",
     name: "Smith.ai",
     category: "receptionist service",
+    // Reband 2026-07-16 review: Smith.ai is a per-call service bought by the
+    // firm/SMB itself — solo reader, same rule as podium.
+    audience: "solo",
     pricingSourceUrl: "https://smith.ai/pricing/ai-receptionist",
     oneLiner:
       "Smith.ai is a North-America-based receptionist service that combines AI with human receptionists, billed per call.",
@@ -886,6 +1024,7 @@ export const COMPETITORS: Competitor[] = [
     slug: "activecampaign",
     name: "ActiveCampaign",
     category: "email automation & CRM",
+    audience: "mixed",
     pricingSourceUrl: "https://www.activecampaign.com/pricing",
     oneLiner:
       "ActiveCampaign is an automation-first email marketing platform with a light CRM layer, priced per contact.",
@@ -919,7 +1058,7 @@ export const COMPETITORS: Competitor[] = [
       },
       {
         title: "Whitelabel for agencies",
-        body: "ActiveCampaign has no agency resale model. SeldonFrame includes a branded client portal and per-client workspaces at $29/mo.",
+        body: "ActiveCampaign has no agency resale model. SeldonFrame includes a branded client portal and per-client workspaces from $99/mo.",
       },
     ],
     whenTheyWin:
@@ -939,6 +1078,7 @@ export const COMPETITORS: Competitor[] = [
     slug: "hubspot",
     name: "HubSpot",
     category: "enterprise CRM",
+    audience: "mixed",
     pricingSourceUrl: "https://www.hubspot.com/pricing/marketing",
     oneLiner:
       "HubSpot is a premium all-in-one CRM and marketing platform that scales from a free tier to enterprise contracts.",
@@ -992,6 +1132,7 @@ export const COMPETITORS: Competitor[] = [
     slug: "clickfunnels",
     name: "ClickFunnels",
     category: "funnel builder",
+    audience: "solo",
     pricingSourceUrl: "https://www.clickfunnels.com/pricing",
     oneLiner:
       "ClickFunnels is a funnel-building platform for offer-sellers, built around ready-made sales pages and checkout flows.",
@@ -1025,7 +1166,7 @@ export const COMPETITORS: Competitor[] = [
       },
       {
         title: "Whitelabel for agencies",
-        body: "ClickFunnels has no agency resale model. SeldonFrame gives every client a branded workspace at $29/mo.",
+        body: "ClickFunnels has no agency resale model. SeldonFrame gives every client a branded workspace from $99/mo.",
       },
     ],
     whenTheyWin:
@@ -1045,6 +1186,7 @@ export const COMPETITORS: Competitor[] = [
     slug: "keap",
     name: "Keap",
     category: "SMB CRM & automation",
+    audience: "solo",
     pricingSourceUrl: "https://keap.com/pricing",
     oneLiner:
       "Keap (owned by Thryv since October 2024) is a veteran small-business CRM and automation platform with invoicing and payments.",
@@ -1098,6 +1240,7 @@ export const COMPETITORS: Competitor[] = [
     slug: "linktree",
     name: "Linktree",
     category: "link-in-bio",
+    audience: "solo",
     pricingSourceUrl: "https://linktr.ee/s/pricing/",
     oneLiner:
       "Linktree is a link-in-bio tool that turns one profile link into a page of links — not a business platform.",
@@ -1151,6 +1294,7 @@ export const COMPETITORS: Competitor[] = [
     slug: "kartra",
     name: "Kartra",
     category: "creator all-in-one",
+    audience: "solo",
     pricingSourceUrl: "https://kartra.com/pricing/",
     oneLiner:
       "Kartra is an all-in-one platform for creators and coaches selling courses, memberships, and video content, with contact-capped tiers.",
@@ -1184,7 +1328,7 @@ export const COMPETITORS: Competitor[] = [
       },
       {
         title: "Whitelabel for agencies",
-        body: "Kartra has no agency resale model. SeldonFrame includes a branded client portal and per-client workspaces at $29/mo.",
+        body: "Kartra has no agency resale model. SeldonFrame includes a branded client portal and per-client workspaces from $99/mo.",
       },
     ],
     whenTheyWin:
@@ -1204,11 +1348,12 @@ export const COMPETITORS: Competitor[] = [
     slug: "sharpspring",
     name: "SharpSpring (Constant Contact)",
     category: "agency marketing automation",
+    audience: "agency",
     pricingSourceUrl: "https://www.constantcontact.com/pricing/lead-gen-crm",
     oneLiner:
       "SharpSpring is an agency-focused marketing automation platform, now operating under Constant Contact and reported to be in maintenance mode after the acquisition.",
     heroSub:
-      "A platform in maintenance mode with quote-gated pricing is a place to migrate FROM, not to. SeldonFrame gives every client an AI receptionist, website, CRM, and booking system for $29/mo flat, publicly priced.",
+      "A platform in maintenance mode with quote-gated pricing is a place to migrate FROM, not to. SeldonFrame is publicly priced: white-label agency plans from $99/mo (0% GMV), solo from $29/mo flat — AI receptionist, website, CRM, and booking included.",
     intro: [
       "Most people looking for a SharpSpring alternative hit the same wall: nobody publishes the price, and the brand's future is unclear. Pricing is quote-gated — the number commonly cited by agencies is around $449/mo per 1,000 contacts, but SharpSpring won't confirm it publicly. Since the Constant Contact acquisition, the brand has been reported as being phased toward retirement, with little visible product investment, and there's no local-business toolkit at all — no phone answering, no booking system, no intake forms.",
       "That said, SharpSpring is impressive. Unlimited users on a flat agency plan and VisitorID website tracking were genuinely ahead of their time, and its agency roots run deep. But a platform being wound down under its acquirer isn't where you want to build a client's front office for the next five years.",
@@ -1257,6 +1402,7 @@ export const COMPETITORS: Competitor[] = [
     slug: "klaviyo",
     name: "Klaviyo",
     category: "ecommerce email & SMS",
+    audience: "solo",
     pricingSourceUrl: "https://www.klaviyo.com/pricing",
     oneLiner:
       "Klaviyo is an ecommerce-focused email and SMS marketing platform with a B2C CRM layer, priced per profile.",
@@ -1290,7 +1436,7 @@ export const COMPETITORS: Competitor[] = [
       },
       {
         title: "Whitelabel for agencies",
-        body: "Klaviyo has no agency resale model. SeldonFrame includes branded client workspaces at $29/mo.",
+        body: "Klaviyo has no agency resale model. SeldonFrame includes branded client workspaces from $99/mo.",
       },
     ],
     whenTheyWin:
@@ -1310,6 +1456,7 @@ export const COMPETITORS: Competitor[] = [
     slug: "zoho",
     name: "Zoho",
     category: "value CRM suite",
+    audience: "mixed",
     pricingSourceUrl: "https://www.zoho.com/crm/zohocrm-pricing.html",
     oneLiner:
       "Zoho is a value-priced CRM and 45-app business suite, sold per user across gated editions.",
@@ -1343,7 +1490,7 @@ export const COMPETITORS: Competitor[] = [
       },
       {
         title: "Whitelabel for agencies",
-        body: "Zoho has no agency resale model. SeldonFrame includes branded client workspaces at $29/mo.",
+        body: "Zoho has no agency resale model. SeldonFrame includes branded client workspaces from $99/mo.",
       },
     ],
     whenTheyWin:
@@ -1363,6 +1510,7 @@ export const COMPETITORS: Competitor[] = [
     slug: "salesforce",
     name: "Salesforce",
     category: "enterprise CRM",
+    audience: "mixed",
     pricingSourceUrl: "https://www.salesforce.com/small-business/pricing/",
     oneLiner:
       "Salesforce is the enterprise CRM standard, now also selling to small businesses through Starter and Pro Suite editions.",
@@ -1396,7 +1544,7 @@ export const COMPETITORS: Competitor[] = [
       },
       {
         title: "Whitelabel for agencies",
-        body: "Salesforce has no agency resale model. SeldonFrame includes branded client workspaces at $29/mo.",
+        body: "Salesforce has no agency resale model. SeldonFrame includes branded client workspaces from $99/mo.",
       },
     ],
     whenTheyWin:
@@ -1416,6 +1564,7 @@ export const COMPETITORS: Competitor[] = [
     slug: "claude-projects",
     name: "Claude Projects",
     category: "DIY workflow",
+    audience: "mixed",
     pricingSourceUrl: "https://www.anthropic.com/pricing",
     oneLiner:
       "Claude Projects is Anthropic's persistent-workspace feature — standing instructions plus a knowledge base that load into every conversation, which many agencies hand-build once per client.",
@@ -1449,7 +1598,7 @@ export const COMPETITORS: Competitor[] = [
       },
       {
         title: "Clients get a login; you get a book of business",
-        body: "Projects are trapped in your personal account. SeldonFrame gives every client a whitelabeled sub-account and portal under your brand — the difference between a workflow you run and a product you sell.",
+        body: "Projects are trapped in your personal account. SeldonFrame gives every client a whitelabeled sub-account and portal under your brand (agency plan, from $99/mo) — the difference between a workflow you run and a product you sell.",
       },
     ],
     whenTheyWin:

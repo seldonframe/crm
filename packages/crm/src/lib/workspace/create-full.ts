@@ -33,8 +33,10 @@ import { resolvePersonalityForBusiness } from "@/lib/crm/personality-generator";
 import { classifyBusinessTypeFromSoul } from "@/lib/page-schema/classify-business";
 import { inferTimezone } from "@/lib/workspace/infer-timezone";
 import { trackEvent } from "@/lib/analytics/track";
+import { buildWorkspaceCreatedEvent, captureFunnelEvent } from "@/lib/analytics/funnel";
 import type { AestheticArchetypeId } from "@/lib/workspace/aesthetic-archetypes";
 import { buildBusinessHoursSoulPatch } from "@/lib/workspace/business-hours-soul";
+import { seedIntakeFieldsOnBookingTemplates } from "@/lib/workspace/seed-booking-intake-fields";
 // v1.55.0 — enhanceLandingForWorkspace is no longer called from the
 // default workspace creation path. The landing-page-creation SKILL.md
 // triggers it indirectly via persist_block when operators opt into
@@ -527,6 +529,66 @@ export async function createFullWorkspace(
     );
   }
 
+  // 2026-07-16 — Step 12.7: SEED vertical-aware booking intake fields on
+  // every booking-template row. This seeding used to live only in
+  // enhanceLandingForWorkspace (removed from the default path at v1.55.0),
+  // so URL/paste-flow workspaces shipped templates with intakeFields unset —
+  // leaving intake semantics to the lazy resolver at render time, where a
+  // later LOOK pick (design picker / copilot update_design) could stamp the
+  // wrong questions (live-confirmed: HVAC company on the "Technical" look
+  // got B2B Company/Role/Team-size/Budget questions). Stored fields win
+  // over the lazy resolver, so seeding here makes intake semantics immune
+  // to later look switches.
+  //
+  // Classifies from BUSINESS signals (the orchestrator-resolved personality
+  // vertical + the operator's soul facts) — the same inputs enhance-blocks
+  // used — never from the visual theme. Soft-fail: worst case the booking
+  // form falls back to the lazy resolver (which now also prefers soul
+  // signals); workspace stays valid.
+  try {
+    const seedResult = await seedIntakeFieldsOnBookingTemplates({
+      businessName: input.business_name,
+      classifier: {
+        vertical: personality.vertical,
+        emergencyService: input.emergency_service ?? null,
+        sameDay: input.same_day ?? null,
+        reviewRating: input.review_rating ?? null,
+        reviewCount: input.review_count ?? null,
+        businessDescription: input.business_description,
+      },
+      templates: await db
+        .select({ id: bookings.id, metadata: bookings.metadata })
+        .from(bookings)
+        .where(
+          and(
+            eq(bookings.orgId, createResult.orgId),
+            eq(bookings.status, "template"),
+          ),
+        ),
+      writeTemplateMetadata: async (templateId, metadata) => {
+        await db
+          .update(bookings)
+          .set({ metadata, updatedAt: new Date() })
+          .where(eq(bookings.id, templateId));
+      },
+    });
+
+    console.log(
+      JSON.stringify({
+        event: "intake_fields_seeded",
+        workspace_id: createResult.orgId,
+        archetype: seedResult.archetype,
+        seeded: seedResult.seeded,
+        skipped: seedResult.skipped,
+      }),
+    );
+  } catch (err) {
+    console.warn(
+      `[create-full] intake_fields seed failed for ${createResult.orgId}:`,
+      err instanceof Error ? err.message : String(err),
+    );
+  }
+
   // v1.55.0 — REMOVED: enhanceLandingForWorkspace (the LLM-driven block
   // generation step) is no longer called by default. The default public
   // surface is now a chatbot-preview page (seeded by v2/complete after
@@ -693,6 +755,19 @@ export async function createFullWorkspace(
       source: "mcp_atomic",
     },
     { orgId: createResult.orgId }
+  );
+
+  // 2026-08-06 funnel observability — workspace_created person-funnel
+  // event, right beside the existing internal workspace_created_full
+  // trackEvent above. This is the single choke point for ALL creation
+  // paths (API route, provisionClientWorkspace, MCP), so one capture here
+  // covers everything. No owner/creator user id is in scope at this call
+  // site (createAnonymousWorkspace sets ownerId: null at creation time),
+  // so distinct id falls back to orgId — see buildWorkspaceCreatedEvent.
+  // is_internal is likewise not in scope here (only createResult.orgId is
+  // available, no org row loaded) — omitted rather than adding a query.
+  captureFunnelEvent(
+    buildWorkspaceCreatedEvent({ orgId: createResult.orgId, source: "mcp_atomic" }),
   );
 
   return {

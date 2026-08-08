@@ -344,6 +344,55 @@
       "when": 1783700000000,
       "tag": "0071_eval_run_jobs",
       "breakpoints": true
+    },
+    {
+      "idx": 49,
+      "version": "7",
+      "when": 1783800000000,
+      "tag": "0072_agent_action_drafts",
+      "breakpoints": true
+    },
+    {
+      "idx": 50,
+      "version": "7",
+      "when": 1783900000000,
+      "tag": "0073_agent_run_receipts",
+      "breakpoints": true
+    },
+    {
+      "idx": 51,
+      "version": "7",
+      "when": 1784000000000,
+      "tag": "0074_agent_workflow_traces",
+      "breakpoints": true
+    },
+    {
+      "idx": 52,
+      "version": "7",
+      "when": 1784100000000,
+      "tag": "0075_replay_skills",
+      "breakpoints": true
+    },
+    {
+      "idx": 53,
+      "version": "7",
+      "when": 1784200000000,
+      "tag": "0076_replay_skills_trigger_filter",
+      "breakpoints": true
+    },
+    {
+      "idx": 54,
+      "version": "7",
+      "when": 1784300000000,
+      "tag": "0077_replay_gate_v2",
+      "breakpoints": true
+    },
+    {
+      "idx": 55,
+      "version": "7",
+      "when": 1786000000000,
+      "tag": "0078_organizations_is_internal",
+      "breakpoints": true
     }
   ]
 }

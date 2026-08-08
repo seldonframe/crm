@@ -16,6 +16,7 @@ import {
   clamp,
   clampEllipsis,
   shortPrice,
+  AgentShareCard,
   AltCard,
   BestCard,
   DefaultCard,
@@ -23,6 +24,80 @@ import {
   ToolCard,
   VsCard,
 } from "../../../src/lib/seo/og-card";
+
+// Minimal element-tree walker for the layout components: expands function
+// components (they're pure — no hooks/state) and collects every text node
+// with its nearest inherited `style.color` AND nearest ancestor
+// `style.backgroundColor` (so a pill's text is judged against the pill's own
+// fill, not the card behind it). This lets us assert VISIBILITY (text color
+// ≠ surface behind it), which is how the tool-card hook regressed in the
+// forest rebrand: the hook was still rendered, but in green #1F2B24 on a
+// #1F2B24 background.
+type TextNode = { text: string; color: string | undefined; background: string | undefined };
+
+type ElementLike = {
+  type?: unknown;
+  props?: { style?: { color?: string; backgroundColor?: string }; children?: unknown };
+};
+
+function collectTextNodes(
+  node: unknown,
+  inheritedColor: string | undefined,
+  out: TextNode[],
+  inheritedBackground?: string,
+): void {
+  if (node == null || typeof node === "boolean") return;
+  if (typeof node === "string" || typeof node === "number") {
+    out.push({ text: String(node), color: inheritedColor, background: inheritedBackground });
+    return;
+  }
+  if (Array.isArray(node)) {
+    for (const child of node) collectTextNodes(child, inheritedColor, out, inheritedBackground);
+    return;
+  }
+  const el = node as ElementLike;
+  if (typeof el.type === "function") {
+    collectTextNodes((el.type as (props: unknown) => unknown)(el.props), inheritedColor, out, inheritedBackground);
+    return;
+  }
+  const color = el.props?.style?.color ?? inheritedColor;
+  const declaredBackground = el.props?.style?.backgroundColor;
+  const background =
+    declaredBackground && declaredBackground !== "transparent" ? declaredBackground : inheritedBackground;
+  collectTextNodes(el.props?.children, color, out, background);
+}
+
+// Every host element that declares an opaque fill, paired with the nearest
+// ancestor fill behind it — catches the non-text half of the green === dark
+// trap (AccentBar, the BrandMark tile, filled pills vanishing on dark cards).
+type FillNode = { background: string; parentBackground: string | undefined };
+
+function collectFills(node: unknown, parentBackground: string | undefined, out: FillNode[]): void {
+  if (node == null || typeof node === "boolean" || typeof node === "string" || typeof node === "number") return;
+  if (Array.isArray(node)) {
+    for (const child of node) collectFills(child, parentBackground, out);
+    return;
+  }
+  const el = node as ElementLike;
+  if (typeof el.type === "function") {
+    collectFills((el.type as (props: unknown) => unknown)(el.props), parentBackground, out);
+    return;
+  }
+  const declared = el.props?.style?.backgroundColor;
+  const isOpaqueFill = Boolean(declared) && declared !== "transparent";
+  if (isOpaqueFill) out.push({ background: declared as string, parentBackground });
+  collectFills(el.props?.children, isOpaqueFill ? (declared as string) : parentBackground, out);
+}
+
+/** Expand function components until the first host element and return its
+ *  backgroundColor — the card's background. */
+function rootBackground(node: unknown): string | undefined {
+  let el = node as ElementLike;
+  while (el && typeof el.type === "function") {
+    el = (el.type as (props: unknown) => unknown)(el.props) as ElementLike;
+  }
+  return el?.props?.style?.backgroundColor;
+}
 
 describe("clamp", () => {
   test("returns the string unchanged when under the limit", () => {
@@ -193,6 +268,97 @@ describe("layout components render without throwing", () => {
   test("DefaultCard renders with no input", () => {
     assert.doesNotThrow(() => DefaultCard());
   });
+});
+
+describe("tool-card hook renders VISIBLY", () => {
+  // Regression: the forest rebrand set OG_COLORS.green = #1F2B24 — identical
+  // to OG_COLORS.dark, the ToolCard background — so the hook line was drawn
+  // in background-colored text and every live tool card showed no hook.
+  // Presence in the tree is not enough; the color must differ from the
+  // card's background.
+  test("a provided hook appears in the tree with a color that differs from the background", () => {
+    const hook = "What do missed calls cost you?";
+    const card = ToolCard({ name: "Missed Call Calculator", hook });
+    const background = rootBackground(card);
+    assert.ok(background, "expected the card root to declare a backgroundColor");
+
+    const texts: TextNode[] = [];
+    collectTextNodes(card, undefined, texts);
+    const hookNode = texts.find((t) => t.text === hook);
+    assert.ok(hookNode, "hook text is missing from the rendered element tree");
+    assert.ok(hookNode.color, "hook text has no explicit color");
+    assert.notEqual(
+      hookNode.color.toLowerCase(),
+      background.toLowerCase(),
+      `hook is rendered in the card's own background color (${background}) — invisible`,
+    );
+  });
+
+  test("an overlong hook is ellipsized within the component cap", () => {
+    const card = ToolCard({ name: "Free Tool", hook: "y".repeat(200) });
+    const texts: TextNode[] = [];
+    collectTextNodes(card, undefined, texts);
+    const hookNode = texts.find((t) => t.text.startsWith("yyy"));
+    assert.ok(hookNode, "clamped hook text missing from the tree");
+    assert.ok(hookNode.text.length <= 70, `hook not clamped: ${hookNode.text.length} chars`);
+    assert.ok(hookNode.text.endsWith("…"), "overlong hook should end with an ellipsis");
+  });
+
+  test("an empty hook renders no dangling hook element", () => {
+    const card = ToolCard({ name: "Free Tool", hook: "" });
+    const texts: TextNode[] = [];
+    collectTextNodes(card, undefined, texts);
+    // Only the name, the pill copy, and the brand mark should remain.
+    assert.ok(texts.every((t) => t.text.trim().length > 0));
+  });
+});
+
+describe("every card renders VISIBLY (blanket invariant)", () => {
+  // Blanket version of the tool-card regression above: the forest rebrand
+  // made OG_COLORS.green === OG_COLORS.dark, so ANY element styled `green`
+  // on a dark card is drawn in background-colored ink — competitor names,
+  // kickers, taglines, arrows, the accent bar, the brand tile, pill fills.
+  // Invariant: no text node and no opaque fill on ANY card may share the
+  // color of the surface directly behind it.
+  const cards: Array<[string, ReturnType<typeof DefaultCard>]> = [
+    ["SfVsCard", SfVsCard({ name: "GoHighLevel", price: "$97-$497/mo" })],
+    ["VsCard", VsCard({ a: "Vapi", b: "Retell AI" })],
+    ["AltCard", AltCard({ name: "Chatbase", price: "$40/mo" })],
+    ["BestCard", BestCard({ title: "Best CRMs", aud: "for Plumbers", n: "7" })],
+    ["ToolCard", ToolCard({ name: "Missed Call Calculator", hook: "What do missed calls cost you?" })],
+    ["AgentShareCard", AgentShareCard({ name: "Intake Agent", steps: "Record|Extract|Deploy" })],
+    ["DefaultCard", DefaultCard()],
+  ];
+
+  for (const [name, card] of cards) {
+    test(`${name}: every text node has a color that differs from the surface behind it`, () => {
+      const texts: TextNode[] = [];
+      collectTextNodes(card, undefined, texts);
+      assert.ok(texts.length > 0, "expected the card to contain text nodes");
+      for (const t of texts) {
+        assert.ok(t.color, `text "${t.text}" has no color (explicit or inherited)`);
+        assert.ok(t.background, `text "${t.text}" has no surface behind it — CardFrame should always set one`);
+        assert.notEqual(
+          t.color.toLowerCase(),
+          t.background.toLowerCase(),
+          `text "${t.text}" is drawn in the color of the surface behind it (${t.background}) — invisible`,
+        );
+      }
+    });
+
+    test(`${name}: every opaque fill differs from the surface behind it`, () => {
+      const fills: FillNode[] = [];
+      collectFills(card, undefined, fills);
+      for (const f of fills) {
+        if (!f.parentBackground) continue; // the card root itself
+        assert.notEqual(
+          f.background.toLowerCase(),
+          f.parentBackground.toLowerCase(),
+          `an element is filled with its parent surface's own color (${f.background}) — invisible`,
+        );
+      }
+    });
+  }
 });
 
 describe("committed OG fonts are valid TTF binaries", () => {
