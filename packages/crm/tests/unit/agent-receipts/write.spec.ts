@@ -10,6 +10,7 @@ import assert from "node:assert/strict";
 import {
   writeRunReceipt,
   deriveReceiptSummary,
+  scrubSecretShapes,
   type WriteRunReceiptInput,
 } from "../../../src/lib/agent-receipts/write";
 
@@ -130,6 +131,84 @@ describe("deriveReceiptSummary", () => {
     const summary = deriveReceiptSummary({ replyText: "   " });
     assert.equal(summary, "ran with no actions");
   });
+
+  // Review fix — scrub at the single exit point: the spec's "never leak
+  // secrets into summaries" rule has no branch qualifier. An ok-path tool
+  // note can echo a credential shape just as easily as a thrown error.
+  test("review fix: an ok-path tool note containing a secret shape is scrubbed too", () => {
+    const summary = deriveReceiptSummary({
+      toolCalls: [{ tool: "SOME_TOOL", ok: true, note: "sent via Bearer abc123" }],
+    });
+    assert.equal(summary.includes("abc123"), false);
+    assert.match(summary, /Bearer \[redacted\]/);
+  });
+});
+
+describe("deriveReceiptSummary — agent truth: error notes (Task 1)", () => {
+  test("an errorMessage takes priority and is prefixed 'error: '", () => {
+    const summary = deriveReceiptSummary({
+      errorMessage: "anthropic 401: invalid x-api-key",
+      toolCalls: [{ tool: "GMAIL_SEND_EMAIL", ok: true, note: "should be ignored" }],
+      replyText: "should also be ignored",
+    });
+    assert.equal(summary, "error: anthropic 401: invalid x-api-key");
+  });
+
+  test("only the first line of a multi-line errorMessage is kept", () => {
+    const summary = deriveReceiptSummary({
+      errorMessage: "anthropic 401: invalid x-api-key\nat resolveClient (client.ts:42)\nat runTurn",
+    });
+    assert.equal(summary, "error: anthropic 401: invalid x-api-key");
+  });
+
+  test("a long errorMessage is truncated to the 140-char summary limit (incl. the 'error: ' prefix)", () => {
+    const summary = deriveReceiptSummary({ errorMessage: "x".repeat(200) });
+    assert.equal(summary.length, 140);
+    assert.equal(summary, `error: ${"x".repeat(133)}`);
+  });
+
+  test("blank errorMessage is ignored — falls through to the ok-path derivation", () => {
+    const summary = deriveReceiptSummary({ errorMessage: "   ", replyText: "fine" });
+    assert.equal(summary, "fine");
+  });
+
+  test("an ok-but-actionless turn (no errorMessage) is UNCHANGED: 'ran with no actions'", () => {
+    const summary = deriveReceiptSummary({});
+    assert.equal(summary, "ran with no actions");
+  });
+
+  test("a secret-shaped errorMessage is scrubbed before it ever becomes a summary", () => {
+    const summary = deriveReceiptSummary({
+      errorMessage: "connect failed: postgres://user:sk-abcDEF12345@host/db",
+    });
+    assert.equal(summary.includes("sk-abcDEF12345"), false);
+    assert.equal(summary.includes("postgres://user:"), false);
+    assert.match(summary, /^error: /);
+  });
+});
+
+describe("scrubSecretShapes — L-10 credential shapes never survive into a receipt summary", () => {
+  const cases: Array<{ label: string; input: string }> = [
+    { label: "postgres://", input: "postgres://user:pass@host:5432/db" },
+    { label: "postgresql://", input: "postgresql://user:pass@host:5432/db" },
+    { label: "sk-", input: "key is sk-abcDEF1234567890" },
+    { label: "sk_", input: "key is sk_abcDEF1234567890" },
+    { label: "wst_", input: "token wst_abcDEF1234567890" },
+    { label: "ghp_", input: "token ghp_abcDEF1234567890" },
+    { label: "Bearer ", input: "Authorization: Bearer abcDEF1234567890" },
+  ];
+
+  for (const { label, input } of cases) {
+    test(`redacts a ${label} shape`, () => {
+      const scrubbed = scrubSecretShapes(input);
+      assert.equal(scrubbed.includes("abcDEF1234567890"), false);
+      assert.equal(scrubbed.includes("pass@host"), false);
+    });
+  }
+
+  test("leaves ordinary text untouched", () => {
+    assert.equal(scrubSecretShapes("anthropic 401: invalid x-api-key"), "anthropic 401: invalid x-api-key");
+  });
 });
 
 describe("writeRunReceipt — summary derivation wiring", () => {
@@ -165,5 +244,41 @@ describe("writeRunReceipt — summary derivation wiring", () => {
     );
     const row = inserted as Record<string, unknown>;
     assert.equal(row.summary, "matched 1, sent 1");
+  });
+
+  test("agent truth: an errorMessage (no explicit summary) is derived + scrubbed into the written row", async () => {
+    let inserted: unknown = null;
+    await writeRunReceipt(
+      baseInput({
+        status: "error",
+        summary: undefined,
+        errorMessage: "anthropic 401: invalid x-api-key",
+      }),
+      {
+        insert: async (row) => {
+          inserted = row;
+        },
+      },
+    );
+    const row = inserted as Record<string, unknown>;
+    assert.equal(row.summary, "error: anthropic 401: invalid x-api-key");
+  });
+
+  test("agent truth: an explicit summary still overrides an errorMessage", async () => {
+    let inserted: unknown = null;
+    await writeRunReceipt(
+      baseInput({
+        status: "error",
+        summary: "custom override",
+        errorMessage: "anthropic 401: invalid x-api-key",
+      }),
+      {
+        insert: async (row) => {
+          inserted = row;
+        },
+      },
+    );
+    const row = inserted as Record<string, unknown>;
+    assert.equal(row.summary, "custom override");
   });
 });

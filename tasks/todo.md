@@ -7,6 +7,178 @@ with a checkable plan, gets ticked off as it ships, and ends with a review block
 
 ## In flight
 
+### Task — funnel observability: auth-secret fix + PostHog funnel events + e2e smoke (2026-08-06, worktree funnel-observability) — BUILT, awaiting merge
+
+Approved by Max after the funnel audit (visitor→paid = 234→10→12→2→0; zero external payers ever; funnel
+unmeasurable in PostHog). Branch feat/funnel-observability off origin/main @ 589220221, 10 commits.
+
+- [x] A. Auth secret: explicit `secret:` into NextAuth via pure `resolveAuthSecret()` (AUTH_SECRET ?? NEXTAUTH_SECRET — v5 only auto-reads the former) + prod fail-loud log + 7 specs
+- [x] B. PostHog funnel: `signed_up` (events.createUser) · `workspace_created` (createFullWorkspace choke point) · `checkout_started` (both Stripe checkout paths, observation-only) · `$identify` client component in (dashboard) layout (home org, active_org_id clears via explicit null) · `aliasOrgToUser` at 5 self-serve ownerId-claim sites (NOT the agency operator-claim path — irreversible person merges) · lazy imports keep posthog-node out of the proxy graph · organizations.is_internal + migration 0078 (journaled; founder backfill; **apply by hand**; staged — no reader yet)
+- [x] C. E2E + CI: @playwright/test + two-tier funnel-smoke (RENDER always/GET-only incl. /api/auth/providers AUTH_SECRET sentinel — live-passed 5/5 vs production; FLOW gated E2E_FULL=1 + hard prod-host guard) · ci.yml + generator regression net + e2e job gated on E2E_BASE_URL · deploy-demo post-deploy smoke · playwright install via workspace bin (not root npx)
+
+**Review (2026-08-06):** verify-build PASS — 106 tests; tsc/use-server/journal clean; regression grep empty.
+Opus round 1: 2 blocking (npx playwright drift; funnel not joinable across orgId/userId spaces) — both fixed.
+Round 2: ship, no blocking. Deferred/known: typecheck CI gate NOT added (pre-existing TS2353 in
+api/copilot/turn/route.ts on main — fix that first); is_internal wiring into jwt→session→identify is the
+next slice; AUTH_SECRET absent from Vercel Preview env (ops task, one command); wasted $create_alias on
+inline-org signup paths accepted for uniformity.
+
+### Task — cursor.directory security-scan fixes: @seldonframe/mcp (2026-07-17, worktree vibrant-hamilton-3697cd)
+
+Scan flagged 4 findings; plugin hidden pending review. Ground truth established before coding:
+published npm 1.60.0 src is byte-identical to this worktree — findings 1 (env-key consent gate),
+3 (SSRF guard), 4 (SKILL.md masked-flow claim) were ALREADY fixed in `5efcc90f1` (v1.59.2) and are
+live on npm; the cursor.directory submission predates that commit, so resubmission clears them.
+Finding 2 is REAL: `upload_workspace_image.local_file_path` accepts any absolute path (only
+image-sniffing guards it — real images anywhere on disk remain exfiltratable). Version drift:
+package.json=1.60.0 but server.json/manifest.json/welcome.js VERSION=1.59.2.
+
+- [ ] 1. Finding 2: `assertLocalPathAllowed` helper in src/security.js — realpath containment
+      under process.cwd() or `SELDONFRAME_UPLOAD_ROOTS` (path-delimited opt-in env var);
+      win32 case-insensitive; symlink-escape safe; explicit remediation error.
+- [ ] 2. Wire into upload_workspace_image local_file_path branch (before readFileSync) +
+      update tool description.
+- [ ] 3. Unit tests in tests/security.test.mjs (inside-cwd OK · outside rejected · extra root
+      opt-in · symlink escape · relative resolved against cwd).
+- [ ] 4. Version bump 1.61.0 everywhere: package.json, server.json (×2), manifest.json,
+      welcome.js VERSION (also settles the pending "server.json sync").
+- [ ] 5. Gates: node --test mcp tests · scripts/run-unit-tests.js (delta-judged) · verify-build.
+- [ ] 6. Commit + PR.
+- [ ] 7. npm publish 1.61.0 (explicitly instructed; may stop at OTP → Max).
+- [ ] 8. Max: cursor.directory Edit-plugin → resubmit re-scan; then ClawHub + Smithery.
+
+Constitution check: progressive key disclosure preserved — consent gate fires only when an env
+key exists AND would be transmitted; no-key platform-fallback first-run untouched.
+
+### Task — Booking intake fields: soul-first classification (2026-07-16, worktree youthful-panini-ffb749)
+
+Live-confirmed bug (flow-tech-air-conditioning): an explicit AESTHETIC pick ("technical-restrained"
+look via design picker) drove B2B booking questions onto an HVAC company whose soul/settings said
+`vertical=hvac` + `emergency_service=true`. Design picker = SURFACE, not build. Generalizes the
+existing step-0 health override in resolveIntakeFieldsFromSoul.
+
+- [x] 1. Move `classifyArchetypeFromSoul` from apply-archetype-theme.ts (db-bound) to
+      aesthetic-archetypes.ts (pure); re-export from the old location for existing importers.
+- [x] 2. Slice A — extract `resolveIntakeFieldsFromSoul` out of lib/bookings/actions.ts
+      ("use server", untestable) into new pure module lib/bookings/resolve-intake-fields.ts:
+      NEW soul-vertical step between the health override and the theme-archetype lookup
+      (soul.personality_vertical ?? settings.crmPersonality.vertical → classifyArchetypeFromSoul);
+      feed the vertical into the blended hints so the step-0 health override sees it too.
+- [x] 3. Wire actions.ts to the new module; pass org.settings.
+- [x] 4. Slice B — pure DI seeder lib/workspace/seed-booking-intake-fields.ts (classify →
+      getBookingIntakeFieldsForArchetype → write intakeFields on template rows lacking them).
+- [x] 5. Call the seeder from createFullWorkspace (create-full.ts, after step 12.6) — covers the
+      /try URL flow AND the paste flow (both funnel through createFullWorkspace).
+- [x] 6. Unit tests (11 new, all green): HVAC soul + technical-restrained theme → bold-urgency ·
+      agency soul on bold-urgency look → B2B (cuts both ways) · empty soul + explicit archetype →
+      archetype fields (back-compat) · health override still wins incl. vertical-only-in-settings ·
+      seeder seeds/skips/preserves-metadata. Related suites 202/202. Committed ea7442b21.
+- [x] 7a. tsc: 1 error, pre-existing (copilot/turn route TS2353) — delta 0. Full runner hits the
+      known Windows ENAMETOOLONG; targeted batches used instead.
+- [x] 7b. verify-build gate #1: PASS on ea7442b21 (tests · tsc-delta-0 · use-server · journal ·
+      regression-grep; smoke deferred post-merge).
+- [x] 8. Reviewer (maker≠checker): SHIP-WITH-FIXES — both findings fixed in e096d4462:
+      (1) BLOCKER seeder skipped the health override → physio ("general" vertical) would get
+      contractor fields PERMANENTLY seeded; (2) "general" default vertical short-circuited
+      theme + name/title hints (Roofs-by-Shiloh regression). Fix = ONE shared
+      classifyIntakeArchetypeFromBusinessSignals used by resolver AND seeder (+
+      extractArchetypeSignalsFromSoul split). 4 new regression tests; suites 206/206; tsc delta 0.
+      Accepted nit: type-only import of BookingIntakeField from actions.ts (harmless, erased).
+- [x] 9. verify-build gate #2 on e096d4462: PASS (15 tests · tsc delta 0 · use-server ·
+      no migrations · regression grep clean · smoke N/A pre-merge).
+
+**Review:** Two commits (ea7442b21 fix + e096d4462 reviewer fixes). The maker≠checker loop earned
+its keep: the reviewer caught that the first-cut seeder skipped the health override — physio
+(vertical "general") would have had contractor fields PERMANENTLY seeded (stored fields win, so
+the render-time override could never repair it) — and that the truthy-but-meaningless "general"
+vertical defeated the Roofs-by-Shiloh name-hints fix. Both fixed by ONE shared
+classifyIntakeArchetypeFromBusinessSignals used by resolver + seeder. 15 new tests; related
+suites 206/206; learnings note docs/learnings/2026-07-16-intake-semantics-from-soul-not-look.md.
+⏳ post-merge: create a FRESH /try workspace (not Flow-Tech — hand-patched) with an HVAC prompt,
+pick the "Technical" look, confirm /book still shows dispatch questions + intakeFields present on
+the template row. Max's merge gate: PR opened from claude/youthful-panini-ffb749.
+
+### Task — credits_exhausted honesty on /clients/new (2026-07-16, branch claude/zen-sutherland-c96203, extends PR #112)
+
+Problem: clients-new-form.tsx maps EVERY 422 to the extraction_failed copy ("We couldn't
+read that site…") in both SSE error listeners. Since #112 the server emits
+`reason: "credits_exhausted"` + honest `message` on the URL path; the paste path
+(run-create-from-paste.ts:119) still emits bare `{reason}`. Merged #112's branch
+(`claude/intelligent-nightingale-771275`, fast-forward to 59bfa0dee) as the base.
+
+- [x] RED: extend clients-new-form.spec.tsx — (a) 422 credits_exhausted + message shows
+      server message; (b) no message → dedicated fallback copy mentioning adding credits
+      to their Anthropic key; (c) paste path shows server message too (all 3 watched fail)
+- [x] RED: new run-create-from-paste.spec.ts — credits_exhausted 422 carries honest
+      `message` (watched fail); other reasons stay bare (guard, green by design)
+- [x] GREEN: CREDITS_EXHAUSTED_UI_MESSAGE exported from anthropic-error-map.ts (single
+      source, both run-* files use it) + COPY.errors.credits_exhausted + both listeners
+      — 46/46 across the 7 affected suites
+- [x] verify-build gate: PASS via verify-runner (web-onboarding 95/95, tsc delta 0,
+      use-server clean, no migrations, regression grep empty; smoke = post-deploy)
+- [x] Commit fe18a8a68 + PR #113 (stacked on #112 — merge #112 first)
+
+Review: shipped as spec'd; only deviation from minimal-diff was hoisting the message
+string into anthropic-error-map.ts (prevents the exact drift class that caused #112).
+Learnings appended to docs/learnings/2026-07-16-credits-exhausted-400-mapping.md
+(corollary: sweep ALL consumer surfaces of an error payload). ⏳ Max: merge #112 → #113.
+
+### Task — Token-smart agent runtime (2026-07-16, worktree hungry-jang)
+
+Context: Max's $20 Anthropic top-up burned in 34 min by 3 duplicate Gmail push agents
+(untruncated GMAIL_FETCH_EMAILS JSON re-sent every loop iteration, uncached, always-premium
+Sonnet). Prod deployments canceled directly (ed050e3a, a37115e4, 2e14ba00 → status=canceled).
+This slice = make the runtime cheap by construction. Max's explicit ask: caching + tool-result
+cap + duplicate-deployment guard.
+
+- [x] 1. Shared helpers in `lib/agents/turn-token-economy.ts` + 15-test spec (cap 20k chars
+      w/ explicit truncation marker; error cap 2k; cache helpers; moving breakpoint).
+- [x] 2. Cap applied in BOTH tool loops + runtime.ts HISTORY REBUILD (historical tool
+      outputs re-tax every later turn — capped at read time; full output still persisted).
+- [x] 3. Prompt caching in both loops: system + last-tool + moving message breakpoint
+      (3 markers ≤ API's 4). Regen call deliberately UNCACHED (no-tools prefix ≠ loop
+      prefix → marker would be pure write premium).
+- [x] 4. Duplicate guard: createDeployment rejects same builder+template+surface+client
+      (non-canceled) w/ duplicate_deployment + duplicateOfDeploymentId; allowDuplicate
+      escape hatch; deploy-to-self → already_deployed; wizard shows honest copy.
+      Both real incidents (Zen Flow ×3, J. Marin ×2) share template id → key catches them.
+- [x] 5. Unit: 60/60 deployments + 56/56 loop specs + 15/15 helpers; tsc delta = 0 new
+      (baseline = 1 pre-existing copilot 'persist' error, present on clean tree too).
+      verify-runner gate DISPATCHED (commit 89ca653d8).
+- [ ] 6. Push + PR after gate PASS (Max merges).
+
+
+### Task — Agency repositioning of homepage (2026-07-15, branch feat/agency-homepage-positioning)
+
+Max's direction: keep marketing-page structure, reword for AGENCIES; everything true per §1b
+(Builder $29 / Managed $49 / Agency $99·$199·$299; 2% GMV solo-only when SF is channel; 0% agency;
+white-label + sub-accounts + portal start at $99). Plus CTA anchor fix + agency-content pricing audit.
+NOTE: another session shares this working tree (clobbered hero edits once + this todo section) —
+edits re-applied and committed promptly to pin them.
+
+- [x] Reword 5 sections (hero · build-steps · modules · smb-cta · pricing) + final-cta + footer
+      (commit 4a5ae1656)
+- [x] CTA route-by-promise: all "Build it free" pills + footer "Start building" → /#hero-form
+      (scroll + focus); nav "Start for free" + FAQ "Start free" stay /signup (label promises signup)
+- [x] BYOK hero line demoted to value framing (§1b)
+- [x] Targeted specs green (landing-mode-shell · marketing-pricing · render-home-markdown = 19/19)
+- [x] /agencies metadata pricing-truth fix (commit d8e8cc7f0)
+- [x] Audit: 41 false/misleading claims found (Explore agent) → fixed by 3 parallel implementers
+      (alternative-pages ×29 · guides ×12 files incl. 2 whole-guide recasts · agency-math/sell/
+      docs-pricing/tier-upsell) — commit 79418533c; seo 1474/1474 + guides 861/861 green
+- [x] Reviewer (maker≠checker): SHIP-WITH-FIXES, 0 blockers — all 5 fixes applied (metadata
+      adjacency · card framing · GMV line gated behind tierLadderOn · pronoun · /home.md re-voice)
+- [x] verify-build gate: PASS (touched suites 14/14 · tsc 0 new · use-server clean · no migrations ·
+      regression grep empty) → pushed, PR #100 open (Max's merge gate)
+
+**Review:** Shipped in one pass: 3 commits (homepage repositioning · /agencies metadata · 41-claim
+sweep). The audit was the sleeper — the retired pricing era ($29 white-label, 5→3→2 GMV ladder,
+$297 docs tier) survived in ~20 files/41 claims of ranked SEO content long after plans.ts moved on.
+Route-by-promise resolved the CTA question cleanly: labels promising a BUILD → chatbox; labels
+promising SIGNUP → /signup. ⏳ post-merge: live smoke /, /agencies, /sell, /docs/billing/pricing +
+Max eyeballs the CTA scroll-focus. Lesson candidates: pricing-claims drift needs a grep gate tied
+to plans.ts changes; two sessions must not share one working tree.
+
 ### Task — /reflect decision loop (2026-07-15, branch feat/reflect-decision-loop)
 
 Compact ~24 FS.blog/Bezos decision articles into `.claude/skills/reflect/` (core loop +
@@ -684,3 +856,33 @@ Plan: docs/superpowers/plans/2026-07-13-circle-mcp-connector.md
 - No DB migrations. No new npm dependencies.
 - Divergences from the plan (all documented in per-task commit messages and the implementer report): the bind-time bearer swap landed in `template-mcp-server.ts` (not `mcp-actions.ts`, which only holds the deps type); `page.tsx`'s undiscovered-composio guard was widened (not just swapped) to also catch an undiscovered vetted-OAuth binding; `fillBlueprintConnectorsForPersist`'s internal swap uses a dynamic import to avoid a circular static import.
 - Full report: `reports/2026-07-13-circle-implementer-report.md`.
+
+---
+
+## 2026-07-18 — Dependabot #123 split: workflow bundler "use server" incompatibility (worktree zen-sutherland)
+
+Evidence (Phase 1 complete):
+- Vercel build of PR #123 fails: Turbopack, 3× "Server Actions must be async functions" in the
+  generated `.well-known/workflow/v1/step/route.js` — the workflow bundler wraps `"use server"`
+  modules (payments/bookings/emails actions.ts) into sync `__esm({...})` closures, leaving the
+  directive inside a non-async function.
+- Our own `check-use-server` gate PASSES on the same build — source files are clean; the
+  generated bundle is what's invalid. Known upstream pattern: vercel/workflow#817.
+- Dependabot branch is STALE (based before #132 — its diff vs main deletes replay files/specs).
+
+Plan:
+- [x] Root-cause investigation (Vercel log, changelogs, upstream issue #817)
+- [x] Exp A: PR #133 `test/workflow-46-isolation` — ONLY workflow ^4.6.0 + @workflow/next ^4.1.0, next stays 16.2.1 → expect Vercel FAIL
+- [x] Exp B: PR #134 `chore/deps-minor-patch-split` — the other 35 bumps, workflow held at 4.2.4/4.0.5 → expect Vercel GREEN (deliverable)
+- [x] Vercel verdicts: #133 FAIL (identical 3 errors, next pinned 16.2.1 → workflow pair alone reproduces) · #134 GREEN
+- [x] @anthropic-ai/sdk 0.80→0.112.3 compat review → comment on #134 (low risk; deep import verified in 0.112.3; wire-level surfaces unaffected by SDK bump)
+- [x] unit-tests delta vs main: identical 70 failing names (DB-bound baseline) → zero regressions
+- [x] Issue #135 filed (root cause + isolation table + unblock options); #133 closed+branch deleted; #123 commented + closed (superseded)
+- [x] dependabot.yml `ignore:` for workflow/@workflow/next added to #134 (comment-command ignores don't work on grouped PRs)
+- [x] Review section + L-39 + learnings note (docs/learnings/2026-07-18-dependabot-batch-isolation-by-preview-build.md) + memory
+
+**Review (2026-07-18):**
+- Deliverable = split PRs + issue, as specified: **PR #134 OPEN, Vercel preview GREEN, awaiting Max's merge** (human merge gate per CLAUDE.md). Contains: 35 bumps (next 16.2.10, @anthropic-ai/sdk 0.112.3, react 19.2.7, zod 4.4.3, grapesjs 0.23, turbo 2.10, …), workflow held at 4.2.4/4.0.5, dependabot ignores, learnings note.
+- Rebuilt on current main (dependabot branch was stale, based before #132) — lockfile regenerated via `pnpm install --lockfile-only`, no local install churn.
+- Verification: Vercel preview build (the exact failing gate) green on #134; red-CI judged by failing-test-name delta (70 = 70, zero new); #133 negative control failed exactly as predicted.
+- Known-accepted: grapesjs-* plugins peer-warn against grapesjs 0.23 (same combination dependabot shipped; warning only).

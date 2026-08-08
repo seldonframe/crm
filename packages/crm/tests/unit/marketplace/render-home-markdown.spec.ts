@@ -13,7 +13,7 @@ import { POSITIONING_ONE_LINER } from "../../../src/app/(public)/home-copy";
 describe("renderHomeMarkdown()", () => {
   test("leads with an H1 promise", () => {
     const md = renderHomeMarkdown();
-    assert.match(md, /^# SeldonFrame — your entire service business, live in 60 seconds/);
+    assert.match(md, /^# SeldonFrame — a whole client front office, live in 60 seconds/);
   });
 
   test("quotes the SHARED positioning line verbatim (single source, no drift)", () => {
@@ -60,7 +60,7 @@ describe("renderHomeMarkdown()", () => {
     assert.match(md, /https:\/\/seldonframe\.com\/marketplace/);
     assert.match(md, /https:\/\/seldonframe\.com\/ai-agents/);
     assert.match(md, /https:\/\/seldonframe\.com\/pricing/);
-    assert.match(md, /https:\/\/seldonframe\.com\/signup/);
+    assert.match(md, /https:\/\/seldonframe\.com\/#hero-form/); // Start-free link enters through the chatbox (2026-07-16)
     // No relative links leak in.
     assert.ok(!/\]\(\/[^/]/.test(md), "must not contain relative markdown links");
   });

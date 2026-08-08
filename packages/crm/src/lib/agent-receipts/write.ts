@@ -38,6 +38,12 @@ export type WriteRunReceiptInput = {
   /** Only consulted when `summary` is absent — the turn's final reply text,
    *  used as the derivation fallback. */
   replyText?: string;
+  /** Agent truth slice (Task 1) — only consulted when `summary` is absent.
+   *  The failure reason (present only on an errored run) — takes priority
+   *  over `toolCalls`/`replyText` in derivation and becomes "error: <first
+   *  line, scrubbed, truncated>". Never assumed secret-safe by the caller;
+   *  `deriveReceiptSummary` scrubs it before it's ever persisted. */
+  errorMessage?: string;
 };
 
 /** Injectable insert fn — defaults to a lazy `@/db` insert (kept out of the
@@ -56,22 +62,60 @@ async function defaultInsert(row: NewAgentRunReceiptRow): Promise<void> {
 const SUMMARY_MAX_LENGTH = 140;
 
 /**
- * Derive a one-line, human-readable summary per the design's rule: the first
- * tool call's note when present, else the turn's reply text truncated to 140
- * chars, else "ran with no actions". Pure; never throws.
+ * Agent truth slice (Task 1) — credential-shape scrubber, reusing L-10's
+ * shape list (tasks/lessons.md): `postgres://`/`postgresql://`, `sk-`, `sk_`,
+ * `wst_`, `ghp_`, `Bearer <token>`. A receipt summary is operator-facing and
+ * MUST NEVER carry a live key/token even when the underlying error message
+ * (a thrown Error, an SDK error) happens to echo one back. Redacts the
+ * matched shape + its contiguous token-ish tail (or, for `Bearer `, the
+ * credential that follows it). Pure; never throws.
+ */
+export function scrubSecretShapes(text: string): string {
+  return text
+    .replace(/postgres(?:ql)?:\/\/[^\s]*/gi, "[redacted]")
+    .replace(/\b(?:sk|sk_|wst|ghp)[-_][A-Za-z0-9._-]+/g, "[redacted]")
+    .replace(/Bearer\s+[A-Za-z0-9._-]+/g, "Bearer [redacted]");
+}
+
+/**
+ * Derive a one-line, human-readable summary. Agent truth slice (Task 1): an
+ * `errorMessage` (when non-blank) takes priority over everything else — the
+ * caller only passes it on a genuine failure, never on an ok-but-actionless
+ * turn — and becomes `"error: " + <first line, secret-scrubbed, truncated to
+ * the 140-char summary limit>`. Absent an errorMessage, the pre-existing rule
+ * applies unchanged: the first tool call's note when present, else the
+ * turn's reply text truncated to 140 chars, else "ran with no actions" (the
+ * ok-but-actionless fallback — NEVER used for an error). Pure; never throws.
  */
 export function deriveReceiptSummary(input: {
   toolCalls?: AgentRunReceiptToolCall[];
   replyText?: string;
+  errorMessage?: string;
 }): string {
-  const firstNote = input.toolCalls?.find((c) => typeof c.note === "string" && c.note.trim().length > 0)
-    ?.note;
-  if (firstNote) return firstNote;
+  const chosen = ((): string => {
+    const rawError = input.errorMessage?.trim();
+    if (rawError) {
+      const firstLine = rawError.split(/\r?\n/)[0];
+      return `error: ${firstLine}`;
+    }
 
-  const reply = input.replyText?.trim();
-  if (reply) return reply.slice(0, SUMMARY_MAX_LENGTH);
+    const firstNote = input.toolCalls?.find(
+      (c) => typeof c.note === "string" && c.note.trim().length > 0,
+    )?.note;
+    if (firstNote) return firstNote;
 
-  return "ran with no actions";
+    const reply = input.replyText?.trim();
+    if (reply) return reply;
+
+    return "ran with no actions";
+  })();
+
+  // Single exit point (review fix): scrub EVERY branch by construction —
+  // the spec's "never leak secrets into summaries" rule has no branch
+  // qualifier, and a tool note / replyText / caller summary can echo a
+  // credential shape just as easily as a thrown error can. Scrub BEFORE the
+  // length cap so a redaction never gets truncated mid-shape.
+  return scrubSecretShapes(chosen).slice(0, SUMMARY_MAX_LENGTH);
 }
 
 /**
@@ -94,7 +138,11 @@ export async function writeRunReceipt(
     const summary =
       input.summary && input.summary.trim().length > 0
         ? input.summary
-        : deriveReceiptSummary({ toolCalls, replyText: input.replyText });
+        : deriveReceiptSummary({
+            toolCalls,
+            replyText: input.replyText,
+            errorMessage: input.errorMessage,
+          });
 
     await insert({
       orgId: input.orgId,

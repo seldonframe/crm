@@ -7,7 +7,7 @@ import { BrandMark } from "../../../src/components/landing/brand-mark";
 describe("<BrandMark>", () => {
   test("renders the canonical brand asset, not an inline approximation", () => {
     const html = renderToString(React.createElement(BrandMark));
-    assert.match(html, /\/brand\/seldonframe-icon\.svg/);
+    assert.match(html, /\/brand\/seldon-mark\.svg/);
     assert.match(html, /SeldonFrame/);
   });
   test("withPathChip renders the /record chip (CSS-gated to record mode)", () => {

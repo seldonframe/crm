@@ -26,6 +26,7 @@ import {
   resolveCheckoutTierGate,
 } from "@/lib/billing/checkout-items";
 import type { TierId } from "@/lib/billing/plans";
+import { buildCheckoutStartedEvent, captureFunnelEvent } from "@/lib/analytics/funnel";
 
 function normalizeReturnPath(value: unknown, fallback: string) {
   if (typeof value !== "string") {
@@ -301,6 +302,20 @@ export async function POST(req: NextRequest) {
       payment_method_types: ["card"],
     });
 
+    // 2026-08-06 funnel observability — checkout_started, tier path. Fired
+    // after sessions.create succeeds; never touches the Stripe call itself
+    // and never fails the route on a capture problem (captureFunnelEvent
+    // is fire-and-forget/catch-swallowing). No org row is loaded on this
+    // path, so is_internal is omitted rather than adding a DB query.
+    captureFunnelEvent(
+      buildCheckoutStartedEvent({
+        userId,
+        orgId,
+        workspaceId: targetWorkspaceId,
+        tier: targetTier,
+      }),
+    );
+
     return NextResponse.json({ url: checkoutSession.url, tier: targetTier });
   }
 
@@ -365,6 +380,19 @@ export async function POST(req: NextRequest) {
       },
     },
   });
+
+  // 2026-08-06 funnel observability — checkout_started, legacy priceId
+  // path. Same posture as the tier path above: fired after sessions.create
+  // succeeds, never fails the route on a capture problem, no DB query
+  // added for is_internal.
+  captureFunnelEvent(
+    buildCheckoutStartedEvent({
+      userId,
+      orgId,
+      workspaceId: targetWorkspaceId,
+      priceId: resolvedPriceId,
+    }),
+  );
 
   return NextResponse.json({ url: checkoutSession.url, tier: targetTier });
 }

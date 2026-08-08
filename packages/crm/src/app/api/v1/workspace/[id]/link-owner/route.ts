@@ -203,6 +203,20 @@ export async function POST(request: Request, { params }: { params: Promise<{ id:
     );
   }
 
+  // 2026-08-06 funnel observability — this is the MCP/admin-token claim
+  // path. Alias the org-keyed distinct id to the new owner so PostHog can
+  // join workspace_created (orgId-keyed) to signed_up/checkout_started
+  // (userId-keyed). Lazy import keeps posthog-node out of module graphs
+  // that don't need it.
+  try {
+    const { aliasOrgToUser } = await import("@/lib/analytics/funnel");
+    aliasOrgToUser(userRow.id, updated.id);
+  } catch (error) {
+    console.warn(
+      `[link-owner] aliasOrgToUser threw (swallowed): ${error instanceof Error ? error.message : String(error)}`,
+    );
+  }
+
   // Best-effort membership upsert. Unique index on (org_id, user_id) prevents duplicates.
   await db
     .insert(orgMembers)
