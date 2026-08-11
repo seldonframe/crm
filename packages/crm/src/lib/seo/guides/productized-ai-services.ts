@@ -1,3 +1,4 @@
+import { AGENCY_PRICING_CLAIM } from "../../marketing/public-claims";
 import type { Guide } from "./types";
 
 export const guide: Guide = {
@@ -72,7 +73,8 @@ export const guide: Guide = {
     },
     {
       h2: "Where SeldonFrame fits (disclosed: we build this product)",
-      body: "Worth saying plainly, since this section describes our own product: SeldonFrame is built around the productization mechanics described above, and this paragraph is part sales pitch. Weigh it accordingly.\n\nA SeldonFrame workspace is the \"template you clone\" made literal — a workspace built for one client can be cloned as the starting point for the next, rather than rebuilt. Agents can publish to a marketplace as reusable templates, which is the same clone-not-rebuild principle applied at the agent level instead of the workspace level.\n\nWhite-label output keeps the agency's brand on what the client sees, which matters for a productized offer specifically — the package needs to read as your product, not a vendor's.\n\nOn cost: SeldonFrame is *BYOK* (bring your own API key), which is what keeps the platform price flat regardless of how much usage a client's agent generates. $29/mo covers unlimited workspaces, and the first workspace is free.\n\nNone of that replaces the packaging work above — it's infrastructure for the mechanics once you've decided what the package is. For a fuller worked example of one specific package's contents, see the [front-office package guide](/guides/what-to-include-in-an-ai-front-office-package).",
+      body:
+        `Worth saying plainly, since this section describes our own product: SeldonFrame is built around the productization mechanics described above, and this paragraph is part sales pitch. Weigh it accordingly.\n\nA SeldonFrame workspace is the "template you clone" made literal — a workspace built for one client can be cloned as the starting point for the next, rather than rebuilt. Agents can publish to a marketplace as reusable templates, which is the same clone-not-rebuild principle applied at the agent level instead of the workspace level.\n\nWhite-label output keeps the agency's brand on what the client sees, which matters for a productized offer specifically — the package needs to read as your product, not a vendor's.\n\nOn cost: SeldonFrame is *BYOK* (bring your own API key), which is what keeps the platform price flat regardless of how much usage a client's agent generates. ${AGENCY_PRICING_CLAIM} The $29/mo Builder plan is for a business you operate yourself and does not include client resale.\n\nNone of that replaces the packaging work above — it's infrastructure for the mechanics once you've decided what the package is. For a fuller worked example of one specific package's contents, see the [front-office package guide](/guides/what-to-include-in-an-ai-front-office-package).`,
     },
   ],
   faq: [

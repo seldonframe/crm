@@ -7,6 +7,8 @@ import AiReceptionistCostCalculatorPage from "../../../src/app/(public)/tools/ai
 import GohighlevelCostCalculatorPage from "../../../src/app/(public)/tools/gohighlevel-cost-calculator/page";
 import { AGENCY_PRICING_CLAIM } from "../../../src/lib/marketing/public-claims";
 import { auditPublicPricingText } from "../../../src/lib/marketing/public-pricing-audit";
+import { GUIDES, getGuide } from "../../../src/lib/seo/guides";
+import { renderGuideMarkdown } from "../../../src/lib/seo/guide-markdown";
 
 function collectText(node: unknown, out: string[] = []): string[] {
   if (typeof node === "string" || typeof node === "number") {
@@ -70,4 +72,70 @@ test("core marketing surfaces use the shared Builder and Agency pricing boundari
 
   assert.match(faq, new RegExp(AGENCY_PRICING_CLAIM.replace(/[.*+?^${}()|[\]\\]/g, "\\$&")));
   assert.match(builderPricing, /Builder is \$29\/mo for businesses you own and operate/i);
+});
+
+test("every registered guide that mentions Builder pricing passes the semantic audit", () => {
+  const builderPricePattern = /\$\s*29\b|\b29(?:\.00)?\s+dollars?\b|\btwenty[-\s]nine\s+dollars?/i;
+
+  for (const guide of GUIDES) {
+    const markdown = renderGuideMarkdown(guide.slug);
+    const text = [
+      guide.title,
+      guide.description,
+      guide.dek,
+      ...guide.sections.flatMap((section) => [section.h2, section.body, section.callout?.text ?? ""]),
+      ...guide.faq.flatMap((faq) => [faq.q, faq.a]),
+    ]
+      .concat(markdown)
+      .join(" ");
+    if (!builderPricePattern.test(text)) continue;
+
+    const result = auditPublicPricingText(text);
+    assert.equal(result.ok, true, `${guide.slug} has a misleading Builder/Agency claim: ${result.reasons.join("; ")}`);
+  }
+});
+
+test("agency-intent guides keep Builder pricing separate from client resale", () => {
+  const agencyIntentSlugs = [
+    "ai-marketplace-fees-compared",
+    "how-do-ai-agents-get-paid",
+    "how-to-get-ai-agency-clients",
+    "how-to-make-money-selling-ai-agents",
+    "how-to-price-an-ai-receptionist-service",
+    "run-client-ai-on-your-own-keys",
+    "why-agencies-leave-gohighlevel",
+    "white-label-ai-front-office-without-agency-pro",
+    "white-label-ai-agents",
+    "ai-agency-pricing-models",
+    "client-portals-for-ai-agencies",
+    "ai-agent-business-ideas",
+    "productized-ai-services",
+    "what-to-include-in-an-ai-front-office-package",
+    "where-to-sell-ai-agents",
+    "selling-ai-services-on-fiverr-vs-owning-your-agent",
+    "what-is-an-mcp-marketplace",
+    "what-is-byok-ai",
+    "gohighlevel-pricing-plans-explained",
+    "hidden-gohighlevel-fees",
+    "is-gohighlevel-ai-employee-worth-it",
+    "gohighlevel-vs-seldonframe",
+    "best-gohighlevel-alternative-for-solopreneurs",
+    "gohighlevel-vs-hubspot",
+    "how-to-replace-gohighlevel",
+    "gpt-store-alternative-for-developers",
+  ] as const;
+
+  for (const slug of agencyIntentSlugs) {
+    const guide = getGuide(slug);
+    const markdown = renderGuideMarkdown(slug);
+    const text = [
+      guide.title,
+      guide.description,
+      guide.dek,
+      ...guide.sections.flatMap((section) => [section.h2, section.body, section.callout?.text ?? ""]),
+      ...guide.faq.flatMap((faq) => [faq.q, faq.a]),
+    ].concat(markdown).join(" ");
+    const result = auditPublicPricingText(text);
+    assert.equal(result.ok, true, `${slug} has a misleading Builder/Agency claim: ${result.reasons.join("; ")}`);
+  }
 });

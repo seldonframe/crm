@@ -23,7 +23,7 @@ const AGENCY_DISTINCTION_PATTERN =
   /\bagency\s+starter\b|\$\s*(?:99|199|299)(?!\d)|\bagency\s+plans?\b/i;
 
 const EXPLICIT_EXCLUSION_PATTERN =
-  /\bdoes\s+not\s+include\b|\bdoesn't\s+include\b|\bnot\s+for\s+(?:resale|clients?)\b|\bwithout\s+(?:white[-\s]?label|client\s+(?:accounts?|portals?|workspaces?))\b/i;
+  /\bdoes\s+not\s+include\b|\bdoesn't\s+include\b|\bnot\s+for\s+(?:resale|clients?)\b|\bwithout\s+(?:white[-\s]?label|client\s+(?:accounts?|portals?|workspaces?))\b|\bwith\s+no\s+(?:client\s+(?:sub[-\s]?accounts?|accounts?|portals?|workspaces?)|white[-\s]?label)\b|\bown[-\s]business\b/i;
 
 const SENTENCE_BOUNDARY_PATTERN = /[.!?;\n]/g;
 

@@ -1,3 +1,4 @@
+import { AGENCY_PRICING_CLAIM } from "../../marketing/public-claims";
 import type { Guide } from "./types";
 
 export const guide: Guide = {
@@ -72,6 +73,10 @@ export const guide: Guide = {
         kind: "analogy",
         text: "*BYOK* is like renting a venue that lets you bring your own caterer instead of buying theirs at a markup — you still pay for the food, just not someone else's cut on top of it.",
       },
+    },
+    {
+      h2: "Choose the tier that matches your business model",
+      body: `${AGENCY_PRICING_CLAIM} Builder is $29/mo for a business you own and operate; it does not include client sub-accounts or white-label resale.`,
     },
   ],
   faq: [

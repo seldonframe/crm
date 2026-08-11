@@ -1,3 +1,4 @@
+import { AGENCY_PRICING_CLAIM } from "../../marketing/public-claims";
 import type { Guide } from "./types";
 
 export const guide: Guide = {
@@ -30,7 +31,7 @@ export const guide: Guide = {
         items: [
           { label: "AI Employee — Growth", value: 50, display: "~$50/mo/location" },
           { label: "AI Employee — Unlimited", value: 97, display: "~$97/mo/location" },
-          { label: "SeldonFrame — flat", value: 29, display: "$29/mo, included" }
+          { label: "SeldonFrame Agency Starter", value: 99, display: "$99/mo, included" }
         ]
       }
     },
@@ -52,7 +53,8 @@ export const guide: Guide = {
     },
     {
       h2: "The flat-priced alternative that avoids the stack",
-      body: "SeldonFrame is built so most of these seven costs never appear. It's $29 per month, flat, with unlimited workspaces and client sub-accounts, the first workspace free forever, no trial gate, and cancel anytime.\n\nThe AI receptionist that GoHighLevel sells as a per-location add-on is the **core product here and is included**, along with the website, CRM, booking, reviews, client portal, and custom domains.\n\nThe reason there's no per-location AI fee and no resold per-minute markup is the mechanism underneath. SeldonFrame runs on your own AI keys — Claude, ChatGPT, or Gemini — and your own Twilio, so AI and telephony bill at **raw provider cost with no platform markup**.\n\nA full client workspace — site, CRM, booking, and a live agent — is generated from one conversation in about three minutes, which also flattens the setup and learning cost. One booked job usually covers the month.\n\nThis doesn't make GoHighLevel the wrong choice for everyone. Its funnel builder, its large library of templates and snapshots, its deep email and SMS campaign automation, and its big community are real strengths. A funnel-heavy agency with the budget and time to master the platform can get enormous value from it.\n\nThe point of listing the seven fees isn't to say the platform is bad. It's to make sure you plan around the real total — see the [full cost breakdown](/guides/how-much-does-gohighlevel-cost) and whether the [AI Employee is worth it](/guides/is-gohighlevel-ai-employee-worth-it) for your case. If what you mainly want is a branded AI front office per client, a flat $29 platform gets you there without the stack."
+      body:
+        `SeldonFrame is built so most of these seven costs never appear. For agency delivery, ${AGENCY_PRICING_CLAIM} The AI receptionist that GoHighLevel sells as a per-location add-on is the **core product here and is included**, along with the website, CRM, booking, reviews, client portal, and custom domains.\n\nThe Builder plan is $29 per month for a business you own and operate yourself; it does not include client sub-accounts or white-label resale.\n\nThe reason there's no per-location AI fee and no resold per-minute markup is the mechanism underneath. SeldonFrame runs on your own AI keys — Claude, ChatGPT, or Gemini — and your own Twilio, so AI and telephony bill at **raw provider cost with no platform markup**.\n\nA full client workspace — site, CRM, booking, and a live agent — is generated from one conversation in about three minutes, which also flattens the setup and learning cost. One booked job usually covers the month.\n\nThis doesn't make GoHighLevel the wrong choice for everyone. Its funnel builder, its large library of templates and snapshots, its deep email and SMS campaign automation, and its big community are real strengths. A funnel-heavy agency with the budget and time to master it can get enormous value from it.\n\nThe point of listing the seven fees isn't to say the platform is bad. It's to make sure you plan around the real total — see the [full cost breakdown](/guides/how-much-does-gohighlevel-cost) and whether the [AI Employee is worth it](/guides/is-gohighlevel-ai-employee-worth-it) for your case. If what you mainly want is a branded AI front office per client, the Agency plan gets you there without the stack.`
     }
   ],
   faq: [
@@ -62,11 +64,11 @@ export const guide: Guide = {
     },
     {
       q: "Is the AI receptionist extra?",
-      a: "On GoHighLevel, yes. The AI Employee is an add-on charged on top of your base plan — reported at around $50 per month per location on the Growth option, or around $97 per month per location on the Unlimited option — and it repeats for every client location. On SeldonFrame the **AI receptionist is the core product**, included in the flat $29 per month price with no per-location add-on."
+      a: "On GoHighLevel, yes. The AI Employee is an add-on charged on top of your base plan — reported at around $50 per month per location on the Growth option, or around $97 per month per location on the Unlimited option — and it repeats for every client location. On SeldonFrame the **AI receptionist is the core product**, included in Agency plans from $99 per month with no per-location add-on. Builder is $29 per month for a business you operate yourself and does not include client resale."
     },
     {
       q: "How do I avoid usage-based surprises?",
-      a: "The surprises come from metered charges for texts, email, calls, and AI minutes that scale with volume and, on GoHighLevel, are often resold with markup. To avoid them, choose a platform where AI and telephony run at **raw provider cost with no platform markup**. SeldonFrame does this by running on your own AI keys and your own Twilio account, so you pay providers directly and the platform fee stays flat at $29 per month regardless of usage."
+      a: "The surprises come from metered charges for texts, email, calls, and AI minutes that scale with volume and, on GoHighLevel, are often resold with markup. To avoid them, choose a platform where AI and telephony run at **raw provider cost with no platform markup**. SeldonFrame does this by running on your own AI keys and your own Twilio account, so you pay providers directly and the agency platform fee stays flat regardless of usage; Builder remains the $29 per month own-business tier and does not include client resale."
     }
   ],
   sources: [

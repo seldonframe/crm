@@ -1,3 +1,4 @@
+import { AGENCY_PRICING_CLAIM } from "../../marketing/public-claims";
 import type { Guide } from "./types";
 
 export const guide: Guide = {
@@ -64,7 +65,8 @@ export const guide: Guide = {
     },
     {
       h2: "Where SeldonFrame fits (disclosed: we build this product)",
-      body: "This is the part where we're the vendor talking about our own product, so weigh it accordingly.\n\nThe friction that usually stops a freelancer from testing the owned-retainer model is cost and setup time. Standing up hosting, a CRM, a booking system, and the agent itself feels like its own project.\n\nSeldonFrame's first workspace is free, and $29/mo flat unlocks unlimited workspaces after that. Running the owned-agent experiment alongside your existing gig work costs close to nothing to try — no separate infrastructure bill, no new stack to learn, BYOK software costs instead of a platform's fee stacked on top of a hosting bill.\n\nIf the retainer model works for a client, the same build can go white-label under your own brand. Once you've done it enough times to have a repeatable pattern, it can be published to the marketplace for other builders to deploy.\n\nNone of that replaces finding your first client — that's still on you. But it removes \"I'd need to build all the infrastructure first\" as the reason not to test whether owning the relationship beats closing one more gig.",
+      body:
+        `This is the part where we're the vendor talking about our own product, so weigh it accordingly.\n\nThe friction that usually stops a freelancer from testing the owned-retainer model is cost and setup time. Standing up hosting, a CRM, a booking system, and the agent itself feels like its own project.\n\nSeldonFrame's first workspace is free, and the $29/mo Builder plan covers a business you own and operate yourself. It does not include client sub-accounts or white-label resale. Running that owned-agent experiment alongside your existing gig work costs close to nothing to try — no separate infrastructure bill, no new stack to learn, BYOK software costs instead of a platform's fee stacked on top of a hosting bill.\n\nIf the retainer model works for a client, the same build can go white-label under your own brand on an Agency plan. ${AGENCY_PRICING_CLAIM} Once you've done it enough times to have a repeatable pattern, it can be published to the marketplace for other builders to deploy.\n\nNone of that replaces finding your first client — that's still on you. But it removes "I'd need to build all the infrastructure first" as the reason not to test whether owning the relationship beats closing one more gig.`,
     },
   ],
   faq: [
