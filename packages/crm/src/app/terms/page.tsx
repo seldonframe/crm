@@ -97,9 +97,11 @@ export default function TermsPage() {
       <section>
         <h2 className="mb-4 mt-10 text-xl font-semibold">9. Open Source License</h2>
         <p className="text-base leading-relaxed text-muted-foreground">
-          The SeldonFrame source code is available under the Business Source License (BSL). You may self-host, modify,
-          and contribute to SeldonFrame. You may deploy SeldonFrame for your own business or your clients&apos;
-          businesses. You may NOT operate a competing hosted service based on the SeldonFrame codebase.
+          The SeldonFrame source code is available under the GNU Affero General Public License, version 3
+          (AGPL-3.0). Subject to that license, you may copy, modify, self-host, redistribute, and deploy SeldonFrame
+          for your own business or your clients&apos; businesses, including as a hosted service. If you modify the
+          software and provide it to users over a network, the AGPL-3.0 source-availability obligations apply. These
+          Terms govern the SeldonFrame hosted service and do not narrow the rights granted by the open-source license.
         </p>
       </section>
 

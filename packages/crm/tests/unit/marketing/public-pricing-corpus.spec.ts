@@ -106,6 +106,8 @@ test("retained marketing FAQ and terms use the current plan ladder", () => {
   assert.match(terms, /Agency Growth \(\$199\/month for 30 client workspaces\)/i);
   assert.match(terms, /Agency Scale \(\$299\/month for unlimited client workspaces\)/i);
   assert.doesNotMatch(terms, /Growth \(\$29\/month|Scale \(\$99\/month/i);
+  assert.match(terms, /GNU Affero General Public License, version 3 \(AGPL-3\.0\)/i);
+  assert.doesNotMatch(terms, /Business Source License|competing hosted service/i);
 });
 
 test("every registered guide that mentions Builder pricing passes the semantic audit", () => {
