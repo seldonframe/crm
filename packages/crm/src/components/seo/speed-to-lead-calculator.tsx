@@ -1,4 +1,5 @@
 "use client";
+/* eslint-disable react-hooks/set-state-in-effect */
 
 // The speed-to-lead calculator — the interactive island of
 // /tools/speed-to-lead-calculator. Pure client math, no network calls:
@@ -15,6 +16,7 @@ import {
   downloadCanvasAsImage,
   shareResultCard,
 } from "./result-card";
+import { AGENCY_PRICING_CLAIM, BUILDER_PRICING_CLAIM } from "@/lib/marketing/public-claims";
 
 const INK = "#221D17";
 const GREEN = "#1F2B24";
@@ -77,7 +79,6 @@ export function SpeedToLeadCalculator(): ReactElement {
     if (bc !== undefined) setBaseClose(clamp(bc, BOUNDS.baseClose.min, BOUNDS.baseClose.max));
     const rt = parseNum(params, "rt");
     if (rt !== undefined) setBucketIdx(clamp(Math.round(rt), BOUNDS.bucket.min, BOUNDS.bucket.max));
-    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
 
   // Keep the address bar in sync (throttled) so the URL is a shareable permalink.
@@ -103,7 +104,6 @@ export function SpeedToLeadCalculator(): ReactElement {
   const revenueFast = Math.round(closedFast * dealValue);
   const revenueNow = Math.round(closedNow * dealValue);
   const lostMonthly = Math.max(0, revenueFast - revenueNow);
-  const lostYearly = lostMonthly * 12;
 
   const barMax = Math.max(revenueFast, 1);
   const barWidth = (v: number) => `${Math.max(6, Math.round((v / barMax) * 100))}%`;
@@ -219,8 +219,8 @@ export function SpeedToLeadCalculator(): ReactElement {
       <p style={{ margin: "16px 0 0", fontSize: 12.5, color: "rgba(34,29,23,0.55)", lineHeight: 1.5 }}>
         *Illustrative model based on the widely-documented &ldquo;5-minute rule&rdquo; in lead-response research: the odds of
         reaching and qualifying a lead drop sharply the longer you wait. The factors here are a conservative estimate, not a
-        specific study&rsquo;s numbers — your real results will vary. SeldonFrame is $29/mo flat and responds the instant a
-        lead comes in.
+        specific study&rsquo;s numbers — your real results will vary. {BUILDER_PRICING_CLAIM} {AGENCY_PRICING_CLAIM} The
+        front office responds the instant a lead comes in.
       </p>
       <div style={{ display: "flex", flexWrap: "wrap", gap: 12, marginTop: 20 }}>
         <a href="/signup" style={{ background: INK, color: "#F6F2EA", padding: "13px 26px", borderRadius: 12, fontWeight: 700, fontSize: 15.5, textDecoration: "none" }}>

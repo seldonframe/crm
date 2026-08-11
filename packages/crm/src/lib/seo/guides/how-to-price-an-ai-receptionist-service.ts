@@ -1,3 +1,4 @@
+import { AGENCY_PRICING_CLAIM } from "../../marketing/public-claims";
 import type { Guide } from "./types";
 
 export const guide: Guide = {
@@ -44,7 +45,7 @@ export const guide: Guide = {
     {
       h2: "Pricing on a flat platform where the AI runs on your own keys",
       body:
-        "Now change the variable that actually drives your margin: the cost of goods underneath the service. If the platform is a flat price instead of a per-location one, and the AI runs on your own keys, the entire per-client cost structure collapses.\n\nOn SeldonFrame the platform is a flat **29 dollars a month** with unlimited workspaces, and the first workspace free forever. Adding your tenth client doesn't add a tenth AI subscription — the per-location fee that stacked to roughly 970 dollars in the earlier example simply doesn't exist here.\n\nThe usage side changes just as much. SeldonFrame runs on your own AI keys and your own Twilio account, so you pay the raw provider cost for calls and messages directly — no platform sitting in the middle marking it up.\n\nThat's the mechanism, not the marketing: because the infrastructure is yours, your *cost of goods* on each client drops close to zero beyond the actual carrier and model charges, which are cents on real usage. The chatty high-volume client that used to threaten your margin on a rebilled platform is now just a few dollars of pass-through cost you control.\n\nDo the arithmetic and the pricing power is obvious. Your retainer stays where the value justifies it — in that reported 500-to-2,000-dollar range depending on the client — but the cost you subtract to find profit is now a flat platform fee plus near-zero usage, instead of a per-location AI subscription plus marked-up rebilling.\n\n**The spread you thought you were selling is the spread you actually keep.** This is the whole point of pricing on a flat, own-keys platform: it doesn't change what the client pays, it changes how much of what they pay survives to become your margin. And because it survives on every client, the model gets stronger as you grow instead of weaker.",
+        `Now change the variable that actually drives your margin: the cost of goods underneath the service. If the platform is a flat price instead of a per-location one, and the AI runs on your own keys, the entire per-client cost structure collapses.\n\n${AGENCY_PRICING_CLAIM} Adding your tenth client stays within the Agency ladder instead of adding a tenth AI subscription; the per-location fee that stacked to roughly 970 dollars in the earlier example simply doesn't exist here.\n\nThe usage side changes just as much. SeldonFrame runs on your own AI keys and your own Twilio account, so you pay the raw provider cost for calls and messages directly — no platform sitting in the middle marking it up.\n\nThat's the mechanism, not the marketing: because the infrastructure is yours, your *cost of goods* on each client drops close to zero beyond the actual carrier and model charges, which are cents on real usage. The chatty high-volume client that used to threaten your margin on a rebilled platform is now just a few dollars of pass-through cost you control.\n\nDo the arithmetic and the pricing power is obvious. Your retainer stays where the value justifies it — in that reported 500-to-2,000-dollar range depending on the client — but the cost you subtract to find profit is now a flat platform fee plus near-zero usage, instead of a per-location AI subscription plus marked-up rebilling.\n\n**The spread you thought you were selling is the spread you actually keep.** This is the whole point of pricing on a flat, own-keys platform: it doesn't change what the client pays, it changes how much of what they pay survives to become your margin. And because it survives on every client, the model gets stronger as you grow instead of weaker.`,
       callout: {
         kind: "analogy",
         text: "Cost of goods is what it actually costs you to deliver one unit of the service — for a coffee shop it's beans and milk; for an AI receptionist it's the AI and carrier charges for that one client's calls and texts.",
@@ -58,7 +59,7 @@ export const guide: Guide = {
         },
         right: {
           heading: "Flat, own-keys platform",
-          items: ["$29/month flat, unlimited workspaces", "Your own AI keys + your own Twilio", "Usage near raw provider cost"],
+          items: ["$99/month Agency Starter, 10 client workspaces", "Your own AI keys + your own Twilio", "Usage near raw provider cost"],
         },
       },
     },

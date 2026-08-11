@@ -63,8 +63,8 @@ describe("LandingMarketingPricingSection — flag OFF (default) — single $29 c
   test("no tier-ladder vocabulary leaks when the flag is off", () => {
     const result = LandingMarketingPricingSection({});
     const text = safeText(result);
-    assert.doesNotMatch(text, /sub-account/i);
     assert.doesNotMatch(text, /Agency Starter|Agency Growth|Agency Scale/);
+    assert.doesNotMatch(text, /10 client sub-accounts|30 client sub-accounts|Unlimited client sub-accounts/i);
   });
 });
 

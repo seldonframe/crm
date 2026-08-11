@@ -1,3 +1,4 @@
+import { AGENCY_PRICING_CLAIM } from "../../marketing/public-claims";
 import type { Guide } from "./types";
 
 export const guide: Guide = {
@@ -52,7 +53,8 @@ export const guide: Guide = {
     },
     {
       h2: "Where SeldonFrame fits in this",
-      body: "Disclosure: we build SeldonFrame, so read this section as the sales pitch it partly is.\n\nSeldonFrame is built for the retainer-and-agency models described above: you describe the agent you want in one conversation and get a real, deployed agent — on voice, web chat, SMS, email, or wherever the client needs it — connected to a working CRM, booking calendar, and intake forms.\n\nThat's instead of a demo you then have to wire into a client's actual stack. Pricing is **$29/month flat with unlimited workspaces** and the first workspace free — there's no trial to sign up for, because the free build-and-use flow functions as the trial.\n\nYou can list a build on the marketplace for the marketplace-leverage path, or use the same underlying build as a white-label template across multiple clients for the agency path, without paying more per workspace as you add clients.\n\nThat said, DIY is a completely legitimate path too, and some readers should take it. If you're comfortable wiring MCP servers to your tools, hand-rolling context files, and maintaining your own stack, owning that infrastructure end-to-end gives you more control and, if your time is cheap relative to your learning appetite, a lower marginal cost.\n\n**The trade-off is real** — a hand-built stack needs ongoing maintenance as APIs change and doesn't come with review gates or a marketplace built in. But if assembling your own tooling sounds like a feature rather than a chore, it's a reasonable way to run this.",
+      body:
+        `Disclosure: we build SeldonFrame, so read this section as the sales pitch it partly is.\n\nSeldonFrame is built for the retainer-and-agency models described above: you describe the agent you want in one conversation and get a real, deployed agent — on voice, web chat, SMS, email, or wherever the client needs it — connected to a working CRM, booking calendar, and intake forms.\n\nThat's instead of a demo you then have to wire into a client's actual stack. ${AGENCY_PRICING_CLAIM} The first workspace is free, so the free build-and-use flow functions as the trial; the $29/mo Builder plan remains the separate path for a business you operate yourself and does not include client resale.\n\nYou can list a build on the marketplace for the marketplace-leverage path, or use the same underlying build as a white-label template across multiple clients on an Agency plan.\n\nThat said, DIY is a completely legitimate path too, and some readers should take it. If you're comfortable wiring MCP servers to your tools, hand-rolling context files, and maintaining your own stack, owning that infrastructure end-to-end gives you more control and, if your time is cheap relative to your learning appetite, a lower marginal cost.\n\n**The trade-off is real** — a hand-built stack needs ongoing maintenance as APIs change and doesn't come with review gates or a marketplace built in. But if assembling your own tooling sounds like a feature rather than a chore, it's a reasonable way to run this.`,
       diagram: {
         type: "compare",
         title: "Build it yourself vs. start from SeldonFrame",
@@ -69,7 +71,7 @@ export const guide: Guide = {
           heading: "SeldonFrame",
           items: [
             "CRM, calendar, intake pre-connected",
-            "$29/mo flat, unlimited workspaces",
+            "$99/mo Agency Starter, 10 client workspaces",
             "Review gates and marketplace built in",
             "Configure it in one conversation",
           ],

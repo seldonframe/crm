@@ -1,4 +1,5 @@
 "use client";
+/* eslint-disable react-hooks/set-state-in-effect */
 
 // The no-show cost calculator — the interactive island of
 // /tools/no-show-cost-calculator. Pure client math, no network calls: sliders →
@@ -15,6 +16,7 @@ import {
   downloadCanvasAsImage,
   shareResultCard,
 } from "./result-card";
+import { AGENCY_PRICING_CLAIM, BUILDER_PRICING_CLAIM } from "@/lib/marketing/public-claims";
 
 const INK = "#221D17";
 const GREEN = "#1F2B24";
@@ -105,7 +107,6 @@ export function NoShowCostCalculator(): ReactElement {
     if (decoded.noShowRate !== undefined) setNoShowRate(decoded.noShowRate);
     if (decoded.apptValue !== undefined) setApptValue(decoded.apptValue);
     if (decoded.reductionPct !== undefined) setReductionPct(decoded.reductionPct);
-    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
 
   // Keep the address bar in sync with the current inputs (throttled) so the
@@ -247,8 +248,8 @@ export function NoShowCostCalculator(): ReactElement {
 
       <p style={{ margin: "16px 0 0", fontSize: 12.5, color: "rgba(34,29,23,0.55)", lineHeight: 1.5 }}>
         *Recoverable assumes reminders + AI confirmations cut no-shows by the amount you set above — real results vary by
-        business, so treat it as a planning estimate, not a guarantee. SeldonFrame is $29/mo flat — at these numbers it
-        pays for itself with{" "}
+        business, so treat it as a planning estimate, not a guarantee. {BUILDER_PRICING_CLAIM} {AGENCY_PRICING_CLAIM} At
+        these numbers Builder pays for itself with{" "}
         <strong>
           {recoveredMonthly > 0 ? (apptValue >= 29 ? "a single recovered appointment" : "a handful of recovered appointments") : "one recovered appointment"}
         </strong>

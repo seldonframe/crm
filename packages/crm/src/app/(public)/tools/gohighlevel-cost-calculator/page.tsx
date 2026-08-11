@@ -12,6 +12,7 @@ import { BuildWidget } from "@/components/seo/build-widget";
 import { ChatGptCtaCard } from "@/components/seo/chatgpt-cta";
 import { buildOgUrl } from "@/lib/seo/og-card";
 import { isWebUngatedBuildOn } from "@/lib/web-build/policy";
+import { AGENCY_PRICING_CLAIM, BUILDER_PRICING_CLAIM } from "@/lib/marketing/public-claims";
 
 /** FAQ answers use a few <strong> tags for readability; JSON-LD wants plain
  *  text, so strip tags before embedding in the schema. */
@@ -54,7 +55,7 @@ const FAQ = [
   },
   {
     q: "How does SeldonFrame's pricing compare?",
-    a: "SeldonFrame is <strong>$29/month flat</strong> on the builder tier (agency tiers up to $299) with unlimited workspaces — no per-sub-account software fee. You connect your own AI provider and telephony account, so usage bills at raw provider cost with no markup.",
+    a: `${BUILDER_PRICING_CLAIM} ${AGENCY_PRICING_CLAIM} You connect your own AI provider and telephony account, so usage bills at raw provider cost with no markup.`,
   },
 ];
 
@@ -85,11 +86,17 @@ export default function GohighlevelCostCalculatorPage(): ReactElement {
           rebilled usage, all stacked per client.
         </p>
         <GohighlevelCostCalculator />
+        <p style={{ margin: "18px 0 0", fontSize: 14.5, lineHeight: 1.6, color: "rgba(34,29,23,0.68)" }}>
+          Replacing GoHighLevel for client delivery?{" "}
+          <Link href="/pricing?plan=agency_starter" className="sf-link" style={{ color: MKT.green, fontWeight: 700 }}>
+            See Agency Starter at $99/mo →
+          </Link>
+        </p>
 
         <section style={{ padding: "40px 0 0" }}>
           <h2 style={{ margin: "0 0 14px", fontSize: 24, fontWeight: 800, letterSpacing: "-0.02em" }}>How it works</h2>
           <p style={{ margin: "0 0 10px", fontSize: 15, lineHeight: 1.65, color: "rgba(34,29,23,0.72)" }}>
-            This calculator adds up three cost lines using GoHighLevel's own published plan prices and add-on rates:
+            This calculator adds up three cost lines using GoHighLevel&apos;s own published plan prices and add-on rates:
           </p>
           <ul style={{ margin: "0 0 10px", paddingLeft: 20, fontSize: 15, lineHeight: 1.7, color: "rgba(34,29,23,0.72)" }}>
             <li>The <strong>plan base</strong> price — flat, does not scale with client count</li>
@@ -105,8 +112,8 @@ export default function GohighlevelCostCalculatorPage(): ReactElement {
         <section style={{ padding: "20px 0 0" }}>
           <h2 style={{ margin: "0 0 14px", fontSize: 24, fontWeight: 800, letterSpacing: "-0.02em" }}>Why it matters</h2>
           <p style={{ margin: "0 0 10px", fontSize: 15, lineHeight: 1.65, color: "rgba(34,29,23,0.72)" }}>
-            GoHighLevel's headline price ($97-$497/mo) looks like the whole story, but the <strong>AI Employee add-on
-            and usage rebilling scale with every client you add</strong> — so a growing agency's real bill climbs a lot
+            GoHighLevel&apos;s headline price ($97-$497/mo) looks like the whole story, but the <strong>AI Employee add-on
+            and usage rebilling scale with every client you add</strong> — so a growing agency&apos;s real bill climbs a lot
             faster than the plan price suggests.
           </p>
         </section>

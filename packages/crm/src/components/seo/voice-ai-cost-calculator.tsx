@@ -1,4 +1,5 @@
 "use client";
+/* eslint-disable react-hooks/set-state-in-effect, react/no-unescaped-entities */
 
 // The voice AI cost-per-minute calculator — the interactive island of
 // /tools/voice-ai-cost-calculator. Pure client math, no network calls.
@@ -30,6 +31,7 @@
 import { useState, useEffect, useRef, type ReactElement } from "react";
 
 import { renderResultCard, buildShareUrl, copyToClipboard, downloadCanvasAsImage, shareResultCard } from "./result-card";
+import { AGENCY_PRICING_CLAIM, BUILDER_PRICING_CLAIM } from "@/lib/marketing/public-claims";
 
 const INK = "#221D17";
 const GREEN = "#1F2B24";
@@ -241,7 +243,6 @@ export function VoiceAiCostCalculator(): ReactElement {
     if (decoded.avgMinutes !== undefined) setAvgMinutes(decoded.avgMinutes);
     if (decoded.platform !== undefined) setPlatform(decoded.platform);
     if (decoded.includeTelephony !== undefined) setIncludeTelephony(decoded.includeTelephony);
-    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
 
   useEffect(() => {
@@ -258,7 +259,6 @@ export function VoiceAiCostCalculator(): ReactElement {
   }, [callsPerMonth, avgMinutes, platform, includeTelephony]);
 
   const result = computeVoiceCost(platform, callsPerMonth, avgMinutes, includeTelephony);
-  const maxComponent = Math.max(...result.stack.map((c) => c.perMinute), 0.001);
   const multiplier = result.advertisedPerMinute > 0 ? result.realPerMinute / result.advertisedPerMinute : 1;
 
   const canvasRef = useRef<HTMLCanvasElement | null>(null);
@@ -278,7 +278,7 @@ export function VoiceAiCostCalculator(): ReactElement {
         rows: [
           { label: "Real per-minute rate", value: `~${moneyPrecise(result.realPerMinute)}/min` },
           { label: "Total minutes/mo", value: result.totalMinutes.toLocaleString("en-US") },
-          { label: "SeldonFrame", value: `${money(SELDONFRAME_MONTHLY)}/mo flat` },
+          { label: "SeldonFrame Builder (owned business)", value: `${money(SELDONFRAME_MONTHLY)}/mo` },
         ],
         footer: "built free at seldonframe.com/tools",
       });
@@ -432,9 +432,9 @@ export function VoiceAiCostCalculator(): ReactElement {
           so their per-component split here is an approximation for illustration.
         </p>
         <p style={{ margin: 0 }}>
-          <strong>SeldonFrame:</strong> $29/mo flat for the platform — you connect your own AI provider and Twilio
-          keys at raw provider cost (typically a few cents per minute), instead of paying a per-minute markup on top
-          of every component.
+          <strong>SeldonFrame:</strong> {BUILDER_PRICING_CLAIM} {AGENCY_PRICING_CLAIM} You connect your own AI provider
+          and Twilio keys at raw provider cost (typically a few cents per minute), instead of paying a per-minute markup
+          on top of every component.
         </p>
       </div>
 

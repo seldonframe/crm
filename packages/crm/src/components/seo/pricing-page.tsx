@@ -20,6 +20,7 @@ import { AuthorByline, articleLd } from "@/components/seo/author-byline";
 import { monthYearToIso } from "@/lib/seo/month-iso";
 import { emphasize } from "@/lib/seo/emphasize";
 import { getCompetitorPricing, PRICING, type CompetitorPricing } from "@/lib/seo/competitor-pricing";
+import { AGENCY_PRICING_CLAIM, BUILDER_PRICING_CLAIM } from "@/lib/marketing/public-claims";
 import { getCompetitor, sfPriceAnchor, type CompetitorAudience } from "@/lib/seo/alternative-pages";
 import { START_HREF, DEMO_HREF } from "@/lib/seo/alternative-pages-extras";
 
@@ -35,6 +36,7 @@ export function startsAtLabel(p: CompetitorPricing): string {
 /** Compose the 3-item FAQ every pricing page shares. Pure + exported so the
  *  Markdown twin and unit tests can reuse it without duplicating copy. */
 export function composePricingFaq(p: CompetitorPricing, name: string, audience: CompetitorAudience): { q: string; a: string }[] {
+  void audience;
   return [
     { q: `How much does ${name} cost?`, a: p.bottomLine },
     {
@@ -43,7 +45,7 @@ export function composePricingFaq(p: CompetitorPricing, name: string, audience: 
     },
     {
       q: `What's the cheapest ${name} alternative?`,
-      a: `SeldonFrame: ${sfPriceAnchor(audience)}, with AI and telephony on your own keys at raw provider cost — no meters. /alternative-to-${p.slug}`,
+      a: `SeldonFrame: ${BUILDER_PRICING_CLAIM} ${AGENCY_PRICING_CLAIM} AI and telephony run on your own keys at raw provider cost. /alternative-to-${p.slug}`,
     },
   ];
 }
@@ -247,12 +249,7 @@ export function CompetitorPricingPage({ slug }: { slug: string }): ReactElement 
           <h2 style={{ margin: 0, fontSize: 26, fontWeight: 800, letterSpacing: "-0.02em" }}>See what you&apos;d pay on SeldonFrame instead</h2>
           <p style={{ margin: "10px auto 0", fontSize: 15.5, lineHeight: 1.6, color: "rgba(246,242,234,0.75)", maxWidth: 560 }}>
             Paste a business&apos;s website and SeldonFrame builds the site, CRM, booking calendar and AI receptionist in about 3 minutes —
-            free, before you sign up. Then it&apos;s{" "}
-            {c.audience === "agency"
-              ? "$99/mo flat for white-label agency plans (or $29/mo solo)."
-              : c.audience === "mixed"
-                ? "$29/mo flat solo, or $99+/mo for agency whitelabel."
-                : "$29/mo flat for unlimited workspaces."}
+            free, before you sign up. Then it&apos;s {sfPriceAnchor(c.audience)}.
           </p>
           <div style={{ display: "flex", flexWrap: "wrap", gap: 12, justifyContent: "center", marginTop: 22 }}>
             <a href={START_HREF} style={{ background: MKT.green, color: "#fff", padding: "13px 26px", borderRadius: 12, fontWeight: 700, fontSize: 15.5, textDecoration: "none" }}>

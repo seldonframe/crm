@@ -1,4 +1,5 @@
 import type { Guide } from "./types";
+import { AGENCY_PRICING_CLAIM, BUILDER_PRICING_CLAIM } from "../../marketing/public-claims";
 
 export const guide: Guide = {
   slug: "how-to-build-a-review-request-agent",
@@ -37,7 +38,19 @@ export const guide: Guide = {
     },
     {
       h2: "The build: DIY vs. assembled, honestly",
-      body: "DIY means wiring three pieces yourself: a webhook or poll on your CRM's job-completion event, an SMS or email send with the review link, and a **suppression list** so you're not re-texting the same customer on every job.\n\nNone of that is exotic. Most CRMs expose a completed-job or paid-invoice event, and SMS/email sending is a commodity API call.\n\nThe review link itself is free either way: Google builds it from a business's Place ID. Our [Google review link generator](/tools/google-review-link-generator) turns a Place ID or Maps URL into that link plus a QR code in a few seconds with no signup.\n\nThe honest trade-off with DIY: the trigger wiring, the delay logic, the suppression list, and the **owner-routing lane** are four separate moving pieces to build and keep working across every client's CRM setup. Doable, but real ongoing maintenance — especially once you're running it for more than one client.\n\nThe assembled path — full disclosure, this is our product — is SeldonFrame. The trigger, delay, follow-up, suppression, and owner-routing logic ship as **one pre-built agent** bound to the client's CRM and calendar, so you're configuring a template instead of building the pipeline from scratch.\n\nFirst workspace is free, $29/mo unlocks unlimited workspaces, and you bring your own SMS/email keys (*BYOK*) so there's no markup on the sending itself.\n\nNeither path is wrong. If you already run the CRM webhook plumbing for other automations, DIY is a reasonable afternoon. If you're standing up your fifth client this month, assembled is the one that doesn't eat your week.",
+      body: `DIY means wiring three pieces yourself: a webhook or poll on your CRM's job-completion event, an SMS or email send with the review link, and a **suppression list** so you're not re-texting the same customer on every job.
+
+None of that is exotic. Most CRMs expose a completed-job or paid-invoice event, and SMS/email sending is a commodity API call.
+
+The review link itself is free either way: Google builds it from a business's Place ID. Our [Google review link generator](/tools/google-review-link-generator) turns a Place ID or Maps URL into that link plus a QR code in a few seconds with no signup.
+
+The honest trade-off with DIY: the trigger wiring, the delay logic, the suppression list, and the **owner-routing lane** are four separate moving pieces to build and keep working across every client's CRM setup. Doable, but real ongoing maintenance — especially once you're running it for more than one client.
+
+The assembled path — full disclosure, this is our product — is SeldonFrame. The trigger, delay, follow-up, suppression, and owner-routing logic ship as **one pre-built agent** bound to the client's CRM and calendar, so you're configuring a template instead of building the pipeline from scratch. ${AGENCY_PRICING_CLAIM}
+
+${BUILDER_PRICING_CLAIM} The first workspace is free, and you bring your own SMS/email keys (*BYOK*) so there's no markup on the sending itself.
+
+Neither path is wrong. If you already run the CRM webhook plumbing for other automations, DIY is a reasonable afternoon. If you're standing up your fifth client this month, assembled is the one that doesn't eat your week.`,
       callout: {
         kind: "analogy",
         text: "A suppression list is a do-not-call list for one topic only — it doesn't silence the customer, it just stops the same review ask from hitting their phone on every single job they book.",

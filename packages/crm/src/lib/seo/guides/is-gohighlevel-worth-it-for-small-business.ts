@@ -1,3 +1,4 @@
+import { AGENCY_PRICING_CLAIM, BUILDER_PRICING_CLAIM } from "../../marketing/public-claims";
 import type { Guide } from "./types";
 
 export const guide: Guide = {
@@ -64,8 +65,7 @@ export const guide: Guide = {
     },
     {
       h2: "The lighter alternative for service businesses",
-      body:
-        "If your honest answer is that you want the phone answered and the calendar filled without becoming a part-time marketing operator, there is a lighter path.\n\nSeldonFrame is built for exactly that. It is an **AI front office** for a service business: an AI receptionist that handles voice, chat, and SMS, plus a website, a CRM, online booking, review collection, a client portal, and a custom domain, all in one place. The AI receptionist is the product, not a bolt-on you switch on later and get billed for separately.\n\nThe pricing is deliberately simple. SeldonFrame is **$29 a month, flat**. You get unlimited workspaces, your first workspace is free forever, and you can cancel anytime.\n\nThere is no trial gate to work around and no per-location AI add-on stacking on top. It runs on your own AI keys and your own Twilio account, which means calls and texts flow through at raw provider cost with no platform markup — the mechanism that keeps the price flat instead of climbing as your call volume grows. For a small business, one booked job usually covers the month.\n\nSetup is the other big difference. Instead of one to three weeks of learning, you build a full client workspace from a single conversation in about three minutes, and it comes out live with the website, booking, and receptionist already wired together.\n\nTo be clear, this is not GoHighLevel with a discount. If you need advanced funnels, deep multi-step email campaigns, agency rebilling, or a giant template marketplace, GoHighLevel is still the stronger fit and you should stay with it. ([GoHighLevel vs. SeldonFrame](/guides/gohighlevel-vs-seldonframe) lays the two out side by side.)\n\nBut if the real job is never miss a lead and book more jobs, a focused AI front office does that job with far less to learn and a bill that does not surprise you."
+      body: `If your honest answer is that you want the phone answered and the calendar filled without becoming a part-time marketing operator, there is a lighter path.\n\nSeldonFrame is built for exactly that. It is an **AI front office** for a service business: an AI receptionist that handles voice, chat, and SMS, plus a website, a CRM, online booking, review collection, a client portal, and a custom domain, all in one place. The AI receptionist is the product, not a bolt-on you switch on later and get billed for separately.\n\n${BUILDER_PRICING_CLAIM} ${AGENCY_PRICING_CLAIM}\n\nThere is no trial gate to work around and no per-location AI add-on stacking on top. Builder and Agency plans use your own AI keys and your own Twilio account, which means calls and texts flow through at raw provider cost with no platform markup. Managed is the option when you want SeldonFrame's keys and a simpler operating model.\n\nSetup is the other big difference. Instead of one to three weeks of learning, you build a full workspace from a single conversation in about three minutes, and it comes out live with the website, booking, and receptionist already wired together.\n\nTo be clear, this is not GoHighLevel with a discount. If you need advanced funnels, deep multi-step email campaigns, agency rebilling, or a giant template marketplace, GoHighLevel is still the stronger fit and you should stay with it. ([GoHighLevel vs. SeldonFrame](/guides/gohighlevel-vs-seldonframe) lays the two out side by side.)\n\nBut if the real job is never miss a lead and book more jobs, a focused AI front office does that job with far less to learn and a bill that does not surprise you.`,
     }
   ],
   faq: [
@@ -79,7 +79,7 @@ export const guide: Guide = {
     },
     {
       q: "What is a simpler alternative for a local business?",
-      a: "SeldonFrame is a lighter option built for service businesses. It is an AI receptionist for voice, chat, and SMS bundled with a website, CRM, booking, reviews, and a client portal for $29 a month flat, with the first workspace free forever and no trial gate. You build a live workspace from one conversation in about three minutes instead of spending weeks learning a platform."
+      a: `SeldonFrame is a lighter option built for service businesses. ${BUILDER_PRICING_CLAIM} Agencies selling client front offices should use an Agency plan: ${AGENCY_PRICING_CLAIM} You build a live workspace from one conversation in about three minutes instead of spending weeks learning a platform.`
     }
   ],
   sources: [

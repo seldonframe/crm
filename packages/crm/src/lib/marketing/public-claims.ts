@@ -22,5 +22,16 @@ export const AGENCY_PLAN_FACTS = [
   { id: "agency_scale", name: "Agency Scale", priceMonthly: 299, audience: "unlimited client workspaces" },
 ] as const;
 
+const BUILDER_PLAN = AGENCY_PLAN_FACTS[0];
+const AGENCY_STARTER_PLAN = AGENCY_PLAN_FACTS[2];
+const AGENCY_GROWTH_PLAN = AGENCY_PLAN_FACTS[3];
+const AGENCY_SCALE_PLAN = AGENCY_PLAN_FACTS[4];
+
+export const BUILDER_PRICING_CLAIM =
+  `Builder is $${BUILDER_PLAN.priceMonthly}/mo for businesses you own and operate yourself; it is BYOK and does not include client sub-accounts or agency resale.`;
+
+export const AGENCY_PRICING_CLAIM =
+  `Agency plans start at $${AGENCY_STARTER_PLAN.priceMonthly}/mo for ${AGENCY_STARTER_PLAN.audience} with white-label delivery; Growth covers ${AGENCY_GROWTH_PLAN.audience} and Scale covers ${AGENCY_SCALE_PLAN.audience}.`;
+
 export const HOSTED_AI_POLICY =
   "Managed uses SeldonFrame's keys; Builder and Agency plans are BYOK." as const;

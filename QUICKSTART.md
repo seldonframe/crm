@@ -22,7 +22,7 @@ Then in Claude Code:
 
 Or sign up at the dashboard: [app.seldonframe.com/signup](https://app.seldonframe.com/signup) — same product, same backend, no setup time.
 
-Pricing for paid tiers: $29/mo (Pro) or $99/mo (Agency, white-label). See [seldonframe.com/#pricing](https://seldonframe.com/#pricing).
+Pricing: Builder is $29/mo for one business you own and operate; Managed is $49/mo on SeldonFrame's keys; Agency Starter is $99/mo for 10 client workspaces and white-label delivery, with Growth ($199/mo) and Scale ($299/mo) for larger client rosters. See [seldonframe.com/#pricing](https://seldonframe.com/#pricing).
 
 ## Self-host
 
