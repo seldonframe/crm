@@ -29,7 +29,7 @@ export type CompetitorExtras = {
 export const SF_PROS: string[] = [
   "An AI receptionist that answers calls, SMS, and web chat — and books real jobs into a real calendar and CRM",
   "The whole front office included: multi-page website, CRM, booking, intake forms, review automation",
-  "Builder is $29/mo for one business you own and operate — unlimited workspaces, bring your own key, and AI and phone service run at raw provider cost",
+  "Builder is $29/mo for one business you own and operate (your own business workspace; no client resale or white-label) — unlimited workspaces, bring your own key, and AI and phone service run at raw provider cost",
   "Whitelabel client delivery starts on Agency plans from $99/mo: branded client portal, per-client workspaces, custom domains, one-click multi-client deploy",
   "Build it free before you sign up — paste a URL, get a working workspace in about 3 minutes",
   "Open core and portable — your agents are plain, editable skill files, and your data lives in your workspace",

@@ -17,9 +17,9 @@ export const LAST_UPDATED = "July 2026";
 // Builder is for one business the operator owns; client hand-off and
 // white-label resale require the Agency ladder.
 export const BUILDER_PRICE_BOUNDARY =
-  "Builder is $29/mo for one business you own and operate";
+  "Builder is $29/mo for one business you operate (your own business workspace; no client resale or white-label)";
 export const AGENCY_PRICE_BOUNDARY =
-  "Agency plans start at $99/mo for client sub-accounts and white-label delivery";
+  "Agency plans start at $99/mo for client workspaces and white-label delivery";
 
 export type AltFaqItem = { q: string; a: string };
 export type SwitchReason = { title: string; body: string };
@@ -103,7 +103,7 @@ export type Competitor = {
 /** SeldonFrame's side of the comparison table — identical on every page. */
 export const SF_COLUMN = {
   bestFor: "Agencies delivering AI front offices to client businesses; builders running one business can use Builder",
-  pricingModel: "Builder is $29/mo for one business you operate; Managed is $49/mo; Agency plans start at $99/mo with client sub-accounts and white-label delivery",
+  pricingModel: "Builder is $29/mo for one business you operate (your own business workspace; no client resale or white-label). Managed is $49/mo. Agency plans start at $99/mo for client workspaces and white-label delivery.",
   aiReceptionist: "Native — AI receptionist answers, qualifies & books across voice, SMS & web chat",
   frontOffice: "Included — multi-page website, CRM, booking calendar, intake forms, review requests in every workspace",
   whitelabel: "Agency add-on from $99/mo — whitelabel client portal, per-client workspaces, custom domains, one-click multi-client deploy",
@@ -139,23 +139,33 @@ export function pairAudience(a: CompetitorAudience, b: CompetitorAudience): Comp
 export function sfPriceAnchor(audience: CompetitorAudience): string {
   switch (audience) {
     case "agency":
-      return "white-label agency plans from $99/mo ($99–$299, client sub-accounts included, 0% GMV) — Builder is $29/mo for one business you operate";
+      return "white-label agency plans from $99/mo (Agency Starter starts at $99/mo for client workspaces; $99–$299, client sub-accounts included, 0% GMV). Builder is $29/mo for one business you operate (your own business workspace; no client resale or white-label)";
     case "solo":
-      return "Builder is $29/mo for one business you operate; unlimited workspaces, first workspace free forever";
+      return "Builder is $29/mo for one business you operate (your own business workspace; no client resale or white-label); unlimited workspaces, first workspace free forever. The Builder price is $29/mo flat.";
     case "mixed":
-      return "Builder is $29/mo for one business you operate, or $99–$299/mo agency plans with white-label + client sub-accounts (0% GMV)";
+      return "Builder is $29/mo for one business you operate (your own business workspace; no client resale or white-label); Agency plans start at $99/mo for client workspaces and white-label delivery ($99–$299, 0% GMV). The Builder price is $29/mo flat.";
   }
+}
+
+/**
+ * The primary structured-data offer for a comparison surface. Agency-led
+ * pages use Agency Starter ($99); solo and mixed pages lead with Builder
+ * ($29), matching the visible `sfPriceAnchor` copy rather than claiming the
+ * cheapest tier for every audience.
+ */
+export function sfPriceAnchorMonthlyPrice(audience: CompetitorAudience): number {
+  return audience === "agency" ? 99 : 29;
 }
 
 /** FAQ items every page shares (appended after the competitor-specific ones). */
 export const SHARED_FAQ: AltFaqItem[] = [
   {
     q: "How can SeldonFrame be $29/mo flat when competitors charge per minute or per credit?",
-    a: "Because you use your own keys. Builder is $29/mo for one business you operate; Agency plans start at $99/mo for client sub-accounts and white-label delivery. Your agents run on your own AI key (Claude, ChatGPT or Gemini) and, for phone, your own Twilio account. You pay the providers at raw cost. SeldonFrame never marks up tokens or minutes.",
+    a: "Because you use your own keys. Builder is $29/mo for one business you operate (your own business workspace; no client resale or white-label); Agency plans start at $99/mo for client workspaces and white-label delivery. Your agents run on your own AI key (Claude, ChatGPT or Gemini) and, for phone, your own Twilio account. You pay the providers at raw cost. SeldonFrame never marks up tokens or minutes.",
   },
   {
     q: "Do you take a cut of what I charge my clients?",
-    a: "SeldonFrame works like Shopify: Builder is $29/mo for one business you operate, while agency plans run $99–$299/mo with white-label and client sub-accounts included. Solo plans add a flat 2% only on sales made through SeldonFrame checkout — agency plans pay 0%. Selling agents on the marketplace carries 5%. Client retainers you bill outside SeldonFrame cost nothing extra.",
+    a: "SeldonFrame works like Shopify: Builder is $29/mo for one business you operate (your own business workspace; no client resale or white-label), while Agency plans run $99–$299/mo with white-label and client sub-accounts included. Solo plans add a flat 2% only on sales made through SeldonFrame checkout — agency plans pay 0%. Selling agents on the marketplace carries 5%. Client retainers you bill outside SeldonFrame cost nothing extra.",
   },
   {
     q: "How fast can I see it working?",
@@ -1361,7 +1371,7 @@ export const COMPETITORS: Competitor[] = [
     oneLiner:
       "SharpSpring is an agency-focused marketing automation platform, now operating under Constant Contact and reported to be in maintenance mode after the acquisition.",
     heroSub:
-      "A platform in maintenance mode with quote-gated pricing is a place to migrate FROM, not to. SeldonFrame is publicly priced: Builder is $29/mo for one business you operate; white-label Agency plans start at $99/mo (0% GMV) for client delivery — AI receptionist, website, CRM, and booking included.",
+      "A platform in maintenance mode with quote-gated pricing is a place to migrate FROM, not to. SeldonFrame is publicly priced: white-label Agency plans start at $99/mo (0% GMV) for client delivery — AI receptionist, website, CRM, and booking included. Builder is $29/mo for one business you operate (your own business workspace; no client resale or white-label).",
     intro: [
       "Most people looking for a SharpSpring alternative hit the same wall: nobody publishes the price, and the brand's future is unclear. Pricing is quote-gated — the number commonly cited by agencies is around $449/mo per 1,000 contacts, but SharpSpring won't confirm it publicly. Since the Constant Contact acquisition, the brand has been reported as being phased toward retirement, with little visible product investment, and there's no local-business toolkit at all — no phone answering, no booking system, no intake forms.",
       "That said, SharpSpring is impressive. Unlimited users on a flat agency plan and VisitorID website tracking were genuinely ahead of their time, and its agency roots run deep. But a platform being wound down under its acquirer isn't where you want to build a client's front office for the next five years.",
