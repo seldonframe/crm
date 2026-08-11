@@ -27,6 +27,7 @@ import { PublicThemeProvider } from "@/components/theme/public-theme-provider";
 import type { OrgTheme } from "@/lib/theme/types";
 import type { EffectiveBranding } from "@/lib/partner-agencies/branding";
 import { CustomerPortalNav } from "./customer-portal-nav";
+import { PosthogResetForm } from "@/components/analytics/posthog-reset-form";
 
 export type CustomerPortalShellProps = {
   theme: OrgTheme;
@@ -122,7 +123,7 @@ export function CustomerPortalShell({
               style={{ color: "#888" }}
             >
               <span>{customerEmail}</span>
-              <form action={signOutAction}>
+              <PosthogResetForm action={signOutAction}>
                 <button
                   type="submit"
                   className="text-[12px] underline"
@@ -130,7 +131,7 @@ export function CustomerPortalShell({
                 >
                   Sign out
                 </button>
-              </form>
+              </PosthogResetForm>
             </div>
           ) : null}
         </header>

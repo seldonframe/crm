@@ -52,6 +52,8 @@ import { PricingShell } from "./pricing-shell";
 import { PricingShellMarketing, type LadderTier } from "./pricing-shell-marketing";
 import { MarketingNav } from "@/components/landing/marketing-nav";
 import { MarketingFooter } from "@/components/landing/marketing-footer";
+import { normalizePaidPlan } from "@/lib/auth/pricing-continuity";
+import { AnalyticsIdentityBridge } from "@/components/analytics/analytics-identity-bridge";
 
 // 2026-07-08 hydration-mismatch fix — "No price id lives in the client"
 // (the rule the legacy single card in pricing-shell.tsx already followed).
@@ -120,19 +122,38 @@ type PricingPageProps = {
 
 export default async function PricingPage({ searchParams }: PricingPageProps) {
   const session = await auth();
-  if (searchParams) await searchParams; // keep Next.js happy if callers pass params
+  const params = searchParams ? await searchParams : {};
+  const rawPlan = typeof params.plan === "string" ? params.plan : null;
+  const initialPlan = normalizePaidPlan(rawPlan) as LadderTier["id"] | null;
+  const resumeCheckout = params.resume_checkout === "1";
 
   const isAuthed = Boolean(session?.user);
   const tierLadderOn = isTierLadderOn({ SF_TIER_LADDER: process.env.SF_TIER_LADDER });
 
-  if (tierLadderOn) {
+  // A paid-plan continuation must land on the tier-aware shell even when the
+  // marketing ladder flag is disabled. The legacy single-plan shell cannot
+  // represent agency tiers or resume their Checkout session safely.
+  if (tierLadderOn || (isAuthed && Boolean(initialPlan) && resumeCheckout)) {
     return (
       <div data-pricing-page="marketing" className="min-h-screen bg-[#F6F2EA] text-[#221D17]">
+        {session?.user?.id ? (
+          <AnalyticsIdentityBridge
+            userId={session.user.id}
+            email={session.user.email}
+            name={session.user.name}
+            workspaceId={session.user.orgId}
+          />
+        ) : null}
         <MarketingNav />
         {/* pt-[100px] clears MarketingNav's fixed header — same offset
             the homepage hero uses (marketing-hero.tsx). */}
         <main id="main-content" className="pt-[100px]">
-          <PricingShellMarketing isAuthed={isAuthed} tiers={buildLadderTiers()} />
+          <PricingShellMarketing
+            isAuthed={isAuthed}
+            tiers={buildLadderTiers()}
+            initialPlan={initialPlan}
+            resumeCheckout={resumeCheckout}
+          />
 
           {/* FAQ — restyled light (details/summary pattern, matches
               marketing-faq-section.tsx's visual language) instead of the

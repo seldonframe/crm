@@ -25,6 +25,23 @@ import {
   isSafeInternalRedirect,
   toInternalRedirectPath,
 } from "../../../src/lib/auth/signup-redirect";
+import { buildPaidSignupRedirect, normalizePaidPlan } from "../../../src/lib/auth/pricing-continuity";
+
+describe("paid signup continuity", () => {
+  test("accepts every sellable tier and resumes checkout after auth", () => {
+    for (const plan of ["builder", "managed", "agency_starter", "agency_growth", "agency_scale"]) {
+      assert.equal(normalizePaidPlan(plan), plan);
+      assert.equal(buildPaidSignupRedirect(plan), `/pricing?plan=${plan}&resume_checkout=1`);
+    }
+  });
+
+  test("rejects free, legacy, malformed, and oversized plan values", () => {
+    for (const plan of ["free", "workspace", "agency", "", "../builder", "x".repeat(80)]) {
+      assert.equal(normalizePaidPlan(plan), null);
+      assert.equal(buildPaidSignupRedirect(plan), null);
+    }
+  });
+});
 
 describe("buildSignupNextPath", () => {
   test("with url + intent=build produces /clients/new?url=...&intent=build", () => {
@@ -325,6 +342,7 @@ describe("isSafeInternalRedirect", () => {
     assert.equal(isSafeInternalRedirect("/clients/new"), true);
     assert.equal(isSafeInternalRedirect("/clients/new?url=https%3A%2F%2Fx.com&intent=build"), true);
     assert.equal(isSafeInternalRedirect("/dashboard"), true);
+    assert.equal(isSafeInternalRedirect("/pricing?plan=builder&resume_checkout=1"), true);
     assert.equal(isSafeInternalRedirect("/dashboard/billing"), true);
     assert.equal(isSafeInternalRedirect("/settings/domain"), true);
     assert.equal(isSafeInternalRedirect("/signup/connect-ai"), true);

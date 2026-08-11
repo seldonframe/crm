@@ -53,6 +53,7 @@ import {
   GENERATION_RUBRIC,
 } from "@/lib/vision/generation-gate";
 import { logEvent } from "@/lib/observability/log";
+import { captureServerEvent } from "@/lib/analytics/capture";
 
 export type RunDeps = {
   enforceWorkspaceLimit: (args: { primaryOrgId: string | null; ownedWorkspaceCount: number }) => Promise<LimitDecision>;
@@ -211,6 +212,12 @@ export async function runCreateFromUrl(input: RunInput): Promise<RunResult> {
         sse.close();
         return;
       }
+      captureServerEvent({
+        event: "workspace_build_started",
+        distinctId: input.sessionUser?.id ?? "anonymous",
+        groups: input.sessionUser?.primaryOrgId ? { workspace: input.sessionUser.primaryOrgId } : undefined,
+        properties: { build_source: "web_url", input_type: "url", is_internal: false },
+      });
 
       // 3. Workspace limit (uses REAL enforceWorkspaceLimit from
       //    lib/billing/limits.ts). Anonymous builds (no sessionUser) have
@@ -325,6 +332,12 @@ export async function runCreateFromUrl(input: RunInput): Promise<RunResult> {
       // the success variant. Guard explicitly so TS is happy and so a
       // malformed `ready` response (no id) doesn't crash the SSE thread.
       if (result.workspace_id) {
+        captureServerEvent({
+          event: "workspace_created",
+          distinctId: input.sessionUser?.id ?? "anonymous",
+          groups: { workspace: result.workspace_id },
+          properties: { workspace_id: result.workspace_id, creation_path: "web_url", is_internal: false },
+        });
         // Anonymous builds have no operator user to link as owner yet —
         // ownership is granted later via the claim flow (claim_token in
         // the done event below), so this step only runs for authed

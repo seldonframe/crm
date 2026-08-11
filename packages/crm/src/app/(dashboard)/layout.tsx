@@ -30,6 +30,7 @@ import { listManagedOrganizations, setActiveOrgAction } from "@/lib/billing/orgs
 import { getHiddenBlocks } from "@/lib/blocks/visibility-actions";
 import { getNotificationFeed } from "@/lib/notifications/feed";
 import { getThemeSettings } from "@/lib/theme/actions";
+import { parseInternalIds } from "@/lib/super-admin/internal-exclusion";
 import { db } from "@/db";
 import { activities, contacts, deals, landingPages, organizations, users } from "@/db/schema";
 import { desc, eq, sql } from "drizzle-orm";
@@ -132,6 +133,15 @@ export default async function DashboardLayout({
     : [null, 0, null];
 
   const isSwitchedOrg = Boolean(orgId && user?.orgId && orgId !== user.orgId);
+  const internalIds = parseInternalIds({
+    SF_INTERNAL_USER_IDS: process.env.SF_INTERNAL_USER_IDS,
+    SF_INTERNAL_AGENCY_ID: process.env.SF_INTERNAL_AGENCY_ID,
+  });
+  const isInternalAnalyticsUser = Boolean(
+    (user?.id && internalIds.userIds.includes(user.id)) ||
+    (activeOrg?.parentAgencyId && activeOrg.parentAgencyId === internalIds.agencyId) ||
+    activeOrg?.testMode,
+  );
 
   // Win-ladder + SeldonChat dock (2026-07-04): flag-gated front-door copilot.
   // Preview URL reuses the same buildWorkspaceUrls().home the dashboard hero
@@ -287,6 +297,9 @@ export default async function DashboardLayout({
         email={user?.email ?? null}
         orgId={user?.orgId ?? null}
         activeOrgId={isSwitchedOrg ? orgId : null}
+        workspaceName={activeOrg?.name ?? null}
+        agencyId={activeOrg?.parentAgencyId ?? null}
+        isInternal={isInternalAnalyticsUser}
       />
       <div className="min-h-screen w-full lg:p-3">
         <div className="flex min-h-screen w-full flex-col items-center justify-start bg-background/95 lg:rounded-2xl lg:border lg:border-border/80 lg:shadow-(--shadow-card)">

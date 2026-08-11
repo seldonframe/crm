@@ -16,6 +16,7 @@
 
 import Link from "next/link";
 import { usePathname } from "next/navigation";
+import { PosthogResetForm } from "@/components/analytics/posthog-reset-form";
 
 export type CustomerPortalNavProps = {
   orgSlug: string;
@@ -131,7 +132,7 @@ export function CustomerPortalNav({
             >
               {customerEmail}
             </div>
-            <form action={signOutAction} className="px-2 mt-3">
+            <PosthogResetForm action={signOutAction} className="px-2 mt-3">
               <button
                 type="submit"
                 className="text-[12px] underline"
@@ -139,7 +140,7 @@ export function CustomerPortalNav({
               >
                 Sign out
               </button>
-            </form>
+            </PosthogResetForm>
           </div>
         ) : null}
       </aside>

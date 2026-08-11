@@ -53,7 +53,7 @@ function sanitizeRedirectTo(value: unknown) {
   return isSafeInternalRedirect(value) ? (value as string).trim() : "/clients/new";
 }
 
-export async function signInWithGoogleAction() {
+export async function signInWithGoogleAction(formData: FormData) {
   assertWritable();
 
   // Google OAuth currently always lands on /clients/new — extending the
@@ -61,7 +61,8 @@ export async function signInWithGoogleAction() {
   // (the OAuth round trip on Google's side would need to preserve our
   // redirectTo, which works but requires testing across the consent
   // screens). Email magic-link is the primary path for the new flow.
-  await signIn("google", { redirectTo: "/clients/new" });
+  const redirectTo = sanitizeRedirectTo(formData.get("redirectTo"));
+  await signIn("google", { redirectTo });
 }
 
 // Test-only DI seam (the repo idiom from installAgentListingAction /

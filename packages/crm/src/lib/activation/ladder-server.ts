@@ -38,6 +38,7 @@ import { listLandingVersions } from "@/lib/landing/r1-customize";
 import { listConnections } from "@/lib/integrations/composio/client";
 import { COPILOT_ARCHETYPE } from "@/lib/agents/copilot/ensure-agent";
 import { captureServerEvent, type CaptureServerEventInput } from "@/lib/analytics/capture";
+import { parseInternalIds } from "@/lib/super-admin/internal-exclusion";
 import type { LadderInputs, LadderStepId } from "@/lib/activation/ladder";
 
 /** The default website-chatbot agent's archetype — pinned here from
@@ -360,6 +361,23 @@ export async function stampLadderEvent(
   deps.captureEvent({
     event: "activation_step_completed",
     distinctId: orgId,
+    groups: { workspace: orgId },
     properties: { step },
   });
+  if (step === "test_booking" || step === "go_live") {
+    const internalIds = parseInternalIds({
+      SF_INTERNAL_USER_IDS: process.env.SF_INTERNAL_USER_IDS,
+      SF_INTERNAL_AGENCY_ID: process.env.SF_INTERNAL_AGENCY_ID,
+    });
+    deps.captureEvent({
+      event: step === "test_booking" ? "first_test_booking_completed" : "workspace_went_live",
+      distinctId: orgId,
+      groups: { workspace: orgId },
+      properties: {
+        workspace_id: orgId,
+        ...(step === "test_booking" ? { booking_source: "workspace" } : { live_method: "activation_ladder" }),
+        is_internal: internalIds.agencyId === orgId,
+      },
+    });
+  }
 }

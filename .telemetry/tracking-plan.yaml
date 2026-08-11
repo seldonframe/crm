@@ -1,0 +1,44 @@
+meta:
+  product: SeldonFrame
+  version: 1
+  created: 2026-08-10
+  updated: 2026-08-10
+  owner: SeldonFrame
+  destinations: [posthog, ga4, database]
+
+entities:
+  user:
+    id_property: user_id
+    id_format: uuid
+    traits:
+      - {name: email, type: string, pii: true}
+      - {name: name, type: string, pii: true}
+      - {name: is_internal, type: boolean, pii: false}
+  workspace:
+    id_property: workspace_id
+    id_format: uuid
+    traits: [name, slug, plan_id, created_at, is_internal]
+  agency:
+    id_property: agency_id
+    id_format: uuid
+    traits: [is_internal]
+
+groups:
+  - type: agency
+    id_format: uuid
+    is_top_level: true
+  - type: workspace
+    id_format: uuid
+    parent_type: agency
+
+events:
+  - {name: pricing_plan_selected, category: commercial_intent, group_level: workspace, required_properties: [plan_id, billing_period, audience, is_authenticated, is_internal]}
+  - {name: account_created, category: lifecycle, group_level: workspace, required_properties: [signup_method, creation_path, is_internal]}
+  - {name: checkout_started, category: billing, group_level: workspace, required_properties: [plan_id, billing_period, checkout_source, is_internal]}
+  - {name: subscription_started, category: billing, group_level: workspace, required_properties: [plan_id, billing_period, currency, value, is_internal]}
+  - {name: workspace_build_started, category: activation, group_level: workspace, required_properties: [build_source, input_type, is_internal]}
+  - {name: workspace_created, category: lifecycle, group_level: workspace, required_properties: [workspace_id, creation_path, is_internal]}
+  - {name: first_test_booking_completed, category: activation, group_level: workspace, required_properties: [workspace_id, is_internal]}
+  - {name: workspace_went_live, category: activation, group_level: workspace, required_properties: [workspace_id, live_method, is_internal]}
+
+ga4_key_events: [sign_up, begin_checkout, purchase]
