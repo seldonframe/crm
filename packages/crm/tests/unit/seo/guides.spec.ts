@@ -38,6 +38,23 @@ test("getGuide resolves every slug and throws on unknown", () => {
   assert.throws(() => getGuide("not-a-real-guide"), /unknown guide slug/);
 });
 
+test("AI front office definition guide is answer-first and agency-aware", () => {
+  const guide = getGuide("what-is-an-ai-front-office");
+  const text = [guide.dek, ...guide.sections.map((section) => section.body), ...guide.faq.map((item) => item.a)].join(" ");
+
+  assert.equal(guide.cluster, "ai-agents");
+  assert.match(guide.dek, /AI front office/i);
+  assert.match(text, /website/i);
+  assert.match(text, /conversations?/i);
+  assert.match(text, /CRM|intake/i);
+  assert.match(text, /booking/i);
+  assert.match(text, /agent/i);
+  assert.match(text, /reviews?|follow-up/i);
+  assert.match(text, /Disclosure/i);
+  assert.match(text, /Builder.*\$29|\$29.*Builder/i);
+  assert.match(text, /Agency.*\$99|\$99.*Agency/i);
+});
+
 test("allGuideSlugs matches GUIDES length with no duplicates", () => {
   const slugs = allGuideSlugs();
   assert.equal(slugs.length, GUIDES.length);
