@@ -93,6 +93,8 @@ import { guide as clientPortalsForAiAgencies } from "./client-portals-for-ai-age
 import { guide as smmaToAiAgency } from "./smma-to-ai-agency";
 import { guide as whatToIncludeInAnAiFrontOfficePackage } from "./what-to-include-in-an-ai-front-office-package";
 import { guide as whatIsAnAiFrontOffice } from "./what-is-an-ai-front-office";
+import { guide as aiFrontOfficeExamples } from "./ai-front-office-examples";
+import { guide as aiFrontOfficeSoftwareForAgencies } from "./ai-front-office-software-for-agencies";
 import { guide as gptStoreAlternativeForDevelopers } from "./gpt-store-alternative-for-developers";
 import { guide as whereToSellAiAgents } from "./where-to-sell-ai-agents";
 import { guide as sellingAiServicesOnFiverrVsOwningYourAgent } from "./selling-ai-services-on-fiverr-vs-owning-your-agent";
@@ -205,6 +207,8 @@ export const GUIDES: Guide[] = [
   smmaToAiAgency,
   whatToIncludeInAnAiFrontOfficePackage,
   whatIsAnAiFrontOffice,
+  aiFrontOfficeExamples,
+  aiFrontOfficeSoftwareForAgencies,
   gptStoreAlternativeForDevelopers,
   whereToSellAiAgents,
   sellingAiServicesOnFiverrVsOwningYourAgent,

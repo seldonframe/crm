@@ -53,6 +53,61 @@ test("AI front office definition guide is answer-first and agency-aware", () => 
   assert.match(text, /Disclosure/i);
   assert.match(text, /Builder.*\$29|\$29.*Builder/i);
   assert.match(text, /Agency.*\$99|\$99.*Agency/i);
+  assert.match(text, /ai-front-office-examples|AI front office examples/i);
+  assert.match(text, /ai-front-office-software-for-agencies|AI front office software/i);
+});
+
+test("AI front office examples guide covers the seven required workflows", () => {
+  const guide = getGuide("ai-front-office-examples");
+  const requiredWorkflows = [
+    "Missed-call recovery",
+    "After-hours answering and booking",
+    "Speed-to-lead qualification",
+    "Quote or estimate intake",
+    "Appointment confirmation and no-show reduction",
+    "Review requests and response handling",
+    "Dormant-customer reactivation",
+  ];
+  const headings = guide.sections.map((section) => section.h2);
+  assert.deepEqual(
+    headings.filter((heading) => requiredWorkflows.includes(heading)),
+    requiredWorkflows,
+    "examples guide should contain exactly the seven required workflow headings",
+  );
+  for (const workflow of requiredWorkflows) {
+    const section = guide.sections.find((candidate) => candidate.h2 === workflow);
+    assert.ok(section, `missing workflow section: ${workflow}`);
+    assert.match(section.body, /Trigger:/i);
+    assert.match(section.body, /Action:/i);
+    assert.match(section.body, /System of record:/i);
+    assert.match(section.body, /Human handoff:/i);
+    assert.match(section.body, /Outcome:/i);
+  }
+});
+
+test("agency software guide has the ten-criterion checklist and pricing boundary", () => {
+  const guide = getGuide("ai-front-office-software-for-agencies");
+  const text = [guide.dek, ...guide.sections.map((section) => `${section.h2} ${section.body}`), ...guide.faq.map((item) => item.a)].join(" ");
+  const criteria = [
+    "client isolation",
+    "agency branding",
+    "client portals",
+    "reusable deployment",
+    "voice, chat, SMS",
+    "BYOK",
+    "testing, evaluations",
+    "data export",
+    "billing shape",
+    "open-source and self-hosting",
+  ];
+  for (const criterion of criteria) assert.match(text, new RegExp(criterion, "i"), `missing criterion: ${criterion}`);
+  assert.match(text, /Disclosure/i);
+  assert.match(text, /Agency Starter.*\$99|\$99.*Agency Starter/i);
+  assert.match(text, /10 client workspaces/i);
+  assert.match(text, /Builder.*\$29|\$29.*Builder/i);
+  assert.match(text, /own-business|own and operate/i);
+  assert.match(text, /does not include client sub-accounts|not.*client sub-accounts/i);
+  assert.match(text, /ai-front-office-examples|AI front office examples/i);
 });
 
 test("allGuideSlugs matches GUIDES length with no duplicates", () => {
