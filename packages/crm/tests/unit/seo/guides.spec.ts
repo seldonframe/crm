@@ -55,6 +55,19 @@ test("AI front office definition guide is answer-first and agency-aware", () => 
   assert.match(text, /Agency.*\$99|\$99.*Agency/i);
   assert.match(text, /ai-front-office-examples|AI front office examples/i);
   assert.match(text, /ai-front-office-software-for-agencies|AI front office software/i);
+  assert.match(text, /five connected core surfaces/i);
+  assert.match(text, /follow-up.*extension/i);
+  assert.doesNotMatch(text, /five connected surfaces.*Reviews and follow-up are the close-the-loop extension/i);
+});
+
+test("small-business GoHighLevel guide separates Builder from Agency pricing", () => {
+  const guide = getGuide("is-gohighlevel-worth-it-for-small-business");
+  const text = [guide.dek, ...guide.sections.map((section) => section.body), ...guide.faq.map((item) => item.a)].join(" ");
+
+  assert.match(text, /Builder is \$29\/mo for businesses you own and operate yourself/i);
+  assert.match(text, /Agency plans start at \$99\/mo for 10 client workspaces/i);
+  assert.match(text, /does not include client sub-accounts or agency resale/i);
+  assert.doesNotMatch(text, /SeldonFrame is \*\*\$29 a month, flat\*\*/i);
 });
 
 test("AI front office examples guide covers the seven required workflows", () => {

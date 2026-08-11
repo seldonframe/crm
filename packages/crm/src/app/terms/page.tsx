@@ -1,4 +1,5 @@
 import Link from "next/link";
+import { AGENCY_PLAN_FACTS, BUILDER_PRICING_CLAIM, HOSTED_AI_POLICY } from "@/lib/marketing/public-claims";
 
 export const metadata = {
   title: "Terms of Service — SeldonFrame",
@@ -63,7 +64,7 @@ export default function TermsPage() {
           effect at the end of the current billing period. Refunds are handled on a case-by-case basis.
         </p>
         <p className="mt-4 text-base leading-relaxed text-muted-foreground">
-          Plans: Free (forever), Growth ($29/month + usage), Scale ($99/month + usage). Self-hosted is free forever.
+          {`Plans include Free (the free build-and-claim flow), ${BUILDER_PRICING_CLAIM} Managed ($${AGENCY_PLAN_FACTS[1].priceMonthly}/month for one managed workspace), and Agency Starter ($${AGENCY_PLAN_FACTS[2].priceMonthly}/month for ${AGENCY_PLAN_FACTS[2].audience}), Agency Growth ($${AGENCY_PLAN_FACTS[3].priceMonthly}/month for ${AGENCY_PLAN_FACTS[3].audience}), and Agency Scale ($${AGENCY_PLAN_FACTS[4].priceMonthly}/month for ${AGENCY_PLAN_FACTS[4].audience}). ${HOSTED_AI_POLICY} Usage charges, taxes, and any third-party provider costs are disclosed at checkout or in the applicable plan details. Self-hosting is available under the applicable open-source license.`}
         </p>
       </section>
 

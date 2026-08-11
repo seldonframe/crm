@@ -2,6 +2,8 @@ import test from "node:test";
 import assert from "node:assert/strict";
 
 import { LandingMarketingFaqSection } from "../../../src/components/landing/marketing-faq-section";
+import { MarketingFaq } from "../../../src/components/marketing/faq";
+import TermsPage from "../../../src/app/terms/page";
 import { LandingMarketingPricingSection } from "../../../src/components/landing/marketing-pricing-section";
 import AiReceptionistCostCalculatorPage from "../../../src/app/(public)/tools/ai-receptionist-cost-calculator/page";
 import GohighlevelCostCalculatorPage from "../../../src/app/(public)/tools/gohighlevel-cost-calculator/page";
@@ -87,6 +89,23 @@ test("core marketing surfaces use the shared Builder and Agency pricing boundari
 
   assert.match(faq, new RegExp(AGENCY_PRICING_CLAIM.replace(/[.*+?^${}()|[\]\\]/g, "\\$&")));
   assert.match(builderPricing, /Builder is \$29\/mo for businesses you own and operate/i);
+});
+
+test("retained marketing FAQ and terms use the current plan ladder", () => {
+  const normalize = (text: string) => text.replace(/\s+/g, " ").trim();
+  const faq = normalize(collectText(MarketingFaq()).join(" "));
+  const terms = normalize(collectText(TermsPage()).join(" "));
+
+  assert.match(faq, /Builder is \$29\/mo for businesses you own and operate yourself/i);
+  assert.match(faq, /Agency plans start at \$99\/mo for 10 client workspaces/i);
+  assert.doesNotMatch(faq, /Growth at \$29|Scale at \$99/i);
+
+  assert.match(terms, /Builder is \$29\/mo for businesses you own and operate yourself/i);
+  assert.match(terms, /Managed \(\$49\/month for one managed workspace\)/i);
+  assert.match(terms, /Agency Starter \(\$99\/month for 10 client workspaces\)/i);
+  assert.match(terms, /Agency Growth \(\$199\/month for 30 client workspaces\)/i);
+  assert.match(terms, /Agency Scale \(\$299\/month for unlimited client workspaces\)/i);
+  assert.doesNotMatch(terms, /Growth \(\$29\/month|Scale \(\$99\/month/i);
 });
 
 test("every registered guide that mentions Builder pricing passes the semantic audit", () => {
