@@ -47,6 +47,16 @@ function isMarketingHost(rawBaseUrl: string | undefined): boolean {
   }
 }
 
+function isProductionMarketingHost(rawBaseUrl: string | undefined): boolean {
+  if (!rawBaseUrl) return false;
+  try {
+    const host = new URL(rawBaseUrl).hostname.toLowerCase();
+    return host === "seldonframe.com" || host === "www.seldonframe.com";
+  } catch {
+    return false;
+  }
+}
+
 const FLOW_BASE_URL = process.env.E2E_BASE_URL;
 const FLOW_IS_PRODUCTION = isProductionHost(FLOW_BASE_URL);
 
@@ -54,7 +64,7 @@ test.describe("render tier (GET-only, safe everywhere)", () => {
   test("GET / is healthy", async ({ page }) => {
     const response = await page.goto("/");
     expect(response?.status()).toBe(200);
-    if (isMarketingHost(FLOW_BASE_URL)) {
+    if (isProductionMarketingHost(FLOW_BASE_URL)) {
       expect(new URL(page.url()).pathname).toBe("/");
       await expect(page.getByRole("heading", { name: /Sell AI front offices/i })).toBeVisible();
       await expect(page.getByRole("link", { name: "For agencies", exact: true })).toHaveAttribute("href", "/agencies");
