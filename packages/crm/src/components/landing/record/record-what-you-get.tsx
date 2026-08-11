@@ -19,7 +19,7 @@ const CARDS = [
   },
   {
     title: "Yours, flat price",
-    body: "Recording and compiling are free with no signup. $29/mo when you switch it on. Cancel anytime.",
+    body: "Recording and compiling are free while you build the first client workspace. Agency plans start at $99/mo with 0% GMV. Cancel anytime.",
   },
 ] as const;
 

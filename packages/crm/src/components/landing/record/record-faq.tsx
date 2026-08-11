@@ -42,7 +42,7 @@ const FAQS: readonly FaqItem[] = [
   {
     question: "What does it cost?",
     answer:
-      "Recording, compiling, and testing are free — no signup to start. It's $29/mo when you switch your agent on. Cancel anytime.",
+      "Recording, compiling, and testing are free — build the first client workspace before checkout. Agency plans start at $99/mo, carry 0% GMV, and can be cancelled anytime.",
   },
 ];
 

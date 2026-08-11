@@ -39,6 +39,10 @@ import { heroSubmitTarget } from "@/components/landing/hero-submit-target";
 import { BorderBeam } from "@/components/ui/border-beam";
 import { Highlighter } from "@/components/ui/highlighter";
 import { AnimatedShinyText } from "@/components/ui/magic/animated-shiny-text";
+import {
+  AGENCY_HERO_HEADLINE,
+  AGENCY_HERO_SUBHEAD,
+} from "@/lib/marketing/public-claims";
 
 // Re-exported for callers that only need the pure routing decision (e.g.
 // tests) without pulling in this "use client" component.
@@ -250,29 +254,20 @@ export function MarketingHero({
       <p className="inline-flex items-center gap-2.5 font-sans text-[12.5px] tracking-[0.04em] text-[#6E665A]">
         <span className="inline-block h-px w-4 bg-[#9A9183]" aria-hidden />
         <span className="sf-blink-dot inline-block size-1.5 rounded-full bg-[#1F2B24]" aria-hidden />
-        Each client built in 3 minutes — No coding
+        The agency delivery loop — live in minutes
       </p>
 
       {/* Headline — outcome + mechanism (the Postiz formula) */}
       <h1 className="mt-3 max-w-[22ch] text-balance font-sans text-[clamp(34px,4.8vw,56px)] font-[500] leading-[1.04] tracking-[-0.025em] text-[#221D17]">
-        Sell AI front offices that run{" "}
-        <em className="font-[Newsreader,Georgia,serif] font-normal not-italic tracking-[-0.01em]">
-          on autopilot
-        </em>
+        {AGENCY_HERO_HEADLINE}
       </h1>
 
       {/* Subhead — what runs on autopilot, concretely, then the openness line */}
       <p className="mx-auto mt-4 max-w-[68ch] text-pretty text-[clamp(15.5px,1.6vw,17.5px)] leading-[1.55] text-[#6E665A]">
         <Highlighter repeat color="rgba(31, 43, 36,0.18)">
-          Every client gets an agent that answers every call, texts back every lead,
-          books the job, and asks for the review
+          {AGENCY_HERO_SUBHEAD}
         </Highlighter>{" "}
-        — across{" "}
-        <strong className="font-[500] text-[#221D17]">
-          voice, SMS, email, and web chat
-        </strong>{" "}
-        — plus the website, bookings, and CRM in one dashboard. You charge the retainer,
-        on a platform you own.
+        You keep the client relationship, the data, and the margin.
       </p>
       {/* Primary CTA — routes to the chatbox, not /signup: the label promises
           a build, and the ungated build IS the trial (route-by-promise,
@@ -291,7 +286,7 @@ export function MarketingHero({
           }}
           className="inline-flex items-center gap-2.5 rounded-[11px] bg-[#1F2B24] px-6 py-3.5 text-[15px] font-[500] text-[#F6F2EA] shadow-[0_1px_2px_rgba(34,29,23,.10),0_6px_16px_rgba(34,29,23,.10),0_18px_40px_rgba(34,29,23,.06),inset_0_1.5px_0_rgba(255,255,255,.12)] transition-all hover:-translate-y-[1.5px] hover:shadow-[0_2px_4px_rgba(34,29,23,.12),0_12px_26px_rgba(34,29,23,.14),inset_0_1.5px_0_rgba(255,255,255,.14)] active:translate-y-px"
         >
-          Build it free →
+          Build your first client front office →
         </a>
       </div>
 
@@ -448,7 +443,7 @@ export function MarketingHero({
 
       {/* Proof checklist */}
       <ul className="mt-6 flex flex-wrap items-center justify-center gap-x-5 gap-y-2">
-        {["Start free", "Each client live in 3 minutes", "Yours to keep — open source"].map((item) => (
+        {["Start with a client URL", "Publish a tested workspace", "AGPL-3.0 and yours to keep"].map((item) => (
           <li key={item} className="flex items-center gap-2 text-[13.5px] text-[#6E665A]">
             <span className="flex size-[17px] items-center justify-center rounded-full bg-[rgba(31, 43, 36,.12)] text-[10px] font-[700] text-[#1F2B24]" aria-hidden>✓</span>
             {item}

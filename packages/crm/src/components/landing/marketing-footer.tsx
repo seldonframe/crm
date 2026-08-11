@@ -3,7 +3,7 @@
 // Redesign 2026-06-18 — warm light aesthetic.
 // Seven-column footer on md+ (brand + 6 link columns incl. the Compare/Free-tools/
 // Pricing-guides SEO mesh, PostPlanify-style). Paper-soft background, warm ink
-// typography. Dual CTA strip above the columns — SMB + agency paths.
+// typography. Agency-first CTA strip above the columns.
 //
 // 2026-07-17: added the "Pricing guides" column (indexation-consolidation
 // Part 1c — the homepage/footer previously linked zero pricing pages despite
@@ -28,7 +28,7 @@ const COLUMNS: readonly Column[] = [
       { label: "Marketplace", href: "/marketplace" },
       { label: "Sell AI agents", href: "/sell" },
       { label: "For agencies", href: "/agencies" },
-      { label: "Changelog", href: "https://github.com/seldonframe/crm/releases", external: true },
+      { label: "Changelog", href: "https://github.com/seldonframe/seldonframe/releases", external: true },
     ],
   },
   {
@@ -37,10 +37,10 @@ const COLUMNS: readonly Column[] = [
       { label: "Docs", href: "/docs" },
       { label: "Guides", href: "/guides" },
       { label: "Blog", href: "/blog" },
-      { label: "MCP / Claude Code", href: "https://github.com/seldonframe/crm#claude-code-mcp", external: true },
+      { label: "MCP / Claude Code", href: "https://github.com/seldonframe/seldonframe#claude-code-mcp", external: true },
       { label: "API", href: "/docs" },
       { label: "Live demos", href: "#demos" },
-      { label: "Status", href: "https://github.com/seldonframe/crm", external: true },
+      { label: "Status", href: "https://github.com/seldonframe/seldonframe", external: true },
     ],
   },
   {
@@ -95,7 +95,7 @@ const COLUMNS: readonly Column[] = [
     links: [
       { label: "Contact", href: "mailto:hello@seldonframe.com" },
       { label: "Partnerships", href: "mailto:partner@seldonframe.com" },
-      { label: "GitHub", href: "https://github.com/seldonframe/crm", external: true },
+      { label: "GitHub", href: "https://github.com/seldonframe/seldonframe", external: true },
       { label: "Terms", href: "https://app.seldonframe.com/terms", external: true },
       { label: "Privacy", href: "https://app.seldonframe.com/policy", external: true },
     ],
@@ -118,7 +118,7 @@ export function MarketingFooter() {
               <BrandMark size={22} />
             </Link>
             <p className="m-0 text-[13.5px] leading-[1.55] text-[var(--lp-muted)]">
-              The complete front office — website, booking, AI receptionist, intake, and CRM —
+              The agency-owned front office — website, booking, AI receptionist, intake, and CRM —
               wired together so your clients never miss a lead.
             </p>
             <div className="flex flex-col gap-2.5">
@@ -167,7 +167,7 @@ export function MarketingFooter() {
         </div>
 
         <div className="mt-14 flex flex-wrap items-center justify-between gap-3.5 border-t border-[var(--lp-border-soft)] pt-5 font-mono text-[11.5px] text-[var(--lp-faint)]">
-          <span>© 2026 SeldonFrame, Inc. All rights reserved.</span>
+          <span>© 2026 SeldonFrame, Inc. · AGPL-3.0</span>
           <span className="lp-record-only items-center text-[13.5px] text-[var(--lp-muted)]">
             Recordings stay private — they train your agent only.
           </span>
@@ -181,7 +181,7 @@ export function MarketingFooter() {
               X
             </Link>
             <Link
-              href="https://github.com/seldonframe/crm"
+              href="https://github.com/seldonframe/seldonframe"
               target="_blank"
               rel="noopener noreferrer"
               className="text-[var(--lp-faint)] transition-colors hover:text-[var(--lp-ink)]"
