@@ -1,8 +1,7 @@
 // packages/crm/src/app/(marketing)/pricing-public/page.tsx
 //
-// New marketing pricing page (2026-06-18; flat-model rewrite 2026-06-22).
-// Standalone deep-dive on pricing — light warm theme, the flat $29/mo
-// model + GMV explainer + FAQ. Unauthenticated visitors can reach this
+// Standalone deep-dive on agency pricing — light warm theme, white-label
+// tiers, GMV explainer + FAQ. Unauthenticated visitors can reach this
 // from the nav or "Learn more about pricing" links.
 //
 // Route: /pricing-public
@@ -16,23 +15,16 @@ import { LandingMarketingFaqSection } from "@/components/landing/marketing-faq-s
 import { MarketingFinalCta } from "@/components/landing/marketing-final-cta";
 import { MarketingFooter } from "@/components/landing/marketing-footer";
 
-/** SF_TIER_LADDER (2026-07-08) — same strict-"1" contract as the other
- *  dark-by-default flags. Duplicated locally (also in
- *  app/pricing/page.tsx + app/(public)/page.tsx) rather than added to
- *  lib/web-build/policy.ts, which is outside this task's touched-files
- *  list. */
-function isTierLadderOn(env: { SF_TIER_LADDER?: string | undefined }): boolean {
-  return env.SF_TIER_LADDER?.trim() === "1";
-}
-
 export const metadata: Metadata = {
   title: "Pricing — SeldonFrame",
   description:
-    "$29/mo flat · unlimited workspaces · cancel anytime. No metered bills — plus a flat 2% fee only when SeldonFrame is your sales channel.",
+  "Agency plans from $99/mo with white-label client workspaces, branded portals, and 0% GMV. Builder and Managed plans cover your own operation.",
 };
 
 export default function PricingPublicPage() {
-  const tierLadderOn = isTierLadderOn({ SF_TIER_LADDER: process.env.SF_TIER_LADDER });
+  // Public pricing must show the current sellable agency ladder even when
+  // the legacy homepage flag is absent in a preview environment.
+  const tierLadderOn = true;
   return (
     <div className="min-h-screen bg-[#F6F2EA] text-[#221D17] selection:bg-[#1F2B24]/20 selection:text-[#1F2B24]">
       <MarketingNav />
@@ -46,15 +38,15 @@ export default function PricingPublicPage() {
               <span className="h-px w-4 bg-[#1F2B24] opacity-50" aria-hidden />
             </div>
             <h1 className="mx-auto mt-3.5 max-w-[20ch] text-[clamp(34px,4.8vw,56px)] font-[500] leading-[1.04] tracking-[-0.025em] text-[#221D17]">
-              $29 a month.{" "}
+              Agency plans from $99/mo.{" "}
               <em className="font-[Newsreader,Georgia,serif] font-normal not-italic text-[#6E665A]">
                 We only make money when you do.
               </em>
             </h1>
             <p className="mx-auto mt-4 max-w-[54ch] text-[16px] leading-[1.55] text-[#6E665A]">
-              One flat monthly price — unlimited workspaces, no metered bills, no surprise fees.
-              Build it free, and cancel anytime. We add a flat 2% fee only when SeldonFrame is your
-              sales channel — so we only make money when you do.
+              Deploy branded client workspaces from one repeatable delivery loop. Agency plans
+              include white-label, branded client portals, and 0% GMV. Build the first client
+              workspace before checkout and cancel anytime.
             </p>
           </div>
         </section>

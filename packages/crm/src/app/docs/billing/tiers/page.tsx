@@ -8,21 +8,21 @@ export default function Page() {
       category="Billing & plans"
       categoryHref="/docs"
       title="Plan tiers"
-      lede="What's included at each plan and what triggers a move up. Detailed feature breakdown. Every hosted plan includes managed AI — no key, no usage wallet."
+      lede="What's included at each plan and what triggers a move up. Choose Builder or Managed for your own operation; choose Agency when you deploy client workspaces."
       githubPath="app/docs/billing/tiers/page.tsx"
     >
-      <h2>Builder ($19/mo)</h2>
+      <h2>Builder ($29/mo)</h2>
       <ul>
         <li>Up to 10 landing pages</li>
         <li>Your own custom domain</li>
         <li>Your branding (logo, colors, fonts)</li>
         <li>Edit your whole site by chatting — no code</li>
-        <li>Managed AI included (no key to paste)</li>
-        <li>No CRM, booking, or AI agents (move to Workspace for those)</li>
+        <li>Bring your own AI key at provider cost</li>
+        <li>Full CRM, booking, intake, and AI agents for businesses you operate</li>
         <li>Community support (Discord)</li>
       </ul>
 
-      <h2>Workspace ($49/mo)</h2>
+      <h2>Managed ($49/mo)</h2>
       <ul>
         <li>One full AI front office: website + booking + intake + CRM + chatbot</li>
         <li>Custom domain + your branding</li>
@@ -30,27 +30,32 @@ export default function Page() {
         <li>Booking page + intake forms, wired to the CRM</li>
         <li>Website chatbot that books against the real calendar</li>
         <li>Missed-call text-back so you never lose a lead</li>
-        <li>Managed AI included (no key, no usage wallet)</li>
+        <li>Managed AI on SeldonFrame's keys under fair use</li>
         <li>Email support (24h response)</li>
       </ul>
 
-      <h2>Agency ($297/mo)</h2>
+      <h2>Agency Starter ($99/mo)</h2>
       <ul>
-        <li>10 client workspaces included, +$10/mo each beyond</li>
+        <li>10 client workspaces included</li>
         <li>White-label brand (your name + logo across the dashboard your clients see)</li>
         <li>Per-workspace custom domains</li>
-        <li>Optional AI voice receptionist at +$99/mo per agent</li>
-        <li>Bulk operations across client workspaces</li>
-        <li>Managed AI included on every client workspace</li>
-        <li>Priority support (4h response)</li>
+        <li>0% GMV on agency resale</li>
+        <li>BYOK AI at provider cost</li>
+      </ul>
+
+      <h2>Agency Growth ($199/mo) and Agency Scale ($299/mo)</h2>
+      <ul>
+        <li>Growth includes 30 client sub-accounts and one-click deploy operations.</li>
+        <li>Scale includes unlimited client sub-accounts, API + MCP access, and marketplace rent-out.</li>
+        <li>Both plans include full white-label, branded client portals, and 0% GMV.</li>
       </ul>
 
       <h2>What triggers a move up</h2>
       <ul>
-        <li>Needing a CRM, booking, and a chatbot — not just landing pages (Builder → Workspace).</li>
-        <li>Wanting to white-label and resell to clients (→ Agency).</li>
-        <li>Going past 10 client workspaces (+$10/mo each on Agency).</li>
-        <li>Adding an AI voice receptionist that answers the phone (+$99/mo per agent).</li>
+        <li>Wanting SeldonFrame-managed AI instead of your own provider key (Builder → Managed).</li>
+        <li>Wanting to white-label and resell to clients (→ Agency Starter).</li>
+        <li>Going past 10 client workspaces (Agency Starter → Agency Growth).</li>
+        <li>Going past 30 client workspaces or needing API/MCP and marketplace access (Agency Growth → Agency Scale).</li>
       </ul>
 
       <h2>Switching tiers</h2>

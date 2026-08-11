@@ -4,7 +4,7 @@ import { ArticleShell, Callout, CodeBlock, InAppLink, Step } from "../../article
 
 export const metadata = {
   title: "Connect Claude Code · Docs",
-  description: "Plug Claude Code into your SeldonFrame workspace via MCP. One token, two minutes, and you're driving your CRM and agents from the terminal.",
+  description: "Plug Claude Code into SeldonFrame via MCP and operate branded client workspaces from the terminal.",
 };
 
 export default function Page() {
@@ -13,7 +13,7 @@ export default function Page() {
       category="Getting started"
       categoryHref="/docs"
       title="Connect Claude Code"
-      lede="SeldonFrame ships with an MCP server. Paste your token into Claude Code and it can read your CRM, build pages, ship agents — all from natural language."
+      lede="SeldonFrame ships with an MCP server. Paste your token into Claude Code and build, test, publish, and operate client workspaces from natural language."
       githubPath="app/docs/getting-started/connect-claude-code/page.tsx"
     >
       <h2>What you'll get</h2>
@@ -21,10 +21,10 @@ export default function Page() {
         Once Claude Code is connected, you can say things like:
       </p>
       <ul>
-        <li><em>"Build me a website chatbot for my HVAC business that can book appointments."</em></li>
-        <li><em>"Add John Smith (john@acme.com) to my CRM with stage 'qualified.'"</em></li>
-        <li><em>"Run evals on my customer-support agent and publish if ≥90% pass."</em></li>
-        <li><em>"Show me my agent's last 10 conversations and flag any that asked for a refund."</em></li>
+        <li><em>"Build a branded website and booking flow for my HVAC client."</em></li>
+        <li><em>"Add John Smith (john@acme.com) to the client's CRM with stage 'qualified.'"</em></li>
+        <li><em>"Run evals on this client agent and publish if ≥90% pass."</em></li>
+        <li><em>"Show me the client's last 10 conversations and flag refund requests."</em></li>
       </ul>
 
       <Step n={1} title="Get your MCP token">

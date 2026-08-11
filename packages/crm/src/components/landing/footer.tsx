@@ -13,7 +13,7 @@
 // leans on (open-source section above, FAQ §6 isolation answer, the
 // pricing page's "BYOK on all tiers" rail).
 //
-// GitHub repo: seldonframe/crm (matches nav.tsx and the rest of Cut C).
+// GitHub repo: seldonframe/seldonframe.
 
 import Link from "next/link";
 import { GitFork, ExternalLink } from "lucide-react";
@@ -32,17 +32,17 @@ const PRODUCT_LINKS: readonly FooterLink[] = [
 const RESOURCE_LINKS: readonly FooterLink[] = [
   {
     label: "Claude Code MCP",
-    href: "https://github.com/seldonframe/crm#claude-code-mcp",
+    href: "https://github.com/seldonframe/seldonframe#claude-code-mcp",
     external: true,
   },
   {
     label: "GitHub Issues",
-    href: "https://github.com/seldonframe/crm/issues",
+    href: "https://github.com/seldonframe/seldonframe/issues",
     external: true,
   },
   {
     label: "Changelog",
-    href: "https://github.com/seldonframe/crm/releases",
+    href: "https://github.com/seldonframe/seldonframe/releases",
     external: true,
   },
 ];
@@ -90,7 +90,7 @@ export function LandingFooter() {
             </p>
           </div>
           <Link
-            href="https://github.com/seldonframe/crm"
+            href="https://github.com/seldonframe/seldonframe"
             target="_blank"
             rel="noopener noreferrer"
             // a11y: zinc-950 on teal #1F2B24 = 7.2:1 (white-on-teal
@@ -111,7 +111,7 @@ export function LandingFooter() {
               <br />
               Open source under{" "}
               <Link
-                href="https://github.com/seldonframe/crm/blob/main/LICENSE"
+                href="https://github.com/seldonframe/seldonframe/blob/main/LICENSE"
                 target="_blank"
                 rel="noopener noreferrer"
                 className="underline decoration-zinc-700 underline-offset-2 transition-colors hover:text-zinc-300 hover:decoration-zinc-500"

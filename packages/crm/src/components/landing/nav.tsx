@@ -33,7 +33,7 @@ type NavLink = { href: string; label: string; external?: boolean };
 
 const NAV_LINKS: NavLink[] = [
   { href: "/pricing", label: "Pricing" },
-  { href: "https://github.com/seldonframe/crm", label: "GitHub", external: true },
+  { href: "https://github.com/seldonframe/seldonframe", label: "GitHub", external: true },
   { href: "/login", label: "Sign In" },
 ];
 

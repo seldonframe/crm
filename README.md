@@ -4,9 +4,9 @@
 
 # SeldonFrame
 
-**Build almost any AI agent — from your IDE.**
+**Sell AI front offices. Deploy them in minutes.**
 
-The open-source platform that gives your coding agent the primitives real production agents need: triggers, skills, channels, tools, an owned memory (the Brain), guardrails, evals, one-command deploy, and built-in money rails. Describe an agent in one sentence — minutes later it's answering a real business's phone, chat, and SMS, and booking real appointments. Free to build.
+SeldonFrame is the agent-native, open-source alternative to GoHighLevel for agencies serving local businesses. Give your coding agent a client's URL and it can create a branded website, booking flow, intake, CRM, and AI agent in one workspace. Run evals, publish, and hand it off — then operate every client from one agency view.
 
 [![License: AGPL v3](https://img.shields.io/badge/License-AGPL_v3-1FAE85.svg)](LICENSE)
 [![npm version](https://img.shields.io/npm/v/@seldonframe/mcp.svg?color=1FAE85)](https://www.npmjs.com/package/@seldonframe/mcp)
@@ -15,7 +15,7 @@ The open-source platform that gives your coding agent the primitives real produc
 [![X](https://img.shields.io/badge/follow-%40themaxthule-1d9bf0.svg)](https://x.com/themaxthule)
 [![smithery badge](https://smithery.ai/badge/maximehoule100/seldonframe)](https://smithery.ai/servers/maximehoule100/seldonframe)
 
-[Website](https://seldonframe.com) · [For builders](https://seldonframe.com/build) · [Docs](https://seldonframe.com/docs) · [Discord](https://discord.gg/sbVUu976NW)
+[Website](https://seldonframe.com) · [For agencies](https://seldonframe.com/agencies) · [For builders](https://seldonframe.com/build) · [Docs](https://seldonframe.com/docs) · [Discord](https://discord.gg/sbVUu976NW)
 
 **Live demos:** [HVAC](https://j-marin-heating-air-conditioning-9599.app.seldonframe.com/) · [Med spa](https://app.seldonframe.com/w/metro-medspa-9d24) · [Med spa](https://app.seldonframe.com/w/skinney-medspa) · [Weight loss](https://app.seldonframe.com/w/vive-ageless-weight-loss-center)
 
@@ -23,7 +23,7 @@ The open-source platform that gives your coding agent the primitives real produc
 
 ---
 
-## Ship your first agent in 60 seconds
+## Ship your first client front office
 
 ```bash
 claude mcp add seldonframe -- npx -y @seldonframe/mcp
@@ -37,12 +37,12 @@ Or as an auto-updating Claude Code plugin:
 ```
 
 ```
-> Build me an AI receptionist for an HVAC company in New Orleans.
+> Build a branded AI front office for my HVAC client in New Orleans.
 
-  ✓ Live at acme-hvac.app.seldonframe.com
+  ✓ Workspace ready at acme-hvac.app.seldonframe.com
 ```
 
-No API key. No signup form. **Your first workspace is free forever.** That one sentence stands up a hosted front office — website, booking page, intake form, CRM — with an AI agent already answering on chat and booking against the real calendar. Add a phone number and it answers calls too.
+Build the first client workspace before paying. Hosted Managed uses SeldonFrame's keys; Builder and Agency plans are BYOK. Your agency owns the client relationship, workspace data, and delivery margin.
 
 **See a real one — a live workspace, not a mockup:**
 
@@ -81,6 +81,17 @@ And here's the agent on that site handling a real inbound — checking the live 
 </table>
 
 Click any screenshot — [this HVAC workspace](https://j-marin-heating-air-conditioning-9599.app.seldonframe.com/) is live and books real appointments. More live workspaces: [Metro MedSpa](https://app.seldonframe.com/w/metro-medspa-9d24) · [SKINNEY Medspa](https://app.seldonframe.com/w/skinney-medspa) · [Vive Ageless Weight Loss](https://app.seldonframe.com/w/vive-ageless-weight-loss-center) — and more on [seldonframe.com](https://seldonframe.com).
+
+---
+
+## The agency delivery loop
+
+1. **Start with the client URL.** SeldonFrame extracts the business facts and creates the workspace.
+2. **Apply your agency playbook.** Brand the site, booking flow, intake, CRM, and agent.
+3. **Verify before handoff.** Run evals and complete a real test booking.
+4. **Publish and operate.** Give the client a branded portal while your agency keeps the master view.
+
+The same loop works from the dashboard, Claude Code, Cursor, Windsurf, or any MCP-compatible agent. See the [agency workflow](https://seldonframe.com/agencies).
 
 ---
 
@@ -158,9 +169,9 @@ Agents that do real work end up touching real money — so the rails are platfor
 
 ---
 
-## Use SeldonFrame from any IDE
+## Operate every client from any IDE
 
-One npm package — [`@seldonframe/mcp`](https://www.npmjs.com/package/@seldonframe/mcp) — runs as a local MCP server in every major AI-native editor. Pick yours, paste the snippet, and ask your agent to build a workspace — your own website, booking page, intake form, and CRM, with the agent wired in. **First workspace is free and needs no API key.**
+One npm package — [`@seldonframe/mcp`](https://www.npmjs.com/package/@seldonframe/mcp) — runs as a local MCP server in every major AI-native editor. Pick yours, paste the snippet, and ask your agent to create or update a client workspace — website, booking page, intake form, CRM, and agent in one pass.
 
 <details>
 <summary><strong>Claude Code</strong></summary>
@@ -269,7 +280,7 @@ Or one line: `codex mcp add seldonframe -- npx -y @seldonframe/mcp`
 Once connected, restart your IDE (MCP connectors load at session start), then just say:
 
 ```
-> Build a workspace for [business name]. [city, state]. [services]. [phone, optional].
+> Build a workspace for my client: [business name]. [city, state]. [services]. [phone, optional].
 ```
 
 See the same six snippets, kept in sync, at [seldonframe.com/build](https://seldonframe.com/build#install).
@@ -290,19 +301,22 @@ Brings up Postgres, migrations, and the app on `localhost:3000` — the same das
 
 ---
 
-## When you're ready to sell
+## When you're ready to scale
 
-Your builder hub is **[seldonframe.com/build](https://seldonframe.com/build)** — publish an agent, set the price (monthly, per-call, per-outcome, or one-time), and any LLM can rent it over MCP. **Every published agent gets a free storefront**: a public listing page with schema.org markup, a markdown twin, and `llms.txt` coverage — so both humans *and* AI agents can discover and buy it. We ship the commodity agents as everyone's free floor, we never build vertical agents that compete with yours, and we never train on your prompts or data.
+Your agency hub is **[seldonframe.com/agencies](https://seldonframe.com/agencies)** — deploy branded client workspaces, set your own client pricing, and keep the master view. Builders can still publish portable agents through **[seldonframe.com/build](https://seldonframe.com/build)** and let other LLMs rent them over MCP.
 
 ## Pricing — no surprises
 
 | | |
 |---|---|
 | **Self-host** | $0 — AGPL-3.0, the entire monorepo · [`docker compose up`](QUICKSTART.md#self-host) and you're running |
-| **Hosted — first workspace** | Free forever, no card |
-| **Hosted — unlimited workspaces** | $29/mo flat (white-label + voice included) |
-| **Your AI tokens** | Bring your own key — we never mark up usage |
-| **When you sell** | 5% only when the marketplace brings the buyer · ~2% through your own storefront · **$0 anywhere else** |
+| **Builder** | $29/mo · BYOK · workspaces for businesses you operate |
+| **Managed** | $49/mo · SeldonFrame-managed AI · one workspace |
+| **Agency Starter** | $99/mo · white-label · 10 client workspaces · 0% GMV |
+| **Agency Growth** | $199/mo · 30 client workspaces · 0% GMV |
+| **Agency Scale** | $299/mo · unlimited client workspaces · API/MCP + marketplace access · 0% GMV |
+| **Build before checkout** | Create the first client workspace free, then choose the hosted plan that matches your delivery needs |
+| **Marketplace sales** | 5% only when the marketplace brings the buyer |
 ## Tech stack
 
 - **Next.js 16** (App Router) + **React 19** + **TypeScript** — one deployable app: dashboard, generated public sites, and API

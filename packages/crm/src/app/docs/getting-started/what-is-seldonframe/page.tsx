@@ -4,7 +4,7 @@ import { ArticleShell, Callout, InAppLink } from "../../article-shell";
 
 export const metadata = {
   title: "What is SeldonFrame · Docs",
-  description: "SeldonFrame is an AI-native Business OS — a CRM, website, agents, and automations all in one workspace, built and updated through natural language.",
+  description: "SeldonFrame is the agent-native, open-source front-office platform agencies use to deploy branded client workspaces.",
 };
 
 export default function Page() {
@@ -13,25 +13,23 @@ export default function Page() {
       category="Getting started"
       categoryHref="/docs"
       title="What is SeldonFrame"
-      lede="Your AI front office — website, booking, AI receptionist, intake, CRM, and chatbot, wired together and live in 60 seconds from a URL. Edit your whole site by chatting; missed-call text-back so you never lose a lead."
+      lede="The agent-native, open-source alternative to GoHighLevel for agencies: deploy a branded website, booking flow, CRM, intake, and agent for every client from one workspace."
       githubPath="app/docs/getting-started/what-is-seldonframe/page.tsx"
     >
       <h2>The short version</h2>
       <p>
-        Most local-service businesses end up paying for five tools — a
-        CRM, a website builder, an email tool, a chatbot, and a scheduler
-        — that don't talk to each other. SeldonFrame gives you all of
-        that as one AI front office. Your website, booking page, AI
-        receptionist, intake form, CRM, and reminders share the same
-        database, the same brand, and the same admin — live in 60 seconds
-        from a URL, with no code.
+        Agencies usually stitch together a CRM, website builder, scheduler,
+        forms, messaging, and an AI layer for every client. SeldonFrame
+        turns that delivery work into one repeatable client workspace:
+        branded website, booking page, AI receptionist, intake form, CRM,
+        reminders, and client portal sharing the same data and operating
+        surface.
       </p>
 
-      <Callout variant="tip" title="Never lose a lead">
-        When a call comes in that you can't pick up, missed-call
-        text-back fires automatically — the caller gets a friendly text
-        so the lead doesn't go cold. And you edit the whole site just by
-        chatting; you don't have to be technical.
+      <Callout variant="tip" title="Deliver, then operate">
+        Start from the client's URL, apply their brand and service facts,
+        run the agent evals, and publish a live workspace. Your agency keeps
+        the master view while the client gets a branded portal.
       </Callout>
 
       <h2>What you get on day one</h2>
@@ -41,7 +39,7 @@ export default function Page() {
         </li>
         <li>
           <strong>A public website</strong> at <code>your-name.app.seldonframe.com</code>{" "}
-          (or your own custom domain) with landing pages, intake forms, and
+          (or the client's custom domain) with landing pages, intake forms, and
           booking pages.
         </li>
         <li>
@@ -57,9 +55,9 @@ export default function Page() {
 
       <h2>What makes it AI-native</h2>
       <p>
-        Two things. First, the same workspace any operator clicks through
-        is also exposed as an MCP server — so Claude Code (or any
-        MCP-aware agent) can read and write your CRM, build pages, and
+        Two things. First, the same workspace any agency operates in the
+        dashboard is also exposed as an MCP server — so Claude Code (or any
+        MCP-aware agent) can read and write the client CRM, build pages, and
         ship agents through natural language. You can say{" "}
         <em>"build me a chatbot for my HVAC business"</em> in Claude Code
         and watch it happen.
@@ -80,10 +78,10 @@ export default function Page() {
 
       <h2>Who it's for</h2>
       <p>
-        Two audiences. Solo operators (HVAC owner, dentist, coach, agency
-        of one) who want a single tool that runs their entire customer
-        operation. And agencies — the "Acme AI" of the world — who white-label
-        the platform, host their clients on it, and bill them.
+        Agencies and independent operators who sell AI front offices to
+        service businesses. Solo operators can run their own workspace too;
+        agencies get the white-label client workspaces, branded portals, and
+        repeatable delivery workflow.
       </p>
 
       <h2>Next steps</h2>

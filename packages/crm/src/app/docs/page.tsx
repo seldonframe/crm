@@ -10,10 +10,9 @@
 // Card hover lifts subtly (border tint shift + scale-up icon). Generous
 // padding. No badges, no marketing fluff — just clean information.
 //
-// All links use anchor IDs (#chatbot, #workspaces, etc.) since
-// individual article pages aren't built yet. As articles get written,
-// the anchors get replaced with real /docs/<slug> routes — same nav
-// structure, just deeper.
+// The homepage is an agency-oriented map of the existing article routes.
+// Keep the first click concrete: an agency should be able to move from
+// promise → first workspace → client handoff without guessing.
 
 import Link from "next/link";
 import {
@@ -42,11 +41,10 @@ export default function DocsHome() {
           SeldonFrame Docs
         </h1>
         <p className="text-lg text-muted-foreground max-w-2xl">
-          Everything you need to stand up an AI front office — website,
-          booking, AI receptionist, intake, CRM, and chatbot, wired
-          together and live in 60 seconds from a URL. Edit your whole
-          site by chatting; missed-call text-back so you never lose a
-          lead.
+          Everything an agency needs to sell and operate AI front offices:
+          branded website, booking, intake, CRM, client portal, and agents
+          in repeatable workspaces. Start from a client URL, run the evals,
+          publish, and hand it off without rebuilding the stack every time.
         </p>
       </header>
 
@@ -56,27 +54,27 @@ export default function DocsHome() {
         <div className="grid gap-3 sm:grid-cols-2 lg:grid-cols-4">
           <BigCard
             icon={<Sparkles className="size-5" />}
-            title="3-minute demo"
-            description="Type a prompt in Claude Code, watch a full business OS provision live"
-            href="/docs#demo"
+            title="Agency delivery loop"
+            description="Take a client URL from workspace build to tested, branded handoff"
+            href="/docs/getting-started/first-workspace"
           />
           <BigCard
             icon={<Bot className="size-5" />}
             title="Build a chatbot"
-            description="One MCP call creates a website chatbot with FAQ + booking + safety evals"
-            href="/docs#chatbot"
+            description="One MCP call creates a website chatbot with FAQ, booking, and evals"
+            href="/docs/agents/build-chatbot"
           />
           <BigCard
             icon={<Building2 className="size-5" />}
             title="Your first workspace"
-            description="Live website + CRM + booking on a real subdomain in under 60 seconds"
-            href="/docs#first-workspace"
+            description="Create a client workspace with website, CRM, booking, and a public URL"
+            href="/docs/getting-started/first-workspace"
           />
           <BigCard
             icon={<Code2 className="size-5" />}
             title="Claude Code MCP"
-            description="Connect SeldonFrame to Claude Code and build with natural language"
-            href="/docs#claude-code"
+            description="Connect the MCP and operate client workspaces in natural language"
+            href="/docs/getting-started/connect-claude-code"
           />
         </div>
       </section>
@@ -93,20 +91,20 @@ export default function DocsHome() {
           />
           <Step
             num={2}
-            title="Build your workspace"
-            body="Tell Claude Code about your business — name, industry, services, hours. Seldon generates a public website, booking page, intake form, CRM pipeline, and AI agents tuned to your industry."
-            code='"Build me a workspace for Cypress Pine HVAC in Phoenix — services: AC repair, install, maintenance. Mon-Sat 7a-7p."'
+            title="Build a client workspace"
+            body="Give Claude Code the client's URL, industry, services, and hours. Seldon generates the public website, booking page, intake form, CRM pipeline, and agent foundation."
+            code='"Build a workspace for Cypress Pine HVAC in Phoenix — services: AC repair, install, maintenance. Mon-Sat 7a-7p."'
           />
           <Step
             num={3}
             title="Add a chatbot"
-            body="One MCP call wires a chatbot into your website. Pass FAQ + pricing + greeting; Seldon runs the safety evals, generates the embed snippet, gives you a sandbox URL."
+            body="One MCP call wires a chatbot into the client website. Pass FAQ, pricing facts, and greeting; Seldon runs the safety evals and gives you a publishable embed."
             code="build_website_chatbot({ workspace_id, name, faq, pricing_facts, greeting })"
           />
           <Step
             num={4}
             title="Customize from the dashboard"
-            body="Open the dashboard at app.seldonframe.com — every concept (customers, deals, bookings, agents, pages, email, automations) is editable inline. Or keep iterating from Claude Code with update_website_chatbot, update_agent_blueprint, etc."
+            body="Open the dashboard at app.seldonframe.com, apply the client's brand, review the evals, and publish the workspace. Hand the client their branded portal while you keep the agency view."
             isLast
           />
         </div>
@@ -161,10 +159,10 @@ export default function DocsHome() {
           icon={<Bot className="size-5" />}
           title="AI Agents"
           items={[
-            { title: "Build a chatbot", description: "configure_llm + create_agent + publish in one call", href: "/docs#chatbot" },
-            { title: "Eval gate", description: "8 platform-owned safety probes; ≥87.5% to go live", href: "/docs#evals" },
-            { title: "Update an agent", description: "Edit FAQ / pricing / greeting / capabilities inline", href: "/docs#update-agent" },
-            { title: "Embed on your site", description: "Single <script> tag, mobile-first, brand-inheriting", href: "/docs#embed" },
+            { title: "Build a chatbot", description: "configure_llm + create_agent + publish in one call", href: "/docs/agents/build-chatbot" },
+            { title: "Eval gate", description: "Run safety probes before the client-facing agent goes live", href: "/docs/agents/eval-gate" },
+            { title: "Update an agent", description: "Edit FAQ / pricing / greeting / capabilities inline", href: "/docs/agents/update-agent" },
+            { title: "Embed on your site", description: "Single <script> tag, mobile-first, brand-inheriting", href: "/docs/agents/embed" },
           ]}
         />
 
@@ -172,10 +170,10 @@ export default function DocsHome() {
           icon={<Layout className="size-5" />}
           title="Pages & website"
           items={[
-            { title: "Public pages", description: "Hero, services, FAQ, CTA — composed from your Soul", href: "/docs#pages" },
-            { title: "Forms", description: "Lead capture; submissions become customers automatically", href: "/docs#forms" },
-            { title: "Booking pages", description: "Slot picker tied to your availability + appointment types", href: "/docs#booking-pages" },
-            { title: "Custom domains", description: "Use yourdomain.com instead of the Seldon subdomain", href: "/docs#domains" },
+            { title: "Public pages", description: "Hero, services, FAQ, CTA — composed from the client's Soul", href: "/docs/pages/public-pages" },
+            { title: "Forms", description: "Lead capture; submissions become customers automatically", href: "/docs/pages/forms" },
+            { title: "Booking pages", description: "Slot picker tied to availability + appointment types", href: "/docs/pages/booking" },
+            { title: "Custom domains", description: "Use the client's domain instead of a Seldon subdomain", href: "/docs/your-business/custom-domains" },
           ]}
         />
 
@@ -216,7 +214,7 @@ export default function DocsHome() {
           icon={<CreditCard className="size-5" />}
           title="Billing"
           items={[
-            { title: "Pricing", description: "Builder ($19/mo), Workspace ($49/mo), Agency ($297/mo)", href: "/docs/billing/pricing" },
+            { title: "Pricing", description: "Builder $29, Managed $49, Agency $99/$199/$299", href: "/docs/billing/pricing" },
             { title: "Managed AI included", description: "AI is bundled on every plan — no key to paste, no usage wallet", href: "/docs/billing/pricing" },
             { title: "Invoices", description: "Stripe customer portal for receipts + payment methods", href: "/docs/billing/invoices" },
           ]}

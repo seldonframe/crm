@@ -56,8 +56,8 @@ export function MarketingFinalCta({
 
         <p className="mx-auto mt-5 max-w-[50ch] text-[16.5px] leading-[1.55] text-[color-mix(in_oklab,var(--lp-cta-slab-ink)_74%,transparent)]">
           Paste a client&rsquo;s URL or describe the business. We build the website, booking,
-          AI receptionist, intake, and CRM — all wired together and live in 3 minutes.
-          For your clients&rsquo; businesses, or your own.
+          AI receptionist, intake, and CRM — all wired together for your agency to brand,
+          publish, and hand off.
         </p>
 
         <div className="mt-9 flex flex-wrap items-center justify-center gap-4">
@@ -73,7 +73,7 @@ export function MarketingFinalCta({
               href="/#hero-form"
               className="inline-flex items-center gap-2.5 rounded-[11px] bg-[var(--lp-cta-slab-ink)] px-7 py-4 text-[15px] font-[500] text-[var(--lp-cta-slab)] shadow-[0_1px_2px_rgba(0,0,0,.2),0_12px_30px_rgba(0,0,0,.25),inset_0_1.5px_0_rgba(255,255,255,.6)] transition-all hover:-translate-y-[1.5px] active:translate-y-px focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-[var(--lp-accent)]"
             >
-              Build it free →
+              Build your first client front office →
             </Link>
           )}
           <Link
@@ -85,7 +85,7 @@ export function MarketingFinalCta({
         </div>
 
         <p className="mt-6 font-sans text-[13px] text-[color-mix(in_oklab,var(--lp-cta-slab-ink)_45%,transparent)]">
-          Build it free · $29/mo · unlimited workspaces · cancel anytime · your data exports as JSON
+          Build the first client workspace free · agency plans from $99/mo · 0% GMV · cancel anytime
         </p>
       </div>
     </section>

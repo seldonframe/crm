@@ -46,12 +46,10 @@ import { auth } from "@/auth";
 import { isWebUngatedBuildOn } from "@/lib/web-build/policy";
 import { isRecordToAgentOn } from "@/lib/recordings/policy";
 
-/** SF_TIER_LADDER (2026-07-08) — same strict-"1" contract as the other
- *  dark-by-default flags. Duplicated locally (also in
- *  app/pricing/page.tsx) rather than added to lib/web-build/policy.ts,
- *  which is outside this task's touched-files list. */
+/** Public marketing uses the current agency ladder by default. Set the
+ *  flag explicitly to "0" only for a controlled legacy rollback. */
 function isTierLadderOn(env: { SF_TIER_LADDER?: string | undefined }): boolean {
-  return env.SF_TIER_LADDER?.trim() === "1";
+  return env.SF_TIER_LADDER?.trim() !== "0";
 }
 
 import { UnifiedLanding } from "./unified-landing";
@@ -61,10 +59,10 @@ import { resolveLandingMode } from "./landing-mode";
 import { POSITIONING_ONE_LINER } from "./home-copy";
 
 export const metadata: Metadata = {
-  title: "SeldonFrame — Your entire service business, live in 3 minutes.",
+  title: "SeldonFrame — Sell AI front offices. Deploy them in minutes.",
   description: POSITIONING_ONE_LINER,
   openGraph: {
-    title: "SeldonFrame — Your entire service business, live in 3 minutes.",
+    title: "SeldonFrame — Sell AI front offices. Deploy them in minutes.",
     description: POSITIONING_ONE_LINER,
     type: "website",
     url: "https://seldonframe.com",
@@ -72,7 +70,7 @@ export const metadata: Metadata = {
   },
   twitter: {
     card: "summary_large_image",
-    title: "SeldonFrame — Your entire service business, live in 3 minutes.",
+    title: "SeldonFrame — Sell AI front offices. Deploy them in minutes.",
     description: POSITIONING_ONE_LINER,
     images: ["/brand/twitter-card.png"],
   },

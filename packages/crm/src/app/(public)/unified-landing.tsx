@@ -13,6 +13,7 @@ import { MarketingNav } from "@/components/landing/marketing-nav";
 import { MarketingHero } from "@/components/landing/marketing-hero";
 import { MarketingProofStrip } from "@/components/landing/marketing-proof-strip";
 import { MarketingBuildSteps } from "@/components/landing/marketing-build-steps";
+import { MarketingAgencyOwnership } from "@/components/landing/marketing-agency-ownership";
 import { MarketingIdeStrip } from "@/components/landing/marketing-ide-strip";
 import { MarketingAgentOrbit } from "@/components/landing/marketing-agent-orbit";
 import { MarketingModules, MarketingAgents } from "@/components/landing/marketing-modules";
@@ -73,6 +74,7 @@ export function UnifiedLanding({
               office") → the agent catalog, kept adjacent so the two-ways idea
               pays off immediately. */}
           <MarketingBuildSteps />
+          <MarketingAgencyOwnership />
           <MarketingModules />
           <MarketingAgents />
           {/* "Get paid" (2% GMV) section REMOVED 2026-07-16 (Max's call) —

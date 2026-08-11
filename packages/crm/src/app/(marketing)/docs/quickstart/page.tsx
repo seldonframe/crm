@@ -1,4 +1,4 @@
-// /docs/quickstart — the "Start for $0" CTA destination.
+// /docs/quickstart — the agency-first install and first-client path.
 // Three steps. Step 1 has two install paths (app vs terminal) for users
 // who aren't terminal-comfortable. Steps 2-3 are natural-language prompts
 // that work in either path — no fake CLI commands.
@@ -9,7 +9,7 @@ import { MarketingShell } from "../../marketing-shell";
 export const metadata: Metadata = {
   title: "Quickstart — SeldonFrame",
   description:
-    "Install SeldonFrame in 30 seconds, then describe your business in natural language. Works from the Claude Code desktop app or the terminal.",
+    "Install SeldonFrame once, then build and operate branded client front offices from Claude Code.",
 };
 
 const Section = ({
@@ -75,12 +75,12 @@ export default function QuickstartPage() {
         <header className="mb-10">
           <p className="text-[12px] uppercase tracking-[0.12em] text-[#71717a] font-mono mb-2">Docs · Quickstart</p>
           <h1 className="text-[clamp(30px,4vw,42px)] font-bold tracking-[-0.03em] text-[#fafafa] mb-4 leading-[1.15]">
-            Install once. Describe your business. Ship in minutes.
+            Install once. Ship your first client front office.
           </h1>
           <p className="text-[16px] text-[#a1a1aa] leading-[1.7]">
-            SeldonFrame plugs into Claude Code as an MCP server. After install, you describe
-            your business in natural language and Claude orchestrates the workspace creation,
-            block installs, and customization — same flow whether you&apos;re in the
+            SeldonFrame plugs into Claude Code as an MCP server. After install, you give it a
+            client URL and Claude orchestrates workspace creation, block installs, branding,
+            and customization — same flow whether you&apos;re in the
             Claude Code desktop app or the terminal.
           </p>
         </header>
@@ -104,10 +104,6 @@ export default function QuickstartPage() {
             <li className="flex items-start gap-2">
               <span className="text-[#F6F2EA] text-[12px] font-bold mt-[3px] shrink-0">✓</span>
               <span>Node.js 18 or newer (Node 20 recommended)</span>
-            </li>
-            <li className="flex items-start gap-2">
-              <span className="text-[#F6F2EA] text-[12px] font-bold mt-[3px] shrink-0">✓</span>
-              <span>An Anthropic API key (BYO — SeldonFrame doesn&apos;t margin on tokens)</span>
             </li>
           </ul>
         </section>
@@ -205,21 +201,22 @@ export default function QuickstartPage() {
 
           <Section
             number={2}
-            title="Describe your business"
+            title="Describe your client"
             body="Paste this template into Claude Code (app or terminal — same prompt) and fill in your details:"
-            code={`Create a workspace for my business:
-- Business name: [your business name]
+            code={`Create a workspace for my client:
+- Business name: [your client business name]
 - Industry: [hvac, dental, legal, coaching, real-estate, salon, ...]
 - Location: [city, state]
 - Operating hours: [Mon-Sat 7am-7pm]
 - Team size: [number]
 - Services offered: [3-5 main ones]
-- Website: [URL, optional]`}
+- Website: [client URL, optional]
+- Agency brand: [your agency name, logo, portal style]`}
           />
           <Section
             number={3}
-            title="Watch Claude build it"
-            body="Claude Code chains the right tool calls automatically: creates the workspace, installs an industry-matched vertical pack, configures booking availability, seeds your Soul from your website (if provided), and customizes the intake form. Returns live URLs you can share immediately. Your first workspace builds free — it's $29/mo flat for unlimited workspaces when you're ready to go live, and you can cancel anytime."
+            title="Test, publish, and hand it off"
+            body="Claude Code chains the right tool calls automatically: creates the workspace, installs an industry-matched vertical pack, configures booking availability, seeds the client's Soul from their website, and customizes the intake form. Run the agent evals, complete a test booking, publish the live URLs, and hand the client their branded portal. Build the first client workspace free; agency plans start at $99/mo and carry 0% GMV."
             code={`https://your-business.app.seldonframe.com           ← public home
 https://your-business.app.seldonframe.com/book      ← booking
 https://your-business.app.seldonframe.com/intake    ← intake form
@@ -257,7 +254,7 @@ https://app.seldonframe.com/switch-workspace?...    ← admin dashboard`}
               >
                 Star the repo &rarr;
               </a>
-              <span className="text-[#71717a]"> — open source under MIT</span>
+              <span className="text-[#71717a]"> — open source under AGPL-3.0</span>
             </li>
           </ul>
         </section>

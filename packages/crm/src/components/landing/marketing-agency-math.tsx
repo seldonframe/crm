@@ -45,10 +45,10 @@ export function MarketingAgencyMath() {
         <div className="mb-12 border-b border-[rgba(255,255,255,.12)] pb-8 text-center md:mb-14">
           <span className="inline-flex items-center gap-2.5 rounded-full border border-[rgba(246, 242, 234,.30)] bg-[rgba(246, 242, 234,.10)] px-4 py-1.5 text-[11.5px] font-[700] uppercase tracking-[0.14em] text-[#F6F2EA]">
             <span className="size-1.5 rounded-full bg-[#F6F2EA]" aria-hidden />
-            For builders &amp; agencies
+            For agencies
           </span>
           <p className="mx-auto mt-4 max-w-[48ch] font-[Newsreader,Georgia,serif] text-[clamp(18px,2.4vw,24px)] italic leading-[1.35] text-[rgba(246,242,234,.82)]">
-            Build agents for a living? List them — or run client workspaces under your own brand on the Agency plan.
+            Turn your delivery playbook into a repeatable, white-label client service.
           </p>
         </div>
 
@@ -57,18 +57,17 @@ export function MarketingAgencyMath() {
           <div>
             <div className="inline-flex items-center gap-2.5 text-[12px] font-[600] uppercase tracking-[0.09em] text-[rgba(246, 242, 234,.9)]">
               <span className="h-px w-4 bg-[rgba(246, 242, 234,.5)]" aria-hidden />
-              Build &amp; sell
+              Agency delivery
             </div>
             <h2 className="mt-3.5 text-[clamp(27px,4.2vw,40px)] font-[500] leading-[1.08] tracking-[-0.025em] text-[#F6F2EA]">
-              Build an agent once.{" "}
+              Deploy one playbook.{" "}
               <em className="font-[Newsreader,Georgia,serif] font-normal not-italic text-[rgba(246,242,234,.75)]">
-                Sell it to thousands.
+                Repeat it for every client.
               </em>
             </h2>
             <p className="mt-4 max-w-[50ch] text-[15.5px] leading-[1.55] text-[rgba(246,242,234,.74)]">
-              Build an AI agent for your business — then list it so other businesses can install it.
-              The marketplace puts it in front of them; you earn without marketing it. On the Agency
-              plan (from{" "}
+              Start from a client URL, then ship the same reliable delivery loop across your book of business.
+              On the Agency plan (from{" "}
               <strong className="font-[600] text-[#F6F2EA]">$99/mo</strong>), run client workspaces
               under your own brand — white-label, branded client portal, 10 sub-accounts included.
             </p>
@@ -76,8 +75,8 @@ export function MarketingAgencyMath() {
             {/* Builder perks list */}
             <ul className="mt-6 flex flex-col gap-3">
               {[
-                "List your agent on the marketplace — earn without marketing it",
-                "Build any agent in the Studio, in plain English — voice, SMS, chat & email",
+                "Create a branded client workspace from a URL",
+                "Build agents in plain English — voice, SMS, chat & email",
                 "From $99/mo: your brand on the entire platform — clients never see SeldonFrame",
                 "Set your own per-client pricing and keep the spread",
                 "10 client sub-accounts on Agency Starter ($99/mo) — 30 on Growth, unlimited on Scale",
