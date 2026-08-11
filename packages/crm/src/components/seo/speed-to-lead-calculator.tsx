@@ -1,4 +1,5 @@
 "use client";
+/* eslint-disable react-hooks/set-state-in-effect */
 
 // The speed-to-lead calculator — the interactive island of
 // /tools/speed-to-lead-calculator. Pure client math, no network calls:
@@ -78,7 +79,6 @@ export function SpeedToLeadCalculator(): ReactElement {
     if (bc !== undefined) setBaseClose(clamp(bc, BOUNDS.baseClose.min, BOUNDS.baseClose.max));
     const rt = parseNum(params, "rt");
     if (rt !== undefined) setBucketIdx(clamp(Math.round(rt), BOUNDS.bucket.min, BOUNDS.bucket.max));
-    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
 
   // Keep the address bar in sync (throttled) so the URL is a shareable permalink.
@@ -104,7 +104,6 @@ export function SpeedToLeadCalculator(): ReactElement {
   const revenueFast = Math.round(closedFast * dealValue);
   const revenueNow = Math.round(closedNow * dealValue);
   const lostMonthly = Math.max(0, revenueFast - revenueNow);
-  const lostYearly = lostMonthly * 12;
 
   const barMax = Math.max(revenueFast, 1);
   const barWidth = (v: number) => `${Math.max(6, Math.round((v / barMax) * 100))}%`;

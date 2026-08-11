@@ -1,4 +1,5 @@
 "use client";
+/* eslint-disable react-hooks/set-state-in-effect, react/no-unescaped-entities */
 
 // The voice AI cost-per-minute calculator — the interactive island of
 // /tools/voice-ai-cost-calculator. Pure client math, no network calls.
@@ -242,7 +243,6 @@ export function VoiceAiCostCalculator(): ReactElement {
     if (decoded.avgMinutes !== undefined) setAvgMinutes(decoded.avgMinutes);
     if (decoded.platform !== undefined) setPlatform(decoded.platform);
     if (decoded.includeTelephony !== undefined) setIncludeTelephony(decoded.includeTelephony);
-    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
 
   useEffect(() => {
@@ -259,7 +259,6 @@ export function VoiceAiCostCalculator(): ReactElement {
   }, [callsPerMonth, avgMinutes, platform, includeTelephony]);
 
   const result = computeVoiceCost(platform, callsPerMonth, avgMinutes, includeTelephony);
-  const maxComponent = Math.max(...result.stack.map((c) => c.perMinute), 0.001);
   const multiplier = result.advertisedPerMinute > 0 ? result.realPerMinute / result.advertisedPerMinute : 1;
 
   const canvasRef = useRef<HTMLCanvasElement | null>(null);

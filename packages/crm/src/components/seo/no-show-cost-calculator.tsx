@@ -1,4 +1,5 @@
 "use client";
+/* eslint-disable react-hooks/set-state-in-effect */
 
 // The no-show cost calculator — the interactive island of
 // /tools/no-show-cost-calculator. Pure client math, no network calls: sliders →
@@ -106,7 +107,6 @@ export function NoShowCostCalculator(): ReactElement {
     if (decoded.noShowRate !== undefined) setNoShowRate(decoded.noShowRate);
     if (decoded.apptValue !== undefined) setApptValue(decoded.apptValue);
     if (decoded.reductionPct !== undefined) setReductionPct(decoded.reductionPct);
-    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
 
   // Keep the address bar in sync with the current inputs (throttled) so the

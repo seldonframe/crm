@@ -113,7 +113,7 @@ export default function FreeBookingPagePage(): ReactElement {
         <ChatGptCtaCard />
 
         <section style={{ padding: "40px 0 0" }}>
-          <h2 style={{ margin: "0 0 14px", fontSize: 24, fontWeight: 800, letterSpacing: "-0.02em" }}>What's included</h2>
+          <h2 style={{ margin: "0 0 14px", fontSize: 24, fontWeight: 800, letterSpacing: "-0.02em" }}>What&apos;s included</h2>
           <ul style={{ margin: 0, paddingLeft: 20, fontSize: 15, lineHeight: 1.7, color: "rgba(34,29,23,0.72)" }}>
             <li>A <strong>booking page</strong> on your own <code>&lt;yourbusiness&gt;.app.seldonframe.com</code> subdomain</li>
             <li>As many <strong>appointment types</strong> as you offer, each with its own duration and details</li>
@@ -126,6 +126,7 @@ export default function FreeBookingPagePage(): ReactElement {
         <section style={{ padding: "20px 0 0" }}>
           <h2 style={{ margin: "0 0 14px", fontSize: 24, fontWeight: 800, letterSpacing: "-0.02em" }}>Free booking pages, compared</h2>
           <p style={{ margin: "0 0 14px", fontSize: 15, lineHeight: 1.65, color: "rgba(34,29,23,0.72)" }}>
+            {/* eslint-disable-next-line react/no-unescaped-entities */}
             Hedged where a competitor's free-tier terms can change — check their pricing page for the current details
             before you decide.
           </p>

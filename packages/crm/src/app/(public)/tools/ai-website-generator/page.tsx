@@ -118,7 +118,7 @@ export default function AiWebsiteGeneratorPage(): ReactElement {
           <ol style={{ margin: 0, paddingLeft: 20, fontSize: 15, lineHeight: 1.7, color: "rgba(34,29,23,0.72)" }}>
             <li><strong>Paste or describe.</strong> Drop in your Google Business Profile link, your existing website, or just a couple of sentences about what your business does.</li>
             <li><strong>The generator builds it.</strong> In about 3 minutes you get a real, hosted website with pages, copy, and a matching booking calendar and intake form — not a mockup.</li>
-            <li><strong>Claim it, or don't.</strong> The site is live and usable right away. Claim it when you want to keep editing, connect a domain, or add more.</li>
+            <li><strong>Claim it, or don&apos;t.</strong> The site is live and usable right away. Claim it when you want to keep editing, connect a domain, or add more.</li>
           </ol>
         </section>
 
@@ -136,8 +136,8 @@ export default function AiWebsiteGeneratorPage(): ReactElement {
         <section style={{ padding: "20px 0 0" }}>
           <h2 style={{ margin: "0 0 14px", fontSize: 24, fontWeight: 800, letterSpacing: "-0.02em" }}>AI website generators vs SeldonFrame</h2>
           <p style={{ margin: "0 0 14px", fontSize: 15, lineHeight: 1.65, color: "rgba(34,29,23,0.72)" }}>
-            Tools like Wix's AI site builder, Framer AI, and HubSpot's AI website generator are genuinely good at one
-            job: turning a prompt into a page fast. That's real, and worth using if a page is all you need.
+            Tools like Wix&apos;s AI site builder, Framer AI, and HubSpot&apos;s AI website generator are genuinely good at one
+            job: turning a prompt into a page fast. That&apos;s real, and worth using if a page is all you need.
           </p>
           <div style={{ overflowX: "auto" }}>
             <table style={{ width: "100%", borderCollapse: "collapse", fontSize: 14, minWidth: 480 }}>

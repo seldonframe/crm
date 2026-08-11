@@ -36,6 +36,7 @@ export function startsAtLabel(p: CompetitorPricing): string {
 /** Compose the 3-item FAQ every pricing page shares. Pure + exported so the
  *  Markdown twin and unit tests can reuse it without duplicating copy. */
 export function composePricingFaq(p: CompetitorPricing, name: string, audience: CompetitorAudience): { q: string; a: string }[] {
+  void audience;
   return [
     { q: `How much does ${name} cost?`, a: p.bottomLine },
     {

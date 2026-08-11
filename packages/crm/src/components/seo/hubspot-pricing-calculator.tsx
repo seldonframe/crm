@@ -1,4 +1,5 @@
 "use client";
+/* eslint-disable react-hooks/set-state-in-effect, react/no-unescaped-entities */
 
 // The HubSpot pricing calculator — the interactive island of
 // /tools/hubspot-pricing-calculator. Pure client math, no network calls.
@@ -228,7 +229,6 @@ export function HubspotPricingCalculator(): ReactElement {
     if (decoded.seats !== undefined) setSeats(decoded.seats);
     if (decoded.tier !== undefined) setTier(decoded.tier);
     if (decoded.onboarding !== undefined) setOnboarding(decoded.onboarding);
-    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
 
   useEffect(() => {

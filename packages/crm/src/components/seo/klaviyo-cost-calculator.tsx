@@ -1,4 +1,5 @@
 "use client";
+/* eslint-disable react-hooks/set-state-in-effect, react/no-unescaped-entities */
 
 // The Klaviyo cost calculator — the interactive island of
 // /tools/klaviyo-cost-calculator. Pure client math, no network calls.
@@ -185,7 +186,6 @@ export function KlaviyoCostCalculator(): ReactElement {
     if (decoded.profiles !== undefined) setProfiles(decoded.profiles);
     if (decoded.smsSends !== undefined) setSmsSends(decoded.smsSends);
     if (decoded.countSuppressed !== undefined) setCountSuppressed(decoded.countSuppressed);
-    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
 
   useEffect(() => {

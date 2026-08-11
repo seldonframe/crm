@@ -1,4 +1,5 @@
 "use client";
+/* eslint-disable react-hooks/set-state-in-effect, react/no-unescaped-entities */
 
 // The missed-call cost calculator — the interactive island of
 // /tools/missed-call-calculator. Pure client math, no network calls: sliders →
@@ -40,7 +41,6 @@ export function MissedCallCalculator(): ReactElement {
     if (decoded.missedPerWeek !== undefined) setMissedPerWeek(decoded.missedPerWeek);
     if (decoded.jobValue !== undefined) setJobValue(decoded.jobValue);
     if (decoded.closeRate !== undefined) setCloseRate(decoded.closeRate);
-    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
 
   // Keep the address bar in sync with the current inputs (throttled) so the

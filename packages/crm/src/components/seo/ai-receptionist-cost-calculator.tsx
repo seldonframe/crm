@@ -1,4 +1,5 @@
 "use client";
+/* eslint-disable react-hooks/set-state-in-effect, react/no-unescaped-entities */
 
 // The AI receptionist cost calculator — the interactive island of
 // /tools/ai-receptionist-cost-calculator. Pure client math, no network calls:
@@ -45,7 +46,6 @@ export function AiReceptionistCostCalculator(): ReactElement {
     if (decoded.wage !== undefined) setWage(decoded.wage);
     if (decoded.answeringRate !== undefined) setAnsweringRate(decoded.answeringRate);
     if (decoded.aiRate !== undefined) setAiRate(decoded.aiRate);
-    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
 
   // Keep the address bar in sync with the current inputs (throttled) so the
