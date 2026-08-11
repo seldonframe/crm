@@ -26,7 +26,12 @@ import {
   resolveCheckoutTierGate,
 } from "@/lib/billing/checkout-items";
 import type { TierId } from "@/lib/billing/plans";
+import { captureServerEvent } from "@/lib/analytics/capture";
+import { sendGa4Event } from "@/lib/analytics/ga4";
+import { parseInternalIds } from "@/lib/super-admin/internal-exclusion";
 import { buildCheckoutStartedEvent, captureFunnelEvent } from "@/lib/analytics/funnel";
+
+const CHECKOUT_SOURCES = new Set(["pricing", "signup_resume", "upgrade_modal"]);
 
 function normalizeReturnPath(value: unknown, fallback: string) {
   if (typeof value !== "string") {
@@ -119,6 +124,7 @@ export async function POST(req: NextRequest) {
      *  tier (e.g. "growth_monthly", "scale_monthly"). Server-side we
      *  resolve them to the corresponding tier id. */
     billingPeriod?: unknown;
+    checkout_source?: unknown;
   };
   const quantity = typeof body.quantity === "number" ? body.quantity : 1;
   const successPath = normalizeReturnPath(body.successPath, "/dashboard?success=true&session_id={CHECKOUT_SESSION_ID}");
@@ -126,6 +132,12 @@ export async function POST(req: NextRequest) {
   const requestedPriceId = typeof body.priceId === "string" ? body.priceId.trim() : "";
   const rawTier = typeof body.tier === "string" ? body.tier.trim().toLowerCase() : "";
   const lookupKey = typeof body.billingPeriod === "string" ? body.billingPeriod.trim().toLowerCase() : "";
+  const requestedCheckoutSource = typeof body.checkout_source === "string"
+    ? body.checkout_source.trim().slice(0, 40)
+    : "";
+  const checkoutSource = CHECKOUT_SOURCES.has(requestedCheckoutSource)
+    ? requestedCheckoutSource
+    : "pricing";
 
   if (!Number.isInteger(quantity) || quantity < 1) {
     return NextResponse.json({ error: "quantity must be a positive integer" }, { status: 400 });
@@ -307,14 +319,27 @@ export async function POST(req: NextRequest) {
     // and never fails the route on a capture problem (captureFunnelEvent
     // is fire-and-forget/catch-swallowing). No org row is loaded on this
     // path, so is_internal is omitted rather than adding a DB query.
-    captureFunnelEvent(
-      buildCheckoutStartedEvent({
-        userId,
-        orgId,
-        workspaceId: targetWorkspaceId,
-        tier: targetTier,
-      }),
-    );
+    const isInternal = parseInternalIds({
+      SF_INTERNAL_USER_IDS: process.env.SF_INTERNAL_USER_IDS,
+      SF_INTERNAL_AGENCY_ID: process.env.SF_INTERNAL_AGENCY_ID,
+    }).userIds.includes(userId);
+    captureFunnelEvent(buildCheckoutStartedEvent({ userId, orgId, workspaceId: targetWorkspaceId, tier: targetTier }));
+    captureServerEvent({
+      event: "checkout_started",
+      distinctId: userId,
+      groups: { workspace: targetWorkspaceId },
+      properties: {
+        plan_id: targetTier,
+        billing_period: lookupKey.endsWith("yearly") ? "yearly" : "monthly",
+        checkout_source: checkoutSource,
+        is_internal: isInternal,
+      },
+    });
+    void sendGa4Event({
+      eventName: "begin_checkout",
+      userId,
+      params: { plan_id: targetTier, checkout_source: checkoutSource },
+    });
 
     return NextResponse.json({ url: checkoutSession.url, tier: targetTier });
   }
@@ -385,14 +410,23 @@ export async function POST(req: NextRequest) {
   // path. Same posture as the tier path above: fired after sessions.create
   // succeeds, never fails the route on a capture problem, no DB query
   // added for is_internal.
-  captureFunnelEvent(
-    buildCheckoutStartedEvent({
-      userId,
-      orgId,
-      workspaceId: targetWorkspaceId,
-      priceId: resolvedPriceId,
-    }),
-  );
+  captureFunnelEvent(buildCheckoutStartedEvent({ userId, orgId, workspaceId: targetWorkspaceId, priceId: resolvedPriceId }));
+  captureServerEvent({
+    event: "checkout_started",
+    distinctId: userId,
+    groups: { workspace: targetWorkspaceId },
+    properties: {
+      plan_id: targetTier ?? "legacy",
+      billing_period: "monthly",
+      checkout_source: checkoutSource,
+      is_internal: false,
+    },
+  });
+  void sendGa4Event({
+    eventName: "begin_checkout",
+    userId,
+    params: { plan_id: targetTier ?? "legacy", checkout_source: checkoutSource },
+  });
 
   return NextResponse.json({ url: checkoutSession.url, tier: targetTier });
 }

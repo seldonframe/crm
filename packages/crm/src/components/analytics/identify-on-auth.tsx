@@ -27,6 +27,9 @@ export function IdentifyOnAuth({
   email,
   orgId,
   activeOrgId,
+  workspaceName,
+  agencyId,
+  isInternal = false,
 }: {
   userId: string | null;
   email: string | null;
@@ -34,6 +37,9 @@ export function IdentifyOnAuth({
   orgId: string | null;
   /** The currently active/switched-to workspace, if different and known. */
   activeOrgId?: string | null;
+  workspaceName?: string | null;
+  agencyId?: string | null;
+  isInternal?: boolean;
 }) {
   const lastIdentified = useRef<string | null>(null);
 
@@ -52,11 +58,22 @@ export function IdentifyOnAuth({
         // serialization and would leave a STALE switched-workspace id on the
         // person record after the user switches back to their home org.
         active_org_id: activeOrgId ?? null,
+        is_internal: isInternal,
       });
+      const workspaceGroupId = activeOrgId ?? orgId;
+      if (workspaceGroupId) {
+        posthog.group("workspace", workspaceGroupId, {
+          name: workspaceName ?? undefined,
+          is_internal: isInternal,
+        });
+      }
+      if (agencyId) {
+        posthog.group("agency", agencyId, { is_internal: isInternal });
+      }
     } catch {
       // Never let an identify call throw into the dashboard render path.
     }
-  }, [userId, email, orgId, activeOrgId]);
+  }, [userId, email, orgId, activeOrgId, workspaceName, agencyId, isInternal]);
 
   return null;
 }

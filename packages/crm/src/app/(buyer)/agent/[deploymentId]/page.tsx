@@ -25,6 +25,7 @@ import {
 // (dashboard-topbar.tsx) to sign out. Reused exactly (clears the operator +
 // admin-token cookies, then NextAuth) rather than hand-rolling a GET link.
 import { signOutAllSessionsAction } from "@/lib/auth/actions";
+import { PosthogResetForm } from "@/components/analytics/posthog-reset-form";
 import { BuyerShell } from "@/components/buyer/buyer-shell";
 import { BUYER } from "@/components/buyer/theme";
 import { MyAgentClient } from "./my-agent-client";
@@ -81,7 +82,7 @@ function AccountLinks() {
       >
         My workspaces →
       </Link>
-      <form action={signOutAllSessionsAction}>
+      <PosthogResetForm action={signOutAllSessionsAction}>
         <button
           type="submit"
           style={{
@@ -97,7 +98,7 @@ function AccountLinks() {
         >
           Sign out
         </button>
-      </form>
+      </PosthogResetForm>
     </div>
   );
 }

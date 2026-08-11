@@ -5,6 +5,9 @@ import { integer, pgTable, primaryKey, text, timestamp, uuid } from "drizzle-orm
 import { db } from "@/db";
 import { organizations, users } from "@/db/schema";
 import { authConfig } from "@/lib/auth/config";
+import { captureServerEvent } from "@/lib/analytics/capture";
+import { sendGa4Event } from "@/lib/analytics/ga4";
+import { parseInternalIds } from "@/lib/super-admin/internal-exclusion";
 
 // Sanitize env vars — Vercel stored them with trailing CR+LF bytes
 if (process.env.AUTH_SECRET) process.env.AUTH_SECRET = process.env.AUTH_SECRET.trim();
@@ -219,6 +222,20 @@ const adapter = {
           `[auth][adapter] aliasOrgToUser threw (swallowed): ${error instanceof Error ? error.message : String(error)}`,
         );
       }
+
+      const internalIds = parseInternalIds({
+        SF_INTERNAL_USER_IDS: process.env.SF_INTERNAL_USER_IDS,
+        SF_INTERNAL_AGENCY_ID: process.env.SF_INTERNAL_AGENCY_ID,
+      });
+      const isInternal = internalIds.userIds.includes(created.id) ||
+        (org.parentAgencyId != null && org.parentAgencyId === internalIds.agencyId);
+      captureServerEvent({
+        event: "account_created",
+        distinctId: created.id,
+        groups: { workspace: org.id, ...(org.parentAgencyId ? { agency: org.parentAgencyId } : {}) },
+        properties: { signup_method: "auth", creation_path: "signup", is_internal: isInternal },
+      });
+      void sendGa4Event({ eventName: "sign_up", userId: created.id });
 
       return created;
     } catch (err) {

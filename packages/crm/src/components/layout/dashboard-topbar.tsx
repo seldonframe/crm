@@ -9,6 +9,7 @@ import { usePathname } from "next/navigation";
 import { useLabels } from "@/lib/hooks/use-labels";
 import { signOutAllSessionsAction } from "@/lib/auth/actions";
 import { NotificationsBell } from "@/components/layout/notifications-bell";
+import posthog from "posthog-js";
 import type { NotificationItem } from "@/lib/notifications/feed";
 
 /*
@@ -467,7 +468,7 @@ export function DashboardTopbar({
                   >
                     Settings
                   </Link>
-                  <form action={signOutAllSessionsAction}>
+                  <form action={signOutAllSessionsAction} onSubmit={() => posthog.reset()}>
                     <button
                       type="submit"
                       className="w-full rounded-xl px-2.5 py-2 text-left text-sm text-muted-foreground transition-colors hover:bg-accent/70 hover:text-foreground"

@@ -100,6 +100,16 @@ describe("sendMagicLinkAction — redirectTo threading (marketplace buy intent)"
     assert.equal(box.captured!.redirectTo, "/clients/new?url=https%3A%2F%2Facme.com&intent=build");
   });
 
+  test("preserves the paid-plan resume target through magic-link auth", async () => {
+    const box: { captured: Captured } = { captured: null };
+    await sendMagicLinkAction(
+      {},
+      formWith({ email: "buyer@example.com", redirectTo: "/pricing?plan=agency_growth&resume_checkout=1" }),
+      deps(box),
+    );
+    assert.equal(box.captured!.redirectTo, "/pricing?plan=agency_growth&resume_checkout=1");
+  });
+
   test("an invalid email never reaches signIn (validation guards the action)", async () => {
     const box: { captured: Captured } = { captured: null };
     const result = await sendMagicLinkAction({}, formWith({ email: "not-an-email" }), deps(box));
