@@ -67,7 +67,9 @@ test.describe("render tier (GET-only, safe everywhere)", () => {
     const response = await page.goto("/agencies");
     expect(response?.status()).toBe(200);
     await expect(page.getByRole("heading", { name: /Deploy one playbook/i })).toBeVisible();
-    await expect(page.getByRole("link", { name: /See agency plans/i })).toHaveAttribute("href", "/pricing-public");
+    await expect(
+      page.locator('a[href="/pricing-public"]').filter({ hasText: /See agency plans/i }),
+    ).toHaveAttribute("href", "/pricing-public");
   });
 
   test("GET /docs exposes the agency-first docs hub", async ({ page }) => {
