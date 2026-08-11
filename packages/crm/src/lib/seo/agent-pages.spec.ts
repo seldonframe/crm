@@ -298,6 +298,10 @@ test("Tier-2 composition tailors the headline + intro to the vertical", () => {
     "Tier-2 intro should mention the vertical example service",
   );
   assert.ok(copy.intro.includes(job.painStat.text), "Tier-2 intro should weave the cited stat");
+  assert.match(copy.intro, /agenc(?:y|ies)/i, "Tier-2 intro should speak to the agency buyer");
+  assert.match(copy.intro, /client/i, "Tier-2 intro should frame the vertical as a client outcome");
+  assert.match(copy.metaDescription, /agenc(?:y|ies)|white-label/i);
+  assert.doesNotMatch(copy.intro, /Deploy one for your plumber business/i);
   // The first FAQ is localized to the trade.
   assert.match(copy.faq[0].q, /plumbers/);
 });
