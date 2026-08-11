@@ -41,12 +41,24 @@ function collectLinks(node: unknown, out: string[] = []): string[] {
   return out;
 }
 
+function splitCopy(text: string): string[] {
+  return text
+    .split(/\r?\n\s*\r?\n/)
+    .map((part) => part.trim())
+    .filter(Boolean);
+}
+
 test("core marketing surfaces use the shared Builder and Agency pricing boundaries", async () => {
-  const faq = collectText(LandingMarketingFaqSection()).join(" ");
-  const agencyPricing = collectText(LandingMarketingPricingSection({ tierLadderOn: true })).join(" ");
-  const builderPricing = collectText(LandingMarketingPricingSection()).join(" ");
-  const receptionist = collectText(await AiReceptionistCostCalculatorPage()).join(" ");
-  const gohighlevel = collectText(await GohighlevelCostCalculatorPage()).join(" ");
+  const faqParts = collectText(LandingMarketingFaqSection());
+  const agencyPricingParts = collectText(LandingMarketingPricingSection({ tierLadderOn: true }));
+  const builderPricingParts = collectText(LandingMarketingPricingSection());
+  const receptionistParts = collectText(await AiReceptionistCostCalculatorPage());
+  const gohighlevelParts = collectText(await GohighlevelCostCalculatorPage());
+  const faq = faqParts.join(" ");
+  const agencyPricing = agencyPricingParts.join(" ");
+  const builderPricing = builderPricingParts.join(" ");
+  const receptionist = receptionistParts.join(" ");
+  const gohighlevel = gohighlevelParts.join(" ");
   const receptionistLinks = collectLinks(await AiReceptionistCostCalculatorPage());
   const gohighlevelLinks = collectLinks(await GohighlevelCostCalculatorPage());
 
@@ -59,15 +71,18 @@ test("core marketing surfaces use the shared Builder and Agency pricing boundari
   assert.match(builderPricing, /\$29/);
   assert.match(builderPricing, /own/i);
 
-  for (const [name, text] of [
-    ["faq", faq],
-    ["agency pricing", agencyPricing],
-    ["builder pricing", builderPricing],
-    ["AI receptionist calculator", receptionist],
-    ["GoHighLevel calculator", gohighlevel],
+  for (const [name] of [
+    ["faq"],
+    ["agency pricing"],
+    ["builder pricing"],
+    ["AI receptionist calculator"],
+    ["GoHighLevel calculator"],
   ] as const) {
-    const result = auditPublicPricingText(text);
-    assert.equal(result.ok, true, `${name} has a misleading Builder/Agency claim: ${result.reasons.join("; ")}`);
+    const parts = name === "faq" ? faqParts : name === "agency pricing" ? agencyPricingParts : name === "builder pricing" ? builderPricingParts : name === "AI receptionist calculator" ? receptionistParts : gohighlevelParts;
+    for (const part of parts) {
+      const result = auditPublicPricingText(part);
+      assert.equal(result.ok, true, `${name} has a misleading Builder/Agency claim: ${result.reasons.join("; ")}`);
+    }
   }
 
   assert.match(faq, new RegExp(AGENCY_PRICING_CLAIM.replace(/[.*+?^${}()|[\]\\]/g, "\\$&")));
@@ -79,24 +94,29 @@ test("every registered guide that mentions Builder pricing passes the semantic a
 
   for (const guide of GUIDES) {
     const markdown = renderGuideMarkdown(guide.slug);
-    const text = [
+    const chunks = [
       guide.title,
       guide.description,
       guide.dek,
-      ...guide.sections.flatMap((section) => [section.h2, section.body, section.callout?.text ?? ""]),
+      ...guide.sections.flatMap((section) => [section.h2, ...splitCopy(section.body), section.callout?.text ?? ""]),
       ...guide.faq.flatMap((faq) => [faq.q, faq.a]),
     ]
-      .concat(markdown)
-      .join(" ");
-    if (!builderPricePattern.test(text)) continue;
-
-    const result = auditPublicPricingText(text);
-    assert.equal(result.ok, true, `${guide.slug} has a misleading Builder/Agency claim: ${result.reasons.join("; ")}`);
+      .flatMap(splitCopy)
+      .concat(markdown.split(/\r?\n/).flatMap(splitCopy));
+    for (const text of chunks) {
+      if (!builderPricePattern.test(text)) continue;
+      const result = auditPublicPricingText(text);
+      assert.equal(result.ok, true, `${guide.slug} has a misleading Builder/Agency claim: ${result.reasons.join("; ")}`);
+    }
   }
 });
 
 test("agency-intent guides keep Builder pricing separate from client resale", () => {
   const agencyIntentSlugs = [
+    "best-ai-agent-marketplaces",
+    "how-to-build-and-sell-a-speed-to-lead-agent",
+    "how-to-rent-out-an-ai-agent-via-mcp",
+    "how-to-build-a-review-request-agent",
     "ai-marketplace-fees-compared",
     "how-do-ai-agents-get-paid",
     "how-to-get-ai-agency-clients",
@@ -122,20 +142,29 @@ test("agency-intent guides keep Builder pricing separate from client resale", ()
     "best-gohighlevel-alternative-for-solopreneurs",
     "gohighlevel-vs-hubspot",
     "how-to-replace-gohighlevel",
+    "gohighlevel-saas-mode-vs-flat-pricing",
+    "why-agencies-leave-gohighlevel",
+    "is-gohighlevel-hard-to-learn",
+    "how-to-switch-from-gohighlevel",
+    "how-to-start-an-ai-automation-agency",
+    "how-to-build-an-after-hours-answering-agent",
+    "how-to-build-a-missed-call-text-back-agent",
     "gpt-store-alternative-for-developers",
   ] as const;
 
   for (const slug of agencyIntentSlugs) {
     const guide = getGuide(slug);
     const markdown = renderGuideMarkdown(slug);
-    const text = [
+    const chunks = [
       guide.title,
       guide.description,
       guide.dek,
-      ...guide.sections.flatMap((section) => [section.h2, section.body, section.callout?.text ?? ""]),
+      ...guide.sections.flatMap((section) => [section.h2, ...splitCopy(section.body), section.callout?.text ?? ""]),
       ...guide.faq.flatMap((faq) => [faq.q, faq.a]),
-    ].concat(markdown).join(" ");
-    const result = auditPublicPricingText(text);
-    assert.equal(result.ok, true, `${slug} has a misleading Builder/Agency claim: ${result.reasons.join("; ")}`);
+    ].concat(markdown.split(/\r?\n/).flatMap(splitCopy));
+    for (const text of chunks) {
+      const result = auditPublicPricingText(text);
+      assert.equal(result.ok, true, `${slug} has a misleading Builder/Agency claim: ${result.reasons.join("; ")}`);
+    }
   }
 });

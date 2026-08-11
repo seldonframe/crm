@@ -1,3 +1,4 @@
+import { AGENCY_PRICING_CLAIM, BUILDER_PRICING_CLAIM } from "../../marketing/public-claims";
 import type { Guide } from "./types";
 
 export const guide: Guide = {
@@ -52,12 +53,12 @@ export const guide: Guide = {
     {
       h2: "The alternative: one conversation, minutes to live",
       body:
-        "If the learning curve is the main thing holding you back, the weeks of setup are not the only way. GoHighLevel takes time because it hands you a builder and asks you to assemble the system.\n\nA different approach flips that around: describe your business once, and have the system assemble itself. That is how SeldonFrame works. You have one conversation about your business, and in about three minutes you get a full client workspace that is already live.\n\nThat workspace is not a blank shell either. It comes out with an **AI receptionist** that handles voice, chat, and SMS, plus a website, a CRM, online booking, review collection, a client portal, and a custom domain — all wired together and ready to take calls and bookings.\n\nThere is nothing to snapshot, import, or reconnect. The AI receptionist is the core of the product rather than a separate add-on you learn and enable later, so the thing most owners actually want — the phone answered and the calendar filled — is working from the first few minutes.\n\nThe pricing matches the simplicity. SeldonFrame is **$29 a month, flat**, with unlimited workspaces, the first workspace free forever, and no trial gate to wrestle with. It runs on your own AI keys and your own Twilio account, so usage flows through at raw provider cost with no platform markup, which is what keeps the price flat instead of creeping up as you grow.\n\nTo be fair, this is a trade. You give up the deep funnel building and the huge snapshot library that make GoHighLevel powerful for serious marketers and agencies. If that depth is what you need, GoHighLevel earns its learning curve. See the [full side-by-side](/guides/gohighlevel-vs-seldonframe) if you want the detailed comparison.\n\nBut if you mostly want to be live today instead of in three weeks, **one conversation beats one to three weeks of study.**",
+        `If the learning curve is the main thing holding you back, the weeks of setup are not the only way. GoHighLevel takes time because it hands you a builder and asks you to assemble the system.\n\nA different approach flips that around: describe your business once, and have the system assemble itself. That is how SeldonFrame works. You have one conversation about your business, and in about three minutes you get a full front office workspace that is already live.\n\nThat workspace is not a blank shell either. It comes out with an **AI receptionist** that handles voice, chat, and SMS, plus a website, a CRM, online booking, review collection, a client portal, and a custom domain — all wired together and ready to take calls and bookings.\n\nThere is nothing to snapshot, import, or reconnect. The AI receptionist is the core of the product rather than a separate add-on you learn and enable later, so the thing most owners actually want — the phone answered and the calendar filled — is working from the first few minutes.\n\nThe pricing matches the split. For one business you own and operate, ${BUILDER_PRICING_CLAIM} Agencies delivering client front offices use ${AGENCY_PRICING_CLAIM} Both paths run on your own AI keys and your own Twilio account, so usage flows through at raw provider cost with no platform markup.\n\nTo be fair, this is a trade. You give up the deep funnel building and the huge snapshot library that make GoHighLevel powerful for serious marketers and agencies. If that depth is what you need, GoHighLevel earns its learning curve. See the [full side-by-side](/guides/gohighlevel-vs-seldonframe) if you want the detailed comparison.\n\nBut if you mostly want to be live today instead of in three weeks, **one conversation beats one to three weeks of study.**`,
       diagram: {
         type: "compare",
         title: "Two ways to get to a working system",
         left: { heading: "GoHighLevel", items: ["You assemble the system", "1-3 weeks to functional", "Snapshots speed up building, not learning", "Deep funnel building + snapshot library"] },
-        right: { heading: "SeldonFrame", items: ["The system assembles itself", "About 3 minutes to live", "AI receptionist + site + CRM wired in from the start", "Flat $29/mo, no platform markup"] },
+      right: { heading: "SeldonFrame", items: ["The system assembles itself", "About 3 minutes to live", "AI receptionist + site + CRM wired in from the start", "Builder is $29/mo for one owned business; Agency plans start at $99/mo"] },
       },
     },
   ],
@@ -72,7 +73,7 @@ export const guide: Guide = {
     },
     {
       q: "Is there an easier alternative?",
-      a: "Yes. SeldonFrame lets you build a full, live workspace from one conversation in about three minutes, with an AI receptionist, website, CRM, booking, and reviews already wired together, for $29 a month flat. It trades GoHighLevel's deep funnel building and large snapshot library for a setup that is live the same day rather than after one to three weeks.",
+      a: `Yes. SeldonFrame lets you build a full, live workspace from one conversation in about three minutes, with an AI receptionist, website, CRM, booking, and reviews already wired together. ${BUILDER_PRICING_CLAIM} Agencies use ${AGENCY_PRICING_CLAIM} It trades GoHighLevel's deep funnel building and large snapshot library for a setup that is live the same day rather than after one to three weeks.`,
     },
   ],
   sources: [

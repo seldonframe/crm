@@ -1,4 +1,4 @@
-import { AGENCY_PRICING_CLAIM } from "../../marketing/public-claims";
+import { AGENCY_PRICING_CLAIM, BUILDER_PRICING_CLAIM } from "../../marketing/public-claims";
 import type { Guide } from "./types";
 
 export const guide: Guide = {
@@ -85,7 +85,7 @@ export const guide: Guide = {
     },
     {
       q: "What do agencies switch to?",
-      a: "Many move to a flat-priced, AI-first front office like SeldonFrame. Agency plans are 99 to 299 dollars a month flat with white-label and client sub-accounts included (0% GMV), and solo builders pay 29 dollars a month — so adding clients never adds per-location AI fees. The AI receptionist, website, CRM, booking, reviews, and custom domains are included, it runs on your own AI keys and Twilio at raw provider cost, and a full client workspace is built from one conversation in about three minutes.",
+      a: `Many move to a flat-priced, AI-first front office like SeldonFrame. ${AGENCY_PRICING_CLAIM} ${BUILDER_PRICING_CLAIM} Agencies should use the Agency tier for client delivery; Builder is not a client-resale plan. The AI receptionist, website, CRM, booking, reviews, and custom domains are included, it runs on your own AI keys and Twilio at raw provider cost, and a full client workspace is built from one conversation in about three minutes.`,
     },
     {
       q: "Is GoHighLevel worth it for a small agency?",

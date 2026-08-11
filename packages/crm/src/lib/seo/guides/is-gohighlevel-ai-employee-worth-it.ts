@@ -1,4 +1,4 @@
-import { AGENCY_PRICING_CLAIM } from "../../marketing/public-claims";
+import { AGENCY_PRICING_CLAIM, BUILDER_PRICING_CLAIM } from "../../marketing/public-claims";
 import type { Guide } from "./types";
 
 export const guide: Guide = {
@@ -90,7 +90,7 @@ export const guide: Guide = {
     },
     {
       q: "What is a cheaper AI receptionist for multiple clients?",
-      a: "SeldonFrame's **Agency plans, $99-$299 per month flat**, cover every client sub-account with white-label, a branded portal, and the AI receptionist included — no per-location AI fee, because the AI runs on your own keys at raw provider cost. (Solo operators with just their own workspaces can use the $29/mo Builder tier instead.) Either way, the cost doesn't grow per client the way a per-location add-on does.",
+      a: `SeldonFrame's **Agency plans, $99-$299 per month flat**, cover every client sub-account with white-label, a branded portal, and the AI receptionist included — no per-location AI fee, because the AI runs on your own keys at raw provider cost. ${BUILDER_PRICING_CLAIM} The Agency tier's platform cost does not grow per client the way a per-location add-on does.`,
     },
   ],
   sources: [
