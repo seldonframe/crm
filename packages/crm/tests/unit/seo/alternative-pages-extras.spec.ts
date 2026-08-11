@@ -3,12 +3,13 @@
 // BuildWidget's normalizeSiteInput helper (task D) — mirrors the style of
 // best-pages.spec.ts and seldonframe-vs.spec.ts.
 
-import { describe, test } from "node:test";
+import { test } from "node:test";
 import assert from "node:assert/strict";
 
-import { COMPETITORS, getCompetitor } from "../../../src/lib/seo/alternative-pages";
-import { VS_PAIRS, vsSlug, getVsPair } from "../../../src/lib/seo/alternative-pages-extras";
+import { COMPETITORS, getCompetitor, SF_COLUMN, sfPriceAnchor } from "../../../src/lib/seo/alternative-pages";
+import { VS_PAIRS, vsSlug, getVsPair, SF_PROS, EXTRAS } from "../../../src/lib/seo/alternative-pages-extras";
 import { normalizeSiteInput } from "../../../src/components/seo/build-widget";
+import { auditPublicPricingText } from "../../../src/lib/marketing/public-pricing-audit";
 
 // ─── task A: the 10 new big-volume third-party pairs ───────────────────────
 
@@ -57,6 +58,31 @@ test("every competitor has a valid https pricingSourceUrl", () => {
 test("getCompetitor returns a competitor with pricingSourceUrl set", () => {
   const c = getCompetitor("gohighlevel");
   assert.equal(c.pricingSourceUrl, "https://www.gohighlevel.com/pricing");
+});
+
+test("comparison pricing keeps Builder and Agency resale boundaries explicit", () => {
+  assert.match(SF_COLUMN.pricingModel, /Builder is \$29\/mo for one business you operate/i);
+  assert.match(SF_COLUMN.pricingModel, /Agency plans start at \$99\/mo/i);
+  assert.match(sfPriceAnchor("agency"), /Agency plans|agency plans|white-label agency plans/i);
+  assert.match(sfPriceAnchor("agency"), /Builder is \$29\/mo for one business you operate/i);
+  assert.match(SF_PROS.join(" "), /Builder is \$29\/mo for one business you own and operate/i);
+  assert.match(SF_PROS.join(" "), /Agency plans from \$99\/mo/i);
+  assert.match(EXTRAS.gohighlevel.chooseSf.join(" "), /Agency plans from \$99\/mo/i);
+});
+
+test("every competitor surface keeps Builder pricing separate from client resale", () => {
+  for (const competitor of COMPETITORS) {
+    const copy = [
+      competitor.heroSub,
+      ...competitor.intro,
+      ...competitor.switchReasons.flatMap((reason) => [reason.title, reason.body]),
+      ...competitor.faq.flatMap((faq) => [faq.q, faq.a]),
+    ];
+    for (const text of copy) {
+      const result = auditPublicPricingText(text);
+      assert.equal(result.ok, true, `${competitor.slug} has an ambiguous Builder/Agency claim: ${result.reasons.join("; ")}`);
+    }
+  }
 });
 
 // ─── task D: normalizeSiteInput (BuildWidget) ──────────────────────────────

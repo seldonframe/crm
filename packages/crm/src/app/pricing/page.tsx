@@ -94,7 +94,10 @@ function buildLadderTiers(): LadderTier[] {
  *  isSimpleHomeOn). Read server-side here rather than adding a new
  *  export to policy.ts (kept out of this task's touched-files list). */
 function isTierLadderOn(env: { SF_TIER_LADDER?: string | undefined }): boolean {
-  return env.SF_TIER_LADDER?.trim() === "1";
+  // The current sellable ladder is the production default. Keep an explicit
+  // `0` escape hatch for a controlled rollback; an unset flag must never send
+  // an agency visitor to the retired single-card checkout.
+  return env.SF_TIER_LADDER?.trim() !== "0";
 }
 
 const FAQS: Array<{ q: string; a: string }> = [

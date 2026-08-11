@@ -12,7 +12,7 @@ import { VS_PAIRS, vsSlug, isKeptVsPair } from "@/lib/seo/alternative-pages-extr
 export const metadata: Metadata = {
   title: "SeldonFrame vs the alternatives — honest comparisons for agencies & builders",
   description:
-    "How SeldonFrame compares to GoHighLevel, HubSpot, ActiveCampaign, ClickFunnels, Vapi, Podium and more — plus HighLevel head-to-heads: AI receptionist, website, CRM and booking at $29/mo flat.",
+    "How SeldonFrame compares to GoHighLevel, HubSpot, ActiveCampaign, ClickFunnels, Vapi, Podium and more — Builder is $29/mo for one business you operate; Agency plans start at $99/mo for client delivery.",
   alternates: { canonical: "/alternatives" },
 };
 
@@ -39,6 +39,11 @@ export default function AlternativesHubPage(): ReactElement {
         <p style={{ margin: "14px 0 0", fontSize: 17, lineHeight: 1.55, color: "rgba(34,29,23,0.7)", maxWidth: 660 }}>
           Honest, row-by-row comparisons against the platforms agencies and builders evaluate most — pricing, the AI
           receptionist, and the business system behind it. Where a competitor is the better fit, we say so.
+        </p>
+        <p style={{ margin: "12px 0 0", fontSize: 14.5, lineHeight: 1.6, color: "rgba(34,29,23,0.65)", maxWidth: 660 }}>
+          Pricing boundary: Builder is $29/mo for one business you own and operate. Managed is $49/mo on
+          SeldonFrame&apos;s keys. Client sub-accounts, white-label delivery, and agency resale start at $99/mo on
+          Agency Starter.
         </p>
         <div style={{ display: "grid", gridTemplateColumns: "repeat(auto-fill, minmax(260px, 1fr))", gap: 14, marginTop: 32 }}>
           {COMPETITORS.map((c) => (

@@ -61,7 +61,7 @@ const PLAN: Tier = {
   name: "SeldonFrame",
   price: "$29",
   cadence: "/ mo",
-  tagline: "The whole platform — build it for your business, or sell it to your clients.",
+  tagline: "The whole platform — build it for one business you own and operate.",
   features: [
     "Website + landing pages on your own domain",
     "Booking page (Cal.diy) tied to live availability",
@@ -69,7 +69,7 @@ const PLAN: Tier = {
     "Intake forms wired to the CRM",
     "24/7 AI agent across voice, SMS, web chat & email",
     "Build ANY agent in the Studio — connect external tools",
-    "Whitelabel + resell each workspace to clients",
+    "BYOK AI and telephony, with no client sub-accounts or agency resale",
     "Own + export everything (AGPL — no lock-in)",
   ],
 };
@@ -134,13 +134,13 @@ export function PricingShell({ isAuthed }: PricingShellProps) {
         <div className="space-y-8">
           <header className="space-y-5">
             <h1 className="text-4xl font-semibold leading-[1.05] tracking-tight sm:text-5xl lg:text-[3.5rem]">
-              Spin up a client&apos;s{" "}
+              Spin up your{" "}
               <span className="text-primary">Business OS</span>{" "}
               <span className="text-muted-foreground">in 60 seconds.</span>
             </h1>
             <p className="text-base text-muted-foreground sm:text-lg">
               Paste a URL. We build the CRM, booking page, intake form, and AI
-              chatbot in one pass.
+              chatbot for the business you operate in one pass.
             </p>
           </header>
 

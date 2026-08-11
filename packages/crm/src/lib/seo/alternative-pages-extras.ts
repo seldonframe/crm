@@ -29,8 +29,8 @@ export type CompetitorExtras = {
 export const SF_PROS: string[] = [
   "An AI receptionist that answers calls, SMS, and web chat — and books real jobs into a real calendar and CRM",
   "The whole front office included: multi-page website, CRM, booking, intake forms, review automation",
-  "$29/mo flat with unlimited workspaces — bring your own key and AI and phone service run at raw provider cost",
-  "Whitelabel built in (agency plan, from $99/mo): branded client portal, per-client workspaces, custom domains, one-click multi-client deploy",
+  "Builder is $29/mo for one business you own and operate — unlimited workspaces, bring your own key, and AI and phone service run at raw provider cost",
+  "Whitelabel client delivery starts on Agency plans from $99/mo: branded client portal, per-client workspaces, custom domains, one-click multi-client deploy",
   "Build it free before you sign up — paste a URL, get a working workspace in about 3 minutes",
   "Open core and portable — your agents are plain, editable skill files, and your data lives in your workspace",
 ];
@@ -86,7 +86,7 @@ export const EXTRAS: Record<string, CompetitorExtras> = {
     ],
     chooseSf: [
       "You sell the AI front office — answered calls, booked jobs — not funnels",
-      "You want per-client costs that don't stack ($29 flat, unlimited workspaces, bring your own key)",
+      "You want costs that don't stack (Builder is $29/mo only for a business you operate; Agency plans from $99/mo cover client workspaces)",
       "You want a new client live in 3 minutes, not after a setup project",
       "You want whitelabel without the $497/mo gate",
     ],
@@ -491,7 +491,7 @@ export const EXTRAS: Record<string, CompetitorExtras> = {
     ],
     chooseSf: [
       "Your clients lose money on unanswered phones, not unopened emails",
-      "You want flat $29/mo pricing that doesn't grow with your contact list",
+      "You want Builder at $29/mo for one business you operate; Agency plans from $99/mo for client resale — with no contact-based platform tax",
       "You want the whole front office — site, CRM, booking — not just email",
       "You need whitelabel for agency resale, which ActiveCampaign doesn't offer",
     ],
@@ -680,7 +680,7 @@ export const EXTRAS: Record<string, CompetitorExtras> = {
     ],
     chooseSf: [
       "You're a local service business, not an online store",
-      "You want flat $29/mo, not per-profile scaling that counts suppressed contacts",
+      "You want Builder at $29/mo for one business you operate; Agency plans from $99/mo for client delivery — not per-profile scaling",
       "You need a phone-answering AI receptionist, which Klaviyo doesn't have",
       "You want a website and booking calendar included, not assumed to exist elsewhere",
     ],
@@ -707,7 +707,7 @@ export const EXTRAS: Record<string, CompetitorExtras> = {
     ],
     chooseSf: [
       "You want a working system today, not 45 apps to assemble",
-      "You want flat $29/mo, not per-user, per-edition pricing",
+      "You want Builder at $29/mo for one business you operate; Agency plans from $99/mo for client workspaces — not per-user pricing",
       "You need an AI receptionist Zia doesn't provide",
       "You're an agency needing whitelabel client workspaces",
     ],
@@ -734,7 +734,7 @@ export const EXTRAS: Record<string, CompetitorExtras> = {
     ],
     chooseSf: [
       "You don't have (or want) a dedicated CRM admin",
-      "You want flat $29/mo instead of per-user enterprise editions",
+      "You want Builder at $29/mo for one business you operate; Agency plans from $99/mo for client workspaces — not per-user enterprise editions",
       "You want a receptionist ready immediately, not a custom Agentforce build",
       "You're an agency needing whitelabel client workspaces",
     ],

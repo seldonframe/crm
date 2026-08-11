@@ -7,6 +7,7 @@ import TermsPage from "../../../src/app/terms/page";
 import { LandingMarketingPricingSection } from "../../../src/components/landing/marketing-pricing-section";
 import AiReceptionistCostCalculatorPage from "../../../src/app/(public)/tools/ai-receptionist-cost-calculator/page";
 import GohighlevelCostCalculatorPage from "../../../src/app/(public)/tools/gohighlevel-cost-calculator/page";
+import AlternativesHubPage, { metadata as alternativesMetadata } from "../../../src/app/(public)/alternatives/page";
 import { AGENCY_PRICING_CLAIM } from "../../../src/lib/marketing/public-claims";
 import { auditPublicPricingText } from "../../../src/lib/marketing/public-pricing-audit";
 import { GUIDES, getGuide } from "../../../src/lib/seo/guides";
@@ -89,6 +90,15 @@ test("core marketing surfaces use the shared Builder and Agency pricing boundari
 
   assert.match(faq, new RegExp(AGENCY_PRICING_CLAIM.replace(/[.*+?^${}()|[\]\\]/g, "\\$&")));
   assert.match(builderPricing, /Builder is \$29\/mo for businesses you own and operate/i);
+});
+
+test("alternatives hub states the Builder/Agency boundary in metadata and visible copy", () => {
+  const text = collectText(AlternativesHubPage()).join(" ");
+  assert.match(String(alternativesMetadata.description), /Builder is \$29\/mo for one business you operate/i);
+  assert.match(String(alternativesMetadata.description), /Agency plans start at \$99\/mo/i);
+  assert.match(text, /Builder is \$29\/mo for one business you own and operate/i);
+  assert.match(text, /Client sub-accounts, white-label delivery, and agency resale start at \$99\/mo/i);
+  assert.equal(auditPublicPricingText(text).ok, true);
 });
 
 test("retained marketing FAQ and terms use the current plan ladder", () => {
