@@ -25,6 +25,8 @@ export type AgentPageCtaProps = {
   agentName: string;
   /** The build-flow href carrying the agent (built by the page server side). */
   deployHref: string;
+  /** Agency-first CTA copy, composed by the server page for its vertical. */
+  deployLabel: string;
   /** The public Rent-via-MCP endpoint for this agent. */
   mcpEndpoint: string;
   /** A copyable MCP client-config snippet pointing at the endpoint. */
@@ -37,6 +39,7 @@ export type AgentPageCtaProps = {
 export function AgentPageCta({
   agentName,
   deployHref,
+  deployLabel,
   mcpEndpoint,
   mcpSnippet,
   marketplaceSlug,
@@ -95,14 +98,14 @@ export function AgentPageCta({
             color: MKT.paper,
           }}
         >
-          Get your {agentName} working today.{" "}
+          Build and deliver {agentName} for a client.{" "}
           <span style={{ fontFamily: MKT.fontSerif, fontStyle: "italic", fontWeight: 400, color: MKT.greenLight }}>
             Two ways in.
           </span>
         </h2>
         <p style={{ margin: "10px 0 24px", fontSize: 15.5, lineHeight: 1.55, color: "rgba(246,242,234,0.66)", maxWidth: 520 }}>
-          Deploy it into your own hosted workspace — grounded in your services, hours, and pricing — or rent it over MCP
-          and call it from any agent. No card required to start.
+          Deploy it into a branded client workspace — grounded in that client’s services, hours, and pricing — or rent it
+          over MCP and call it from any agent. No card required to start.
         </p>
 
         <div style={{ display: "flex", flexWrap: "wrap", gap: 12 }}>
@@ -129,7 +132,7 @@ export function AgentPageCta({
             }}
           >
             <MarketplaceIcon name="package" size={19} />
-            Deploy it for my business
+            {deployLabel}
             <MarketplaceIcon name="arrowRight" size={17} />
           </Link>
 
