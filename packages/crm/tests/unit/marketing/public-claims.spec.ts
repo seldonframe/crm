@@ -15,7 +15,6 @@ test("public positioning names the agency outcome", () => {
   assert.match(AGENCY_POSITIONING, /GoHighLevel/i);
   assert.match(AGENCY_HERO_HEADLINE, /front offices/i);
 });
-
 test("public plan facts match the hosted sellable ladder", () => {
   assert.deepEqual(
     AGENCY_PLAN_FACTS.map(({ id, name, priceMonthly }) => ({ id, name, priceMonthly })),
@@ -34,4 +33,3 @@ test("public legal and AI claims are explicit", () => {
   assert.match(HOSTED_AI_POLICY, /Managed/);
   assert.match(HOSTED_AI_POLICY, /BYOK/);
 });
-

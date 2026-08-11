@@ -188,4 +188,3 @@ Run `git diff --check`, inspect the changed-file list, and ensure no telemetry, 
 - [ ] **Step 6: Commit verification fixes**
 
 Commit only genuine verification fixes as `chore: verify agency public surfaces`.
-
