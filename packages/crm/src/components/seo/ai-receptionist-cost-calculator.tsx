@@ -16,6 +16,7 @@ import {
   downloadCanvasAsImage,
   shareResultCard,
 } from "./result-card";
+import { AGENCY_PRICING_CLAIM, BUILDER_PRICING_CLAIM } from "@/lib/marketing/public-claims";
 
 const INK = "#221D17";
 const GREEN = "#1F2B24";
@@ -87,9 +88,9 @@ export function AiReceptionistCostCalculator(): ReactElement {
   // ─── Shareable result card ───
   // bigNumber = the savings figure when positive — "$X,XXX/mo saved" is the
   // striking, share-worthy number (it's the story: "look what I'd save"),
-  // vs. "SeldonFrame $29 flat" which reads as a price tag, not a result.
+  // vs. an unqualified Builder price, which reads as a price tag, not a result.
   // Falls back to the flat price only in the edge case where a human
-  // receptionist would already be cheaper than $29/mo.
+  // receptionist would already be cheaper than the Builder plan.
   const canvasRef = useRef<HTMLCanvasElement | null>(null);
   const [copyFeedback, setCopyFeedback] = useState<string | null>(null);
   const renderTimer = useRef<ReturnType<typeof setTimeout> | null>(null);
@@ -263,8 +264,9 @@ export function AiReceptionistCostCalculator(): ReactElement {
           160 hours (one full-time month).
         </p>
         <p style={{ margin: 0 }}>
-          <strong>SeldonFrame</strong> is $29/mo flat for the platform — you connect your own Twilio and AI provider keys
-          at raw provider cost, typically a few cents per minute, instead of paying a per-call or per-minute markup.
+          <strong>SeldonFrame</strong>: {BUILDER_PRICING_CLAIM} {AGENCY_PRICING_CLAIM} You connect your own Twilio and AI
+          provider keys at raw provider cost, typically a few cents per minute, instead of paying a per-call or per-minute
+          markup.
         </p>
       </div>
 

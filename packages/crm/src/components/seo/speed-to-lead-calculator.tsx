@@ -15,6 +15,7 @@ import {
   downloadCanvasAsImage,
   shareResultCard,
 } from "./result-card";
+import { AGENCY_PRICING_CLAIM, BUILDER_PRICING_CLAIM } from "@/lib/marketing/public-claims";
 
 const INK = "#221D17";
 const GREEN = "#1F2B24";
@@ -219,8 +220,8 @@ export function SpeedToLeadCalculator(): ReactElement {
       <p style={{ margin: "16px 0 0", fontSize: 12.5, color: "rgba(34,29,23,0.55)", lineHeight: 1.5 }}>
         *Illustrative model based on the widely-documented &ldquo;5-minute rule&rdquo; in lead-response research: the odds of
         reaching and qualifying a lead drop sharply the longer you wait. The factors here are a conservative estimate, not a
-        specific study&rsquo;s numbers — your real results will vary. SeldonFrame is $29/mo flat and responds the instant a
-        lead comes in.
+        specific study&rsquo;s numbers — your real results will vary. {BUILDER_PRICING_CLAIM} {AGENCY_PRICING_CLAIM} The
+        front office responds the instant a lead comes in.
       </p>
       <div style={{ display: "flex", flexWrap: "wrap", gap: 12, marginTop: 20 }}>
         <a href="/signup" style={{ background: INK, color: "#F6F2EA", padding: "13px 26px", borderRadius: 12, fontWeight: 700, fontSize: 15.5, textDecoration: "none" }}>

@@ -18,6 +18,7 @@ import { BuildWidget } from "@/components/seo/build-widget";
 import { ChatGptCtaCard } from "@/components/seo/chatgpt-cta";
 import { isWebUngatedBuildOn } from "@/lib/web-build/policy";
 import { buildOgUrl } from "@/lib/seo/og-card";
+import { AGENCY_PRICING_CLAIM, BUILDER_PRICING_CLAIM } from "@/lib/marketing/public-claims";
 
 /** FAQ answers use a few <strong>/<a> tags for readability; JSON-LD wants
  *  plain text, so strip tags before embedding in the schema. */
@@ -45,7 +46,7 @@ export const metadata: Metadata = {
 const FAQ = [
   {
     q: "Is the booking page really free?",
-    a: "Yes. Your first workspace — booking page included — is <strong>free forever</strong>. $29/mo unlocks unlimited workspaces if you ever need more than one.",
+    a: `Yes. Your first workspace — booking page included — is <strong>free forever</strong>. ${BUILDER_PRICING_CLAIM} ${AGENCY_PRICING_CLAIM}`,
   },
   {
     q: "Do reminders and confirmations work out of the box?",

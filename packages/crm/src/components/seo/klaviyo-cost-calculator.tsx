@@ -26,6 +26,7 @@
 import { useState, useEffect, useRef, type ReactElement } from "react";
 
 import { renderResultCard, buildShareUrl, copyToClipboard, downloadCanvasAsImage, shareResultCard } from "./result-card";
+import { AGENCY_PRICING_CLAIM, BUILDER_PRICING_CLAIM } from "@/lib/marketing/public-claims";
 
 const INK = "#221D17";
 const GREEN = "#1F2B24";
@@ -221,7 +222,7 @@ export function KlaviyoCostCalculator(): ReactElement {
         rows: [
           { label: "Email plan (interpolated)", value: `~${money(result.emailMonthly)}/mo` },
           { label: "SMS (hedged rate)", value: `~${moneyPrecise(result.smsMonthly)}/mo` },
-          { label: "SeldonFrame", value: "$29/mo flat" },
+          { label: "SeldonFrame Builder (owned business)", value: "$29/mo" },
         ],
         footer: "built free at seldonframe.com/tools",
       });
@@ -339,9 +340,10 @@ export function KlaviyoCostCalculator(): ReactElement {
           is $0.01-$0.015).
         </p>
         <p style={{ margin: 0 }}>
-          <strong>SeldonFrame:</strong> $29/mo flat — {money(SELDONFRAME_YEARLY)}/yr, same price no matter how big your
-          list gets. Different product scope (Seldon is a front office with CRM/booking/agent, not ecommerce email
-          marketing) — so weigh this as "what flat pricing looks like," not a like-for-like swap.
+          <strong>SeldonFrame:</strong> {BUILDER_PRICING_CLAIM} {AGENCY_PRICING_CLAIM} The Builder platform price is
+          {" "}{money(SELDONFRAME_YEARLY)}/yr, regardless of list size. Different product scope (Seldon is a front office
+          with CRM/booking/agent, not ecommerce email marketing) — so weigh this as "what flat pricing looks like," not a
+          like-for-like swap.
         </p>
       </div>
 

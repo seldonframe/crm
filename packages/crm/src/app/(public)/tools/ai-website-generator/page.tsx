@@ -19,6 +19,7 @@ import { BuildWidget } from "@/components/seo/build-widget";
 import { ChatGptCtaCard } from "@/components/seo/chatgpt-cta";
 import { isWebUngatedBuildOn } from "@/lib/web-build/policy";
 import { buildOgUrl } from "@/lib/seo/og-card";
+import { AGENCY_PRICING_CLAIM, BUILDER_PRICING_CLAIM } from "@/lib/marketing/public-claims";
 
 /** FAQ answers use a few <strong>/<a> tags for readability; JSON-LD wants
  *  plain text, so strip tags before embedding in the schema. */
@@ -46,7 +47,7 @@ export const metadata: Metadata = {
 const FAQ = [
   {
     q: "Is it really free?",
-    a: "Yes. Your first workspace — website, booking page, intake form, and CRM — is <strong>free forever</strong>. $29/mo unlocks unlimited workspaces if you ever need more than one. No credit card is required to build your first site.",
+    a: `Yes. Your first workspace — website, booking page, intake form, and CRM — is <strong>free forever</strong>. ${BUILDER_PRICING_CLAIM} ${AGENCY_PRICING_CLAIM} No credit card is required to build your first site.`,
   },
   {
     q: "Do I need to know how to code?",
@@ -66,7 +67,7 @@ const FAQ = [
   },
   {
     q: "What happens to my site if I never pay?",
-    a: "It stays live on your free subdomain. The $29/mo plan is for builders who want more than one workspace or a custom domain — it isn't a countdown timer on the site you already built.",
+    a: `It stays live on your free subdomain. ${BUILDER_PRICING_CLAIM} ${AGENCY_PRICING_CLAIM} It isn't a countdown timer on the site you already built.`,
   },
 ];
 

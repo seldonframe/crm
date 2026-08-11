@@ -7,6 +7,9 @@ import TermsPage from "../../../src/app/terms/page";
 import { LandingMarketingPricingSection } from "../../../src/components/landing/marketing-pricing-section";
 import AiReceptionistCostCalculatorPage from "../../../src/app/(public)/tools/ai-receptionist-cost-calculator/page";
 import GohighlevelCostCalculatorPage from "../../../src/app/(public)/tools/gohighlevel-cost-calculator/page";
+import FreeBookingPagePage from "../../../src/app/(public)/tools/free-booking-page/page";
+import AiWebsiteGeneratorPage from "../../../src/app/(public)/tools/ai-website-generator/page";
+import { PRICING_FAQS } from "../../../src/app/pricing/page";
 import AlternativesHubPage, { metadata as alternativesMetadata } from "../../../src/app/(public)/alternatives/page";
 import { AGENCY_PRICING_CLAIM } from "../../../src/lib/marketing/public-claims";
 import { auditPublicPricingText } from "../../../src/lib/marketing/public-pricing-audit";
@@ -197,5 +200,20 @@ test("agency-intent guides keep Builder pricing separate from client resale", ()
       const result = auditPublicPricingText(text);
       assert.equal(result.ok, true, `${slug} has a misleading Builder/Agency claim: ${result.reasons.join("; ")}`);
     }
+  }
+});
+
+test("public pricing FAQs keep Builder pricing qualified across tool routes", async () => {
+  const routeTexts = [
+    collectText(await FreeBookingPagePage()).join(" "),
+    collectText(await AiWebsiteGeneratorPage()).join(" "),
+    PRICING_FAQS.map((faq) => `${faq.q} ${faq.a}`).join(" "),
+  ];
+
+  for (const text of routeTexts) {
+    assert.match(text, /Builder is \$29\/mo for businesses you own and operate yourself/i);
+    assert.match(text, /Agency plans start at \$99\/mo for 10 client workspaces/i);
+    assert.doesNotMatch(text, /\$29\/mo (?:plan|unlocks|flat)/i);
+    assert.equal(auditPublicPricingText(text).ok, true);
   }
 });

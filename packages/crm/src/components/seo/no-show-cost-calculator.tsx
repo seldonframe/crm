@@ -15,6 +15,7 @@ import {
   downloadCanvasAsImage,
   shareResultCard,
 } from "./result-card";
+import { AGENCY_PRICING_CLAIM, BUILDER_PRICING_CLAIM } from "@/lib/marketing/public-claims";
 
 const INK = "#221D17";
 const GREEN = "#1F2B24";
@@ -247,8 +248,8 @@ export function NoShowCostCalculator(): ReactElement {
 
       <p style={{ margin: "16px 0 0", fontSize: 12.5, color: "rgba(34,29,23,0.55)", lineHeight: 1.5 }}>
         *Recoverable assumes reminders + AI confirmations cut no-shows by the amount you set above — real results vary by
-        business, so treat it as a planning estimate, not a guarantee. SeldonFrame is $29/mo flat — at these numbers it
-        pays for itself with{" "}
+        business, so treat it as a planning estimate, not a guarantee. {BUILDER_PRICING_CLAIM} {AGENCY_PRICING_CLAIM} At
+        these numbers Builder pays for itself with{" "}
         <strong>
           {recoveredMonthly > 0 ? (apptValue >= 29 ? "a single recovered appointment" : "a handful of recovered appointments") : "one recovered appointment"}
         </strong>
