@@ -18,6 +18,7 @@
 // used across the SEO comparison pages.
 
 import Link from "next/link";
+import { AGENCY_PRICING_CLAIM, BUILDER_PRICING_CLAIM } from "@/lib/marketing/public-claims";
 
 type FaqItem = { question: string; answer: string };
 
@@ -38,7 +39,7 @@ const FAQS: readonly FaqItem[] = [
   {
     question: "Which plan is right for me?",
     answer:
-      "If you run client front offices under your own brand, pick an Agency plan: Starter is $99/mo with 10 client sub-accounts, Growth is $199/mo with 30 plus one-click deploy to all clients, and Scale is $299/mo with unlimited sub-accounts plus API and MCP access. All three include full white-label and branded client portals. Running your OWN business instead? Builder is $29/mo (unlimited workspaces on your own AI key) and Managed is $49/mo (one workspace on ours). Not sure? Build your first workspace free and decide after you've seen it work.",
+      `${AGENCY_PRICING_CLAIM} Agency Starter includes 10 client sub-accounts; Growth is $199/mo for 30 client sub-accounts; Scale is $299/mo for unlimited client sub-accounts. Running your OWN business instead? ${BUILDER_PRICING_CLAIM} Managed is $49/mo (one workspace on ours). Not sure? Build your first workspace free and decide after you've seen it work.`,
   },
   {
     question: "What should I charge my clients?",
