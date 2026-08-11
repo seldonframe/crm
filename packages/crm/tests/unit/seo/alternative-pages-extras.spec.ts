@@ -6,7 +6,7 @@
 import { test } from "node:test";
 import assert from "node:assert/strict";
 
-import { COMPETITORS, getCompetitor, SF_COLUMN, sfPriceAnchor } from "../../../src/lib/seo/alternative-pages";
+import { COMPETITORS, getCompetitor, SF_COLUMN, sfPriceAnchor, pairAudience } from "../../../src/lib/seo/alternative-pages";
 import { VS_PAIRS, vsSlug, getVsPair, SF_PROS, EXTRAS } from "../../../src/lib/seo/alternative-pages-extras";
 import { normalizeSiteInput } from "../../../src/components/seo/build-widget";
 import { auditPublicPricingText } from "../../../src/lib/marketing/public-pricing-audit";
@@ -81,6 +81,18 @@ test("every competitor surface keeps Builder pricing separate from client resale
     for (const text of copy) {
       const result = auditPublicPricingText(text);
       assert.equal(result.ok, true, `${competitor.slug} has an ambiguous Builder/Agency claim: ${result.reasons.join("; ")}`);
+    }
+  }
+});
+
+test("every retained two-competitor pair uses the audience-correct price anchor", () => {
+  for (const pair of VS_PAIRS) {
+    const audience = pairAudience(getCompetitor(pair.a).audience, getCompetitor(pair.b).audience);
+    const anchor = sfPriceAnchor(audience);
+    assert.equal(auditPublicPricingText(anchor).ok, true, `${vsSlug(pair)} anchor is ambiguous`);
+    if (audience === "agency") {
+      assert.match(anchor, /white-label agency plans from \$99\/mo/i);
+      assert.match(anchor, /Builder is \$29\/mo for one business you operate/i);
     }
   }
 });
