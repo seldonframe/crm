@@ -1,6 +1,13 @@
 import { test } from "node:test";
 import assert from "node:assert/strict";
 import { rankUrlsForFaqRelevance } from "@/lib/soul-compiler/sitemap-priority";
+import * as sitemapModule from "../../src/app/sitemap";
+
+const buildSitemap = (
+  sitemapModule as unknown as {
+    default: () => Promise<Array<{ url: string | URL }> >;
+  }
+).default;
 
 function makeMockClient(response: string) {
   return {
@@ -10,6 +17,12 @@ function makeMockClient(response: string) {
       }),
     },
   };
+}
+
+type TestClient = NonNullable<Parameters<typeof rankUrlsForFaqRelevance>[0]["_testClient"]>;
+
+function asTestClient(response: string): TestClient {
+  return makeMockClient(response) as unknown as TestClient;
 }
 
 test("sitemap-priority: returns ranked URLs from Claude response", async () => {
@@ -22,7 +35,7 @@ test("sitemap-priority: returns ranked URLs from Claude response", async () => {
     domain: "example.com",
     apiKey: "sk-test",
     _testUrls: ["https://example.com/faq", "https://example.com/services", "https://example.com/blog/post-1"],
-    _testClient: makeMockClient(mockResponse) as any,
+    _testClient: asTestClient(mockResponse),
   });
 
   assert.equal(result.length, 2);
@@ -40,7 +53,7 @@ test("sitemap-priority: rejects hallucinated URLs not in input", async () => {
     domain: "example.com",
     apiKey: "sk-test",
     _testUrls: ["https://example.com/faq"],
-    _testClient: makeMockClient(mockResponse) as any,
+    _testClient: asTestClient(mockResponse),
   });
 
   assert.equal(result.length, 1);
@@ -63,7 +76,7 @@ test("sitemap-priority: respects limit parameter", async () => {
       "https://example.com/services",
       "https://example.com/about",
     ],
-    _testClient: makeMockClient(mockResponse) as any,
+    _testClient: asTestClient(mockResponse),
   });
 
   assert.equal(result.length, 2);
@@ -74,7 +87,7 @@ test("sitemap-priority: empty URL list returns empty result", async () => {
     domain: "example.com",
     apiKey: "sk-test",
     _testUrls: [],
-    _testClient: makeMockClient("[]") as any,
+    _testClient: asTestClient("[]"),
   });
 
   assert.deepEqual(result, []);
@@ -85,10 +98,23 @@ test("sitemap-priority: malformed JSON falls back to top URLs", async () => {
     domain: "example.com",
     apiKey: "sk-test",
     _testUrls: ["https://example.com/faq", "https://example.com/services"],
-    _testClient: makeMockClient("not json") as any,
+    _testClient: asTestClient("not json"),
   });
 
   // Fallback: return the input URLs with confidence 0.5
   assert.equal(result.length, 2);
   assert.equal(result[0].confidence, 0.5);
+});
+
+test("canonical AI front office guides are included in the guide sitemap", async () => {
+  const entries = await buildSitemap();
+  const urls = new Set(entries.map((entry) => String(entry.url)));
+
+  for (const slug of [
+    "what-is-an-ai-front-office",
+    "ai-front-office-examples",
+    "ai-front-office-software-for-agencies",
+  ]) {
+    assert.ok(urls.has(`https://www.seldonframe.com/guides/${slug}`), `missing sitemap URL: ${slug}`);
+  }
 });
