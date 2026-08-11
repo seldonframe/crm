@@ -46,9 +46,9 @@ const newsreader = Newsreader({
 // removed in this commit) but no longer referenced from layout meta.
 export const metadata: Metadata = {
   metadataBase: new URL("https://www.seldonframe.com"),
-  title: "SeldonFrame — Open-source alternative to GoHighLevel",
+  title: "SeldonFrame — Sell AI front offices. Deploy them in minutes.",
   description:
-    "A complete AI front office — website, booking, CRM, intake, and AI chatbot — wired together in minutes. For your business or your clients'. Plans from $29/mo. AGPL-3.0, no Zapier required.",
+    "The agent-native, open-source alternative to GoHighLevel for agencies selling AI front offices to local businesses. Deploy branded client workspaces, booking, CRM, intake, and agents from one repeatable delivery loop.",
   manifest: "/brand/manifest.webmanifest",
   icons: {
     icon: [
@@ -60,16 +60,16 @@ export const metadata: Metadata = {
     apple: [{ url: "/brand/favicon-180.png", sizes: "180x180" }],
   },
   openGraph: {
-    title: "SeldonFrame — Open-source alternative to GoHighLevel",
+    title: "SeldonFrame — Sell AI front offices. Deploy them in minutes.",
     description:
-      "Pre-wired client ops stack agencies deploy per client in minutes. CRM, booking, intake, AI chatbot — already connected.",
+      "The agent-native, open-source alternative to GoHighLevel for agencies selling AI front offices to local businesses.",
     images: [{ url: "/brand/og-image.png", width: 1200, height: 630 }],
   },
   twitter: {
     card: "summary_large_image",
-    title: "SeldonFrame — Open-source alternative to GoHighLevel",
+    title: "SeldonFrame — Sell AI front offices. Deploy them in minutes.",
     description:
-      "Pre-wired client ops stack agencies deploy per client in minutes. CRM, booking, intake, AI chatbot — already connected.",
+      "Deploy branded client workspaces, booking, CRM, intake, and agents from one repeatable agency delivery loop.",
     images: ["/brand/twitter-card.png"],
   },
 };

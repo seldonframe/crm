@@ -33,6 +33,15 @@ export default function AgenciesPage() {
         <MarketingAgencyMath />
         <MarketingAgencyOwnership />
 
+        <section aria-label="Agency plans" className="border-t border-[rgba(34,29,23,.08)] bg-[#F6F2EA] px-5 py-12 text-center md:px-8 lg:px-12">
+          <Link
+            href="/pricing-public"
+            className="inline-flex items-center gap-2 rounded-[11px] bg-[#1F2B24] px-6 py-3.5 text-[15px] font-[600] text-[#F6F2EA] transition-transform hover:-translate-y-px"
+          >
+            See agency plans →
+          </Link>
+        </section>
+
         {/* Guides for agency builders — cross-links into the supply-side content library. */}
         <section aria-label="Guides for agency builders" className="border-t border-[rgba(34,29,23,.08)] px-5 py-16 md:px-8 lg:px-12">
           <div className="mx-auto max-w-[1120px]">

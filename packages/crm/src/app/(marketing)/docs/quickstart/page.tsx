@@ -203,14 +203,15 @@ export default function QuickstartPage() {
             number={2}
             title="Describe your client"
             body="Paste this template into Claude Code (app or terminal — same prompt) and fill in your details:"
-            code={`Create a workspace for my business:
+            code={`Create a workspace for my client:
 - Business name: [your client business name]
 - Industry: [hvac, dental, legal, coaching, real-estate, salon, ...]
 - Location: [city, state]
 - Operating hours: [Mon-Sat 7am-7pm]
 - Team size: [number]
 - Services offered: [3-5 main ones]
-- Website: [client URL, optional]`}
+- Website: [client URL, optional]
+- Agency brand: [your agency name, logo, portal style]`}
           />
           <Section
             number={3}

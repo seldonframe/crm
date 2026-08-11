@@ -100,6 +100,12 @@ export function MarketingNav() {
           >
             Docs
           </Link>
+          <Link
+            href="/pricing-public"
+            className="hidden h-[34px] items-center whitespace-nowrap rounded-[11px] px-3 text-[13.5px] font-medium text-[var(--lp-muted)] transition-colors hover:text-[var(--lp-ink)] md:inline-flex"
+          >
+            Pricing
+          </Link>
           <div ref={resourcesRef} className="relative hidden md:block">
             <button
               type="button"

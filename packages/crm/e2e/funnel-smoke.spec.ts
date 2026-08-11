@@ -33,28 +33,51 @@ function isProductionHost(rawBaseUrl: string | undefined): boolean {
   }
 }
 
+function isMarketingHost(rawBaseUrl: string | undefined): boolean {
+  if (!rawBaseUrl) return false;
+  try {
+    const host = new URL(rawBaseUrl).hostname.toLowerCase();
+    return host === "seldonframe.com" || host === "www.seldonframe.com";
+  } catch {
+    return false;
+  }
+}
+
 const FLOW_BASE_URL = process.env.E2E_BASE_URL;
 const FLOW_IS_PRODUCTION = isProductionHost(FLOW_BASE_URL);
 
 test.describe("render tier (GET-only, safe everywhere)", () => {
   test("GET / is healthy", async ({ page }) => {
-    // Reality check (verified live 2026-08-06): src/proxy.ts treats
-    // app.seldonframe.com / localhost / 127.0.0.1 / *.vercel.app as the
-    // "app host" and unconditionally redirects `/` there to /login
-    // (anonymous) or /dashboard (authenticated) BEFORE the marketing
-    // landing page ((public)/page.tsx) is ever reached — that page only
-    // renders at `/` on the marketing host (seldonframe.com /
-    // www.seldonframe.com), which E2E_BASE_URL does not target here.
-    // So on every environment this suite actually runs against, `/`
-    // resolving to a healthy /login is the correct sentinel, not
-    // landing-page nav copy.
     const response = await page.goto("/");
     expect(response?.status()).toBe(200);
-    expect(new URL(page.url()).pathname).toBe("/login");
-    await expect(page.getByRole("heading", { name: "Welcome to SeldonFrame" })).toBeVisible();
+    if (isMarketingHost(FLOW_BASE_URL)) {
+      expect(new URL(page.url()).pathname).toBe("/");
+      await expect(page.getByRole("heading", { name: /Sell AI front offices/i })).toBeVisible();
+      await expect(page.getByRole("link", { name: "For agencies", exact: true })).toHaveAttribute("href", "/agencies");
+    } else {
+      expect(new URL(page.url()).pathname).toBe("/login");
+      await expect(page.getByRole("heading", { name: "Welcome to SeldonFrame" })).toBeVisible();
+    }
 
     const body = await page.content();
     expect(body).not.toMatch(BROKEN_PAGE_PATTERN);
+  });
+
+  test("GET /agencies exposes the agency delivery path", async ({ page }) => {
+    const response = await page.goto("/agencies");
+    expect(response?.status()).toBe(200);
+    await expect(page.getByRole("heading", { name: /Deploy one playbook/i })).toBeVisible();
+    await expect(page.getByRole("link", { name: /See agency plans/i })).toHaveAttribute("href", "/pricing-public");
+  });
+
+  test("GET /docs exposes the agency-first docs hub", async ({ page }) => {
+    const response = await page.goto("/docs");
+    expect(response?.status()).toBe(200);
+    await expect(page.getByRole("heading", { name: "SeldonFrame Docs" })).toBeVisible();
+    await expect(page.getByRole("link", { name: /Agency delivery loop/i })).toHaveAttribute(
+      "href",
+      "/docs/getting-started/first-workspace",
+    );
   });
 
   test("GET /api/auth/providers exposes at least one provider (AUTH_SECRET sentinel)", async ({
