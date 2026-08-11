@@ -68,7 +68,7 @@ test.describe("render tier (GET-only, safe everywhere)", () => {
       expect(new URL(page.url()).pathname).toBe("/");
       await expect(page.getByRole("heading", { name: /Sell AI front offices/i })).toBeVisible();
       await expect(
-        page.getByRole("navigation", { name: "Primary navigation" }).getByRole("link", {
+        page.locator('header[aria-label="Primary navigation"]').getByRole("link", {
           name: "For agencies",
           exact: true,
         }),
