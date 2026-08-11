@@ -37,7 +37,11 @@ function isMarketingHost(rawBaseUrl: string | undefined): boolean {
   if (!rawBaseUrl) return false;
   try {
     const host = new URL(rawBaseUrl).hostname.toLowerCase();
-    return host === "seldonframe.com" || host === "www.seldonframe.com";
+    return (
+      host === "seldonframe.com" ||
+      host === "www.seldonframe.com" ||
+      (host.startsWith("crm-git-") && host.endsWith(".vercel.app"))
+    );
   } catch {
     return false;
   }
