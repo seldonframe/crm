@@ -67,7 +67,12 @@ test.describe("render tier (GET-only, safe everywhere)", () => {
     if (isProductionMarketingHost(FLOW_BASE_URL)) {
       expect(new URL(page.url()).pathname).toBe("/");
       await expect(page.getByRole("heading", { name: /Sell AI front offices/i })).toBeVisible();
-      await expect(page.getByRole("link", { name: "For agencies", exact: true })).toHaveAttribute("href", "/agencies");
+      await expect(
+        page.locator('header[aria-label="Primary navigation"]').getByRole("link", {
+          name: "For agencies",
+          exact: true,
+        }),
+      ).toHaveAttribute("href", "/agencies");
     } else {
       expect(new URL(page.url()).pathname).toBe("/login");
       await expect(page.getByRole("heading", { name: "Welcome to SeldonFrame" })).toBeVisible();
