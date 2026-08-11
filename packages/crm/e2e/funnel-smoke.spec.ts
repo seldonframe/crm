@@ -64,6 +64,7 @@ test.describe("render tier (GET-only, safe everywhere)", () => {
   });
 
   test("GET /agencies exposes the agency delivery path", async ({ page }) => {
+    test.skip(!isMarketingHost(FLOW_BASE_URL), "marketing surface check requires the marketing host");
     const response = await page.goto("/agencies");
     expect(response?.status()).toBe(200);
     await expect(page.getByRole("heading", { name: /Deploy one playbook/i })).toBeVisible();
@@ -73,6 +74,7 @@ test.describe("render tier (GET-only, safe everywhere)", () => {
   });
 
   test("GET /docs exposes the agency-first docs hub", async ({ page }) => {
+    test.skip(!isMarketingHost(FLOW_BASE_URL), "marketing surface check requires the marketing host");
     const response = await page.goto("/docs");
     expect(response?.status()).toBe(200);
     await expect(page.getByRole("heading", { name: "SeldonFrame Docs" })).toBeVisible();
