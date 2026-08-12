@@ -152,10 +152,10 @@ Search for unsupported absolutes (`always`, `never`, `guaranteed`, invented perc
 
 Capture the evidence hierarchy, platform-versus-setup distinction, cannibalization avoidance, explicit non-fit section, and static Markdown-twin requirement.
 
-- [ ] **Step 2: Run package build and merge-gate checks**
+- [x] **Step 2: Run package build and merge-gate checks**
 
 Run `pnpm build` from the repository root. Run the focused guide unit suite, TypeScript, use-server hygiene, migration journal check, and forbidden-path regression grep. Any non-`.next/` TypeScript error or altered forbidden file fails the gate.
 
-- [ ] **Step 3: Inspect the final diff and status**
+- [x] **Step 3: Inspect the final diff and status**
 
 Confirm only the specification, plan, learning note, guide tests, ten guide modules, registry, and ten Markdown routes changed. Do not merge, push, or deploy without a separate user request.
