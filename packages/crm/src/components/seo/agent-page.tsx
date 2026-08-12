@@ -29,7 +29,7 @@ import { MarketplaceIcon } from "@/components/marketplace/marketplace-icons";
 import { MKT, SURFACE_META, mcpEndpointFor, mcpSnippetFor } from "@/components/marketplace/marketplace-data";
 import { AgentPageCta } from "@/components/seo/agent-page-cta";
 import { ToolLogoRow } from "@/components/seo/tool-marks";
-import { MarkdownPointer } from "@/components/seo/markdown-pointer";
+import { AGENCY_PLAN_FACTS } from "@/lib/marketing/public-claims";
 import {
   composePageCopy,
   deployHrefFor,
@@ -57,7 +57,9 @@ export function AgentPage({ job, vertical }: AgentPageProps): ReactElement {
   // specific, not generic. (Task B)
   const steps = job.howItWorks;
   const related = relatedJobsForVertical(job.slug, 5);
-  const verticalLabel = vertical ? vertical.plural : "your business";
+  const deployLabel = vertical
+    ? `Build this for ${aOrAnLower(vertical.name)} ${vertical.name} client`
+    : "Build this for a client";
   // Review-agent cluster (PR 2, Part 1c): on a kept google-review-agent Tier-2
   // page, cross-link the tool that builds the review link this agent sends,
   // plus the other kept verticals for the SAME job (siblings) — every folded
@@ -72,12 +74,6 @@ export function AgentPage({ job, vertical }: AgentPageProps): ReactElement {
   // render their composed copy inline so the content lives on the hub instead
   // of vanishing with the page.
   const byIndustry = !vertical ? VERTICALS : [];
-  // The public `.md` twin of THIS page (Tier-1 or Tier-2) — pointed at by the
-  // visually-hidden Markdown pointer for the human-pastes-URL-into-an-LLM flow.
-  const markdownHref = vertical
-    ? `/ai-agents/${job.slug}/for/${vertical.slug}.md`
-    : `/ai-agents/${job.slug}.md`;
-
   // ── schema.org: SoftwareApplication (the agent) + FAQPage (the registry FAQ).
   // Two graphs, emitted as JSON-LD so search engines + LLMs can cite the page.
   const softwareLd = {
@@ -87,8 +83,14 @@ export function AgentPage({ job, vertical }: AgentPageProps): ReactElement {
     applicationCategory: "BusinessApplication",
     operatingSystem: "SeldonFrame",
     description: copy.metaDescription,
-    offers: { "@type": "Offer", price: "0", priceCurrency: "USD" },
-    provider: { "@type": "Organization", name: "SeldonFrame", url: "https://seldonframe.com" },
+    offers: AGENCY_PLAN_FACTS.map((plan) => ({
+      "@type": "Offer",
+      name: plan.name,
+      price: String(plan.priceMonthly),
+      priceCurrency: "USD",
+      description: plan.audience,
+    })),
+    provider: { "@id": "https://www.seldonframe.com/#org" },
   };
   const faqLd = {
     "@context": "https://schema.org",
@@ -107,7 +109,6 @@ export function AgentPage({ job, vertical }: AgentPageProps): ReactElement {
     >
       <MarketplaceStyles />
       <AgentPageStyles />
-      <MarkdownPointer href={markdownHref} />
       {/* GEO: structured data — SoftwareApplication + FAQPage. */}
       <script type="application/ld+json" dangerouslySetInnerHTML={{ __html: JSON.stringify(softwareLd) }} />
       <script type="application/ld+json" dangerouslySetInnerHTML={{ __html: JSON.stringify(faqLd) }} />
@@ -139,7 +140,7 @@ export function AgentPage({ job, vertical }: AgentPageProps): ReactElement {
         {/* ── HERO: semantic h1 + one-liner + the cited stat, rendered prominently ── */}
         <header style={{ paddingBottom: 30, borderBottom: "1px solid rgba(34,29,23,0.10)" }}>
           <div style={{ fontSize: 12, fontWeight: 600, letterSpacing: "0.12em", textTransform: "uppercase", color: MKT.green, marginBottom: 12 }}>
-            {vertical ? `AI agent for ${vertical.plural}` : "Deploy a working agent in 60 seconds"}
+            {vertical ? `Agency playbook · ${vertical.plural}` : "Agency-ready agent · deploy in 60 seconds"}
           </div>
           <h1 className="sf-ap-h1" style={{ margin: 0, fontSize: 44, fontWeight: 800, letterSpacing: "-0.03em", lineHeight: 1.05, maxWidth: 760 }}>
             {copy.h1}
@@ -199,7 +200,7 @@ export function AgentPage({ job, vertical }: AgentPageProps): ReactElement {
               }}
             >
               <MarketplaceIcon name="package" size={19} />
-              Deploy it for {verticalLabel === "your business" ? "my business" : `my ${vertical?.name}`}
+              {deployLabel}
               <MarketplaceIcon name="arrowRight" size={17} />
             </Link>
           </div>
@@ -459,9 +460,11 @@ export function AgentPage({ job, vertical }: AgentPageProps): ReactElement {
         {/* ── FLYWHEEL: "more agents for [vertical]" cross-links ── */}
         {related.length > 0 ? (
           <section style={SECTION}>
-            <h2 style={{ ...H2, marginBottom: 4 }}>More agents for {verticalLabel}</h2>
+            <h2 style={{ ...H2, marginBottom: 4 }}>
+              More agents for {vertical ? `${vertical.plural} clients` : "client businesses"}
+            </h2>
             <p style={{ margin: "0 0 18px", fontSize: 14.5, color: "rgba(34,29,23,0.55)" }}>
-              Every one deploys a working agent into your own workspace in about a minute.
+              Every one deploys into a branded client workspace in about a minute.
             </p>
             <div className="sf-ap-related">
               {related.map((r) => (
@@ -508,6 +511,7 @@ export function AgentPage({ job, vertical }: AgentPageProps): ReactElement {
           <AgentPageCta
             agentName={job.name}
             deployHref={deployHref}
+            deployLabel={deployLabel}
             mcpEndpoint={mcpEndpoint}
             mcpSnippet={mcpSnippet}
             marketplaceSlug={job.marketplaceSlug}

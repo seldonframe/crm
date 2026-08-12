@@ -15,6 +15,10 @@ import { GuideDiagramView, GuideDiagramStyles, faviconUrl } from "@/components/s
 import type { GuideCallout } from "@/lib/seo/guides/types";
 import { tokenizeInlineMarkup, stripInlineMarkup, startsWithKindOfLike } from "@/lib/seo/guide-inline";
 import { ChatGptCtaButton } from "@/components/seo/chatgpt-cta";
+import {
+  GOHIGHLEVEL_COLLECTION_PATH,
+  gohighlevelDiagnosticSiblings,
+} from "@/lib/seo/gohighlevel-discovery";
 
 /** Split a section body into paragraphs on blank lines. */
 function paragraphs(body: string): string[] {
@@ -107,6 +111,7 @@ function domainFromUrl(url: string): string | null {
 
 export function GuidePage({ slug }: { slug: string }): ReactElement {
   const g = getGuide(slug);
+  const diagnosticSiblings = gohighlevelDiagnosticSiblings(slug);
   const canonical = `/guides/${g.slug}`;
   const iso = monthYearToIso(LAST_UPDATED);
 
@@ -216,6 +221,43 @@ export function GuidePage({ slug }: { slug: string }): ReactElement {
               </details>
             ))}
           </section>
+
+          {diagnosticSiblings.length > 0 && (
+            <section style={{ marginTop: 38 }}>
+              <div style={{ display: "flex", alignItems: "baseline", justifyContent: "space-between", flexWrap: "wrap", gap: 10, marginBottom: 14 }}>
+                <div>
+                  <p style={{ margin: "0 0 5px", fontFamily: MKT.fontMono, fontSize: 11, fontWeight: 600, letterSpacing: "0.08em", color: "rgba(34,29,23,0.48)", textTransform: "uppercase" }}>
+                    Continue diagnosing
+                  </p>
+                  <h2 style={{ margin: 0, fontSize: 21, fontWeight: 800, letterSpacing: "-0.02em" }}>Related GoHighLevel agency problems</h2>
+                </div>
+                <Link href={GOHIGHLEVEL_COLLECTION_PATH} className="sf-link" style={{ color: MKT.green, fontSize: 13.5, fontWeight: 750 }}>
+                  View the complete field guide →
+                </Link>
+              </div>
+              <div style={{ display: "grid", gridTemplateColumns: "repeat(auto-fit, minmax(200px, 1fr))", gap: 10 }}>
+                {diagnosticSiblings.map((sibling) => (
+                  <Link
+                    key={sibling.slug}
+                    data-ghl-diagnostic-sibling="true"
+                    href={`/guides/${sibling.slug}`}
+                    className="sf-link"
+                    style={{
+                      display: "block",
+                      padding: "15px 16px",
+                      border: `1px solid ${MKT.ink10}`,
+                      borderRadius: 12,
+                      background: "rgba(255,255,255,0.5)",
+                      color: MKT.ink,
+                      textDecoration: "none",
+                    }}
+                  >
+                    <span style={{ fontSize: 14.5, fontWeight: 750, lineHeight: 1.4 }}>{sibling.title}</span>
+                  </Link>
+                ))}
+              </div>
+            </section>
+          )}
 
           {g.sources.length > 0 && (
             <section style={{ marginTop: 34 }}>

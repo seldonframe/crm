@@ -54,6 +54,7 @@ import { MarketingNav } from "@/components/landing/marketing-nav";
 import { MarketingFooter } from "@/components/landing/marketing-footer";
 import { normalizePaidPlan } from "@/lib/auth/pricing-continuity";
 import { AnalyticsIdentityBridge } from "@/components/analytics/analytics-identity-bridge";
+import { AGENCY_PRICING_CLAIM, BUILDER_PRICING_CLAIM } from "@/lib/marketing/public-claims";
 
 // 2026-07-08 hydration-mismatch fix — "No price id lives in the client"
 // (the rule the legacy single card in pricing-shell.tsx already followed).
@@ -94,21 +95,24 @@ function buildLadderTiers(): LadderTier[] {
  *  isSimpleHomeOn). Read server-side here rather than adding a new
  *  export to policy.ts (kept out of this task's touched-files list). */
 function isTierLadderOn(env: { SF_TIER_LADDER?: string | undefined }): boolean {
-  return env.SF_TIER_LADDER?.trim() === "1";
+  // The current sellable ladder is the production default. Keep an explicit
+  // `0` escape hatch for a controlled rollback; an unset flag must never send
+  // an agency visitor to the retired single-card checkout.
+  return env.SF_TIER_LADDER?.trim() !== "0";
 }
 
-const FAQS: Array<{ q: string; a: string }> = [
+export const PRICING_FAQS: Array<{ q: string; a: string }> = [
   {
     q: "How many client workspaces can I run?",
-    a: "As many of your own as you want, on the flat $29/mo Builder plan — no per-workspace charge. Running CLIENT sub-accounts under your own brand is the agency ladder, starting at $99/mo (Agency Starter includes 10 sub-accounts).",
+    a: `${BUILDER_PRICING_CLAIM} ${AGENCY_PRICING_CLAIM}`,
   },
   {
     q: "Can I white-label SeldonFrame for my clients?",
-    a: "Yes — whitelabel and resell to clients is included on every agency plan (Agency Starter $99/mo and up). The flat $29/mo Builder plan is for your own workspaces, not whitelabel resale.",
+    a: `Yes — white-label delivery and client resale are included on Agency plans. ${AGENCY_PRICING_CLAIM} ${BUILDER_PRICING_CLAIM}`,
   },
   {
     q: "Is there a free trial?",
-    a: "You're charged $29/mo flat when you connect through Stripe from this page — there's no separate trial period. You can cancel anytime from Settings → Billing and you won't be billed again.",
+    a: `You can build your first workspace free before checkout. When you connect through Stripe, ${BUILDER_PRICING_CLAIM} ${AGENCY_PRICING_CLAIM} There is no separate trial period, and you can cancel anytime from Settings → Billing.`,
   },
   {
     q: "What about self-hosting?",
@@ -180,7 +184,7 @@ export default async function PricingPage({ searchParams }: PricingPageProps) {
               </div>
 
               <div className="mt-8 border-t border-[rgba(34,29,23,.10)]">
-                {FAQS.map((faq) => (
+                {PRICING_FAQS.map((faq) => (
                   <details key={faq.q} className="group border-b border-[rgba(34,29,23,.10)]">
                     <summary className="flex cursor-pointer list-none items-center justify-between gap-4 py-5 text-[16px] font-[500] leading-tight tracking-[-0.01em] text-[#221D17] [&::-webkit-details-marker]:hidden">
                       <span>{faq.q}</span>
@@ -217,8 +221,8 @@ export default async function PricingPage({ searchParams }: PricingPageProps) {
           <p className="text-xs font-semibold uppercase tracking-[0.16em] text-muted-foreground">
             Frequently asked
           </p>
-          <Accordion className="mt-3" defaultValue={[FAQS[0].q]}>
-            {FAQS.map((faq) => (
+          <Accordion className="mt-3" defaultValue={[PRICING_FAQS[0].q]}>
+            {PRICING_FAQS.map((faq) => (
               <AccordionItem key={faq.q} value={faq.q}>
                 <AccordionTrigger>{faq.q}</AccordionTrigger>
                 <AccordionContent>

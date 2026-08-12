@@ -681,7 +681,7 @@ export const VALUE_FRAME_FAQ: FaqItem[] = [
   },
   {
     q: "How much does it cost?",
-    a: "$29/mo flat, with unlimited workspaces and cancel anytime — no card to start building. Your AI key is billed by the provider directly at cost (usually pennies a day); we never mark it up or add a usage tax on top.",
+    a: "Build the first workspace free. Agencies start with Agency Starter at $99/mo for 10 client sub-accounts, full white-label, and branded client portals; Growth is $199/mo for 30 clients and Scale is $299/mo for unlimited clients. Running only your own businesses? Builder is $29/mo BYOK and Managed is $49/mo on SeldonFrame's keys. Cancel anytime, with no card required to start building.",
   },
   {
     q: "How much can it save me?",
@@ -899,7 +899,8 @@ export function composePageCopy(job: AgentJob, vertical?: Vertical): ComposedPag
 
   const pluralCased = headlineCasePlural(vertical.plural);
   const h1 = `${job.name} for ${pluralCased}`;
-  const intro = `For ${vertical.plural}, ${vertical.painHook}. ${aOrAn(job.name)} ${job.name} closes that gap: it ${job.verticalLede}. ${job.painStat.text} Deploy one for your ${ownBusinessPhrase(vertical)} in about 60 seconds, grounded in your own services, hours, and pricing — including ${vertical.exampleService}.`;
+  const clientArticle = aOrAn(vertical.name).toLowerCase();
+  const intro = `For agencies serving ${vertical.plural}, ${vertical.painHook}. ${aOrAn(job.name)} ${job.name} closes that gap: it ${job.verticalLede}. ${job.painStat.text} Build and white-label one for ${clientArticle} ${vertical.name} client in about 60 seconds, grounded in the client's services, hours, and pricing — including ${vertical.exampleService}.`;
 
   // Localize only the first FAQ question to the trade; answers already generalize.
   // The shared value-frame block is appended AFTER, unchanged (it's vertical-
@@ -916,7 +917,7 @@ export function composePageCopy(job: AgentJob, vertical?: Vertical): ComposedPag
     title: `${job.name} for ${pluralCased} — ${shortPromise(job)} | SeldonFrame`,
     h1,
     metaDescription: clampDescription(
-      `${job.name} for ${vertical.plural}: ${job.oneLiner} Deploy a working agent in 60 seconds.`,
+      `${job.name} for ${vertical.plural}: build and white-label a working client agent from one agency workspace in about 60 seconds.`,
     ),
     intro,
     faq,
@@ -927,16 +928,6 @@ export function composePageCopy(job: AgentJob, vertical?: Vertical): ComposedPag
  *  first letter (good enough for our names: "AI…" → "An", "Quote…" → "A"). */
 function aOrAn(name: string): string {
   return /^[aeiou]/i.test(name.trim()) ? "An" : "A";
-}
-
-/** "your plumber business" but "your HVAC company" (not "company business") —
- *  avoids doubling when the vertical noun already ends in business/company/etc. */
-function ownBusinessPhrase(vertical: Vertical): string {
-  const name = vertical.name.trim();
-  if (/\b(business|company|companies|firm|practice|shop|spa|salon|barbershop|restaurant|agent)\b/i.test(name)) {
-    return name;
-  }
-  return `${name} business`;
 }
 
 /** A terse vertical-page promise for the <title> tail. */

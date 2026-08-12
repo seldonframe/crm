@@ -20,7 +20,18 @@
 //     Those workspaces ship their own LocalBusiness schema generated
 //     per workspace — not SeldonFrame's Organization schema.
 //
-// The allowlist is identical to GA's: same hosts, same rationale.
+// Product facts come from the same dependency-free public claims module used by
+// the homepage and docs. That prevents stale JSON-LD from silently advertising
+// a retired pricing ladder after the visible product has moved on.
+
+import {
+  AGENCY_PLAN_FACTS,
+  AGENCY_POSITIONING,
+  LICENSE_LABEL,
+} from "@/lib/marketing/public-claims";
+
+const MARKETING_ORIGIN = "https://www.seldonframe.com";
+const ORGANIZATION_ID = `${MARKETING_ORIGIN}/#org`;
 
 /**
  * Allowlist of hosts where the SeldonFrame-marketing JSON-LD is
@@ -49,11 +60,11 @@ export function shouldRenderMarketingStructuredData(host: string): boolean {
 const organizationSchema = {
   "@context": "https://schema.org",
   "@type": "Organization",
+  "@id": ORGANIZATION_ID,
   name: "SeldonFrame",
-  url: "https://seldonframe.com",
-  logo: "https://seldonframe.com/brand/seldonframe-icon.svg",
-  description:
-    "Open-source alternative to GoHighLevel. SeldonFrame generates a pre-wired client operations stack — CRM, booking page, intake form, and AI chatbot — that agencies deploy per client in minutes. Built for freelance web designers and small agencies serving local service businesses.",
+  url: MARKETING_ORIGIN,
+  logo: `${MARKETING_ORIGIN}/brand/seldonframe-icon.svg`,
+  description: AGENCY_POSITIONING,
   sameAs: [
     "https://github.com/seldonframe/seldonframe",
     "https://www.npmjs.com/package/@seldonframe/mcp",
@@ -65,49 +76,30 @@ const organizationSchema = {
 const websiteSchema = {
   "@context": "https://schema.org",
   "@type": "WebSite",
+  "@id": `${MARKETING_ORIGIN}/#website`,
   name: "SeldonFrame",
-  url: "https://seldonframe.com",
-  publisher: {
-    "@type": "Organization",
-    name: "SeldonFrame",
-  },
+  url: MARKETING_ORIGIN,
+  publisher: { "@id": ORGANIZATION_ID },
 };
 
 const softwareApplicationSchema = {
   "@context": "https://schema.org",
   "@type": "SoftwareApplication",
+  "@id": `${MARKETING_ORIGIN}/#software`,
   name: "SeldonFrame",
   applicationCategory: "BusinessApplication",
-  operatingSystem: "Web, Self-hosted (Next.js, AGPL-3.0)",
-  description:
-    "Open-source alternative to GoHighLevel. SeldonFrame is a pre-wired client operations stack — CRM, booking page, intake form, and AI chatbot — that agencies deploy per client in minutes via Claude Code and the @seldonframe/mcp server. Everything is connected on generation: the chatbot books against the real calendar, the intake form writes to the real CRM, the booking page respects the client's hours and timezone. No Zapier, no integration work. Built for freelance web designers and small agencies serving local service businesses including HVAC contractors, plumbers, electricians, dental practices, salons, and roofers.",
-  offers: [
-    {
-      "@type": "Offer",
-      name: "Builder",
-      price: "19",
-      priceCurrency: "USD",
-      description:
-        "Builder: up to 10 standalone landing pages with your own domain and branding.",
-    },
-    {
-      "@type": "Offer",
-      name: "Workspace",
-      price: "49",
-      priceCurrency: "USD",
-      description:
-        "Workspace: one complete workspace — website, booking, intake, CRM, and AI chat — with an optional AI voice receptionist add-on.",
-    },
-    {
-      "@type": "Offer",
-      name: "Agency",
-      price: "297",
-      priceCurrency: "USD",
-      description:
-        "Agency (white-label): your brand on the platform, with client workspaces you resell at your own markup. Flat monthly pricing, no metered bills.",
-    },
-  ],
-  url: "https://seldonframe.com",
+  operatingSystem: `Web, Self-hosted (${LICENSE_LABEL})`,
+  description: AGENCY_POSITIONING,
+  offers: AGENCY_PLAN_FACTS.map((plan) => ({
+    "@type": "Offer",
+    name: plan.name,
+    price: String(plan.priceMonthly),
+    priceCurrency: "USD",
+    description: plan.audience,
+    url: `${MARKETING_ORIGIN}/pricing?plan=${plan.id}`,
+  })),
+  provider: { "@id": ORGANIZATION_ID },
+  url: MARKETING_ORIGIN,
 };
 
 /**

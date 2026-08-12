@@ -25,17 +25,18 @@
 
 import Link from "next/link";
 import { Check } from "lucide-react";
+import { AGENCY_PRICING_CLAIM, BUILDER_PRICING_CLAIM } from "@/lib/marketing/public-claims";
 
 // Everything that's included in the flat $29/mo (the whole platform).
 // Flag-OFF card only. Agency-voiced 2026-07-15 — claims stay tier-true:
 // $29 = Builder (unlimited workspaces YOU operate).
 const INCLUDED: readonly string[] = [
-  "A website on your client's domain, customized to their business — live and taking customers in minutes.",
-  "A CRM and pipeline, so every lead lands in one place and your client always knows who to call next.",
-  "A booking page tied to their real calendar, so customers book themselves while your client is on the job.",
+  "A website on your business's domain, customized to your services — live and taking customers in minutes.",
+  "A CRM and pipeline, so every lead lands in one place and you always know who to call next.",
+  "A booking page tied to your real calendar, so customers book themselves while you are on the job.",
   "A lead form wired straight to the CRM, so no inquiry ever slips through the cracks.",
-  "A website chatbot built in, so the site answers questions and books work 24/7.",
-  "Add any AI agent to take the busywork off their plate — just tell it what you want, no code.",
+  "A website chatbot built in, so your site answers questions and books work 24/7.",
+  "Add any AI agent to take the busywork off your plate — just tell it what you want, no code.",
 ];
 
 // The three sellable agency tiers (SF_TIER_LADDER on). Copy mirrors
@@ -142,7 +143,7 @@ function AgencyTierGrid() {
             </em>
           </h2>
           <p className="mx-auto mt-4 max-w-[62ch] text-[16px] leading-[1.55] text-[var(--lp-muted)]">
-            Every agency plan includes full white-label, branded client portals, unlimited
+            {AGENCY_PRICING_CLAIM} Every agency plan includes full white-label, branded client portals, unlimited
             workspaces of your own, and{" "}
             <strong className="font-[600] text-[var(--lp-ink)]">0% GMV</strong> — we don&apos;t
             tax your client work. Build it free, cancel anytime.
@@ -235,9 +236,7 @@ function AgencyTierGrid() {
             Build your first client workspace free →
           </Link>
           <p className="text-[13px] leading-[1.55] text-[var(--lp-muted)]">
-            Running your own business instead of clients? Builder is $29/mo — the same
-            unlimited workspaces, but everything lives under your own login: no client
-            logins, no white-label. Managed is $49/mo on our keys.{" "}
+            {BUILDER_PRICING_CLAIM} Managed is $49/mo on our keys.{" "}
             <Link
               href="/pricing"
               className="font-[600] text-[var(--lp-accent)] underline underline-offset-2"
@@ -301,8 +300,11 @@ function SingleFlatCard() {
               SeldonFrame
             </h3>
             <p className="mt-1.5 text-[13.5px] leading-[1.5] text-[var(--lp-muted)]">
-              Everything you need to build and run front offices for the clients you
-              operate — in one place, on one flat bill.
+              Everything you need to build and run a front office for a business you own
+              and operate — in one place, on one flat bill.
+            </p>
+            <p className="mt-2 text-[13px] leading-[1.5] text-[var(--lp-muted)]">
+              {BUILDER_PRICING_CLAIM}
             </p>
 
             <div className="mt-5 flex items-baseline gap-1.5">
@@ -315,7 +317,7 @@ function SingleFlatCard() {
               Unlimited workspaces · cancel anytime
             </p>
             <p className="mt-1 text-[13px] font-[500] text-[var(--lp-ink)]">
-              One client covers it. The rest is margin.
+              One business workspace covers it. The rest is margin.
             </p>
 
             <Link
@@ -340,9 +342,9 @@ function SingleFlatCard() {
                 ))}
               </ul>
               <p className="mt-5 rounded-[12px] border border-[color-mix(in_oklab,var(--lp-accent)_25%,transparent)] bg-[var(--lp-accent-soft)] px-4 py-3 text-[13.5px] leading-[1.5] text-[var(--lp-ink)]">
-                Want a voice agent that answers a client&apos;s every call? A review agent that
-                turns their happy customers into 5-star Google reviews? A speed-to-lead agent
-                that texts back missed calls before they hire someone else? Add them in a click.
+                Want a voice agent that answers every call? A review agent that turns happy
+                customers into 5-star Google reviews? A speed-to-lead agent that texts back
+                missed calls before they hire someone else? Add them in a click.
               </p>
               <p className="mt-4 text-[12.5px] leading-[1.5] text-[var(--lp-muted)]">
                 Your agents run on your own AI key (and Twilio for calls/texts), billed by

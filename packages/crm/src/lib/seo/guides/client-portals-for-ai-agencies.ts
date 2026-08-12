@@ -1,3 +1,4 @@
+import { AGENCY_PRICING_CLAIM } from "../../marketing/public-claims";
 import type { Guide } from "./types";
 
 export const guide: Guide = {
@@ -60,7 +61,8 @@ export const guide: Guide = {
     },
     {
       h2: "Build vs. assemble",
-      body: "Two real paths get you a portal.\n\n**DIY**: build a dashboard app that reads from your CRM's and calendar's APIs, wire up your own auth and per-client scoping, style it yourself. It's real engineering work, but it's fully yours — no platform dependency, no per-seat portal fee, and you control every pixel and every access rule. For an agency with the engineering time and a specific portal vision, that's a legitimate, durable choice.\n\nThe other path is a **platform-provided white-label portal** that ships as part of the stack you're already running the agent on — no separate build, but you're accepting the platform's data model and its ceiling on customization.\n\nDisclosure, since we build one of these: every SeldonFrame client workspace ships an agency-brandable portal with CRM, calendar, and agent activity included, on the same $29/mo flat pricing with unlimited workspaces and *BYOK* — so weigh this paragraph as the sales pitch it partly is.\n\nNeither path is wrong. The DIY route is more work and more control. The assembled route is faster and gets you selling sooner.",
+      body:
+        `Two real paths get you a portal.\n\n**DIY**: build a dashboard app that reads from your CRM's and calendar's APIs, wire up your own auth and per-client scoping, style it yourself. It's real engineering work, but it's fully yours — no platform dependency, no per-seat portal fee, and you control every pixel and every access rule. For an agency with the engineering time and a specific portal vision, that's a legitimate, durable choice.\n\nThe other path is a **platform-provided white-label portal** that ships as part of the stack you're already running the agent on — no separate build, but you're accepting the platform's data model and its ceiling on customization.\n\nDisclosure, since we build one of these: Agency Starter includes an agency-brandable portal with CRM, calendar, and agent activity. ${AGENCY_PRICING_CLAIM} Builder's $29/mo plan is for a business you operate yourself and does not include client sub-accounts or white-label resale — so weigh this paragraph as the sales pitch it partly is.\n\nNeither path is wrong. The DIY route is more work and more control. The assembled route is faster and gets you selling sooner.`,
     },
     {
       h2: "Operating rhythm",

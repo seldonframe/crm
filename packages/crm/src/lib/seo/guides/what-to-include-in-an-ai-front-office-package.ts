@@ -1,3 +1,4 @@
+import { AGENCY_PRICING_CLAIM } from "../../marketing/public-claims";
 import type { Guide } from "./types";
 
 export const guide: Guide = {
@@ -70,7 +71,8 @@ export const guide: Guide = {
     },
     {
       h2: "Delivering it without building a platform (disclosed)",
-      body: "Everything above is a spec, not a build guide. Someone still has to stand up the phone agent, the CRM, the calendar integration, and the client portal, and keep all four working together.\n\nDisclosure: we build a product for exactly this. SeldonFrame ships the whole stack — agent, CRM, calendar, portal, white-labeled — as one workspace per client, at **$29/mo flat** with *BYOK* (bring your own model API key, so there's no markup on usage baked into the price). The package described in this article maps directly onto one SeldonFrame workspace per client: the components above are what's in the workspace, and the operating layer above is what you do with it.\n\nDIY assembly is a legitimate path too — wiring together a phone provider, a CRM, a calendar API, and a portal yourself, or subcontracting the build. It's the right call if you want to own every piece of the stack and don't mind the integration and maintenance work that comes with it.\n\nIf you'd rather start selling the package this week than spend it stitching four tools together, that's the gap a packaged platform is built to close.",
+      body:
+        `Everything above is a spec, not a build guide. Someone still has to stand up the phone agent, the CRM, the calendar integration, and the client portal, and keep all four working together.\n\nDisclosure: we build a product for exactly this. SeldonFrame's Agency Starter tier ships the whole stack — agent, CRM, calendar, portal, white-labeled — as one workspace per client. ${AGENCY_PRICING_CLAIM} Builder is the $29/mo own-business plan and does not include client sub-accounts or white-label resale. The package described in this article maps directly onto one SeldonFrame workspace per client: the components above are what's in the workspace, and the operating layer above is what you do with it.\n\nDIY assembly is a legitimate path too — wiring together a phone provider, a CRM, a calendar API, and a portal yourself, or subcontracting the build. It's the right call if you want to own every piece of the stack and don't mind the integration and maintenance work that comes with it.\n\nIf you'd rather start selling the package this week than spend it stitching four tools together, that's the gap a packaged platform is built to close.`,
     },
   ],
   faq: [

@@ -61,6 +61,16 @@ import { guide as gohighlevelVsSeldonframe } from "./gohighlevel-vs-seldonframe"
 import { guide as bestGohighlevelAlternativeForSolopreneurs } from "./best-gohighlevel-alternative-for-solopreneurs";
 import { guide as gohighlevelVsHubspot } from "./gohighlevel-vs-hubspot";
 import { guide as whyAgenciesLeaveGohighlevel } from "./why-agencies-leave-gohighlevel";
+import { guide as gohighlevelClientOnboardingTakesTooLong } from "./gohighlevel-client-onboarding-takes-too-long";
+import { guide as gohighlevelAgencyModelNotPassiveSaas } from "./gohighlevel-agency-model-not-passive-saas";
+import { guide as gohighlevelSupportProblems } from "./gohighlevel-support-problems";
+import { guide as gohighlevelBugsAndOutages } from "./gohighlevel-bugs-and-outages";
+import { guide as whyGohighlevelEmailsGoToSpam } from "./why-gohighlevel-emails-go-to-spam";
+import { guide as gohighlevelSmsNotDelivering } from "./gohighlevel-sms-not-delivering";
+import { guide as gohighlevelWalletsAndRebilling } from "./gohighlevel-wallets-and-rebilling";
+import { guide as gohighlevelWorkflowProblems } from "./gohighlevel-workflow-problems";
+import { guide as canYouExportGohighlevel } from "./can-you-export-gohighlevel";
+import { guide as whoOwnsAGohighlevelSubaccount } from "./who-owns-a-gohighlevel-subaccount";
 import { guide as isGohighlevelWorthItForSmallBusiness } from "./is-gohighlevel-worth-it-for-small-business";
 import { guide as isGohighlevelHardToLearn } from "./is-gohighlevel-hard-to-learn";
 import { guide as doINeedGohighlevel } from "./do-i-need-gohighlevel";
@@ -92,6 +102,9 @@ import { guide as productizedAiServices } from "./productized-ai-services";
 import { guide as clientPortalsForAiAgencies } from "./client-portals-for-ai-agencies";
 import { guide as smmaToAiAgency } from "./smma-to-ai-agency";
 import { guide as whatToIncludeInAnAiFrontOfficePackage } from "./what-to-include-in-an-ai-front-office-package";
+import { guide as whatIsAnAiFrontOffice } from "./what-is-an-ai-front-office";
+import { guide as aiFrontOfficeExamples } from "./ai-front-office-examples";
+import { guide as aiFrontOfficeSoftwareForAgencies } from "./ai-front-office-software-for-agencies";
 import { guide as gptStoreAlternativeForDevelopers } from "./gpt-store-alternative-for-developers";
 import { guide as whereToSellAiAgents } from "./where-to-sell-ai-agents";
 import { guide as sellingAiServicesOnFiverrVsOwningYourAgent } from "./selling-ai-services-on-fiverr-vs-owning-your-agent";
@@ -172,6 +185,16 @@ export const GUIDES: Guide[] = [
   bestGohighlevelAlternativeForSolopreneurs,
   gohighlevelVsHubspot,
   whyAgenciesLeaveGohighlevel,
+  gohighlevelClientOnboardingTakesTooLong,
+  gohighlevelAgencyModelNotPassiveSaas,
+  gohighlevelSupportProblems,
+  gohighlevelBugsAndOutages,
+  whyGohighlevelEmailsGoToSpam,
+  gohighlevelSmsNotDelivering,
+  gohighlevelWalletsAndRebilling,
+  gohighlevelWorkflowProblems,
+  canYouExportGohighlevel,
+  whoOwnsAGohighlevelSubaccount,
   isGohighlevelWorthItForSmallBusiness,
   isGohighlevelHardToLearn,
   doINeedGohighlevel,
@@ -203,6 +226,9 @@ export const GUIDES: Guide[] = [
   clientPortalsForAiAgencies,
   smmaToAiAgency,
   whatToIncludeInAnAiFrontOfficePackage,
+  whatIsAnAiFrontOffice,
+  aiFrontOfficeExamples,
+  aiFrontOfficeSoftwareForAgencies,
   gptStoreAlternativeForDevelopers,
   whereToSellAiAgents,
   sellingAiServicesOnFiverrVsOwningYourAgent,

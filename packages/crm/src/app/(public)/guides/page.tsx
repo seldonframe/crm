@@ -6,6 +6,7 @@ import Link from "next/link";
 import { MarketplaceNav, MarketplaceFooter } from "@/components/marketplace/marketplace-chrome";
 import { MarketplaceStyles } from "@/components/marketplace/marketplace-styles";
 import { MKT } from "@/components/marketplace/marketplace-data";
+import { GOHIGHLEVEL_COLLECTION_PATH } from "@/lib/seo/gohighlevel-discovery";
 import { populatedClusters } from "@/lib/seo/guides";
 
 export const metadata: Metadata = {
@@ -25,6 +26,33 @@ export default function GuidesHubPage(): ReactElement {
         <p style={{ margin: "14px 0 0", fontSize: 17, lineHeight: 1.55, color: "rgba(34,29,23,0.7)", maxWidth: 640 }}>
           Practical guides for local service businesses and the agencies that serve them — honestly sourced, and each paired with a free tool you can use right now.
         </p>
+        <Link
+          href={GOHIGHLEVEL_COLLECTION_PATH}
+          className="sf-link"
+          style={{
+            display: "grid",
+            gridTemplateColumns: "auto minmax(0, 1fr) auto",
+            gap: 18,
+            alignItems: "center",
+            marginTop: 30,
+            padding: "20px 22px",
+            borderRadius: 14,
+            background: MKT.green,
+            color: MKT.paper,
+            textDecoration: "none",
+          }}
+        >
+          <span style={{ fontFamily: MKT.fontMono, fontSize: 11, letterSpacing: "0.08em", color: "rgba(246,242,234,0.58)" }}>
+            FEATURED
+          </span>
+          <span>
+            <strong style={{ display: "block", fontSize: 17, lineHeight: 1.3 }}>GoHighLevel agency field guide</strong>
+            <span style={{ display: "block", marginTop: 4, fontSize: 13.5, lineHeight: 1.5, color: "rgba(246,242,234,0.72)" }}>
+              Diagnose operating problems, model the real cost, compare alternatives, and plan a clean exit.
+            </span>
+          </span>
+          <span aria-hidden style={{ fontSize: 20 }}>→</span>
+        </Link>
         {clusters.map((c) => (
           <section key={c.cluster} style={{ marginTop: 34 }}>
             <h2 style={{ margin: "0 0 14px", fontSize: 21, fontWeight: 800, letterSpacing: "-0.02em" }}>{c.label}</h2>

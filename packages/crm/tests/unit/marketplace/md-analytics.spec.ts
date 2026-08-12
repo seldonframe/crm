@@ -15,6 +15,9 @@ import {
   logMarkdownFetch,
   type MarkdownFetchLogLine,
 } from "../../../src/lib/marketplace/md-analytics";
+import * as whatIsFrontOfficeRoute from "../../../src/app/guides/what-is-an-ai-front-office.md/route";
+import * as frontOfficeExamplesRoute from "../../../src/app/guides/ai-front-office-examples.md/route";
+import * as agencySoftwareRoute from "../../../src/app/guides/ai-front-office-software-for-agencies.md/route";
 
 describe("classifyAiRequest() — AI crawler UA detection", () => {
   test("GPTBot UA → aiCrawler GPTBot, isAi true", () => {
@@ -143,6 +146,23 @@ function captureLog(fn: () => void): { lines: MarkdownFetchLogLine[]; calls: num
   };
 }
 
+async function captureLogAsync(fn: () => Promise<void>): Promise<{ lines: MarkdownFetchLogLine[]; calls: number }> {
+  const original = console.info;
+  const recorded: string[] = [];
+  console.info = ((...args: unknown[]) => {
+    recorded.push(String(args[0]));
+  }) as typeof console.info;
+  try {
+    await fn();
+  } finally {
+    console.info = original;
+  }
+  return {
+    calls: recorded.length,
+    lines: recorded.map((s) => JSON.parse(s) as MarkdownFetchLogLine),
+  };
+}
+
 describe("logMarkdownFetch() — structured md_fetch log line", () => {
   test("emits exactly one action:md_fetch line with the classification", () => {
     const { calls, lines } = captureLog(() =>
@@ -226,4 +246,39 @@ describe("logMarkdownFetch() — structured md_fetch log line", () => {
 
   // Keep node:test's mock registry tidy for any sibling specs in the same proc.
   mock.reset();
+});
+
+describe("canonical guide Markdown twins", () => {
+  const routes = [
+    ["what-is-an-ai-front-office", whatIsFrontOfficeRoute],
+    ["ai-front-office-examples", frontOfficeExamplesRoute],
+    ["ai-front-office-software-for-agencies", agencySoftwareRoute],
+  ] as const;
+
+  test("serve the canonical guide Markdown and emit anonymous GEO analytics", async () => {
+    for (const [slug, routeModule] of routes) {
+      const route = routeModule as unknown as { GET: (req: Request) => Response };
+      const { calls, lines } = await captureLogAsync(async () => {
+        const response = route.GET(new Request(`https://www.seldonframe.com/guides/${slug}.md`, {
+          headers: { "user-agent": "GPTBot/1.1", referer: "https://chatgpt.com/" },
+        }));
+        assert.equal(response.status, 200);
+        assert.equal(response.headers.get("content-type"), "text/markdown; charset=utf-8");
+        assert.equal(
+          response.headers.get("link"),
+          `<https://www.seldonframe.com/guides/${slug}>; rel="alternate"; type="text/html"`,
+        );
+        const body = await response.text();
+        assert.match(body, /^# .+/);
+        assert.match(body, new RegExp(`HTML version: https://www\\.seldonframe\\.com/guides/${slug}`));
+      });
+
+      assert.equal(calls, 1);
+      assert.equal(lines[0].surface, "guide");
+      assert.equal(lines[0].path, `/guides/${slug}.md`);
+      assert.equal(lines[0].aiCrawler, "GPTBot");
+      assert.equal(lines[0].aiReferrer, "chatgpt.com");
+      assert.doesNotMatch(JSON.stringify(lines[0]), /email|name|@/i);
+    }
+  });
 });

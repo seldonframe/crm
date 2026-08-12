@@ -5,6 +5,8 @@ import {
   AGENCY_HERO_HEADLINE,
   AGENCY_POSITIONING,
   AGENCY_PLAN_FACTS,
+  AGENCY_PRICING_CLAIM,
+  BUILDER_PRICING_CLAIM,
   HOSTED_AI_POLICY,
   LICENSE_LABEL,
 } from "../../../src/lib/marketing/public-claims";
@@ -32,4 +34,14 @@ test("public legal and AI claims are explicit", () => {
   assert.equal(LICENSE_LABEL, "AGPL-3.0");
   assert.match(HOSTED_AI_POLICY, /Managed/);
   assert.match(HOSTED_AI_POLICY, /BYOK/);
+});
+
+test("public pricing claims distinguish Builder from Agency", () => {
+  assert.match(BUILDER_PRICING_CLAIM, /\$29/);
+  assert.match(BUILDER_PRICING_CLAIM, /own/i);
+  assert.doesNotMatch(BUILDER_PRICING_CLAIM, /white-label/i);
+
+  assert.match(AGENCY_PRICING_CLAIM, /\$99/);
+  assert.match(AGENCY_PRICING_CLAIM, /10 client/i);
+  assert.match(AGENCY_PRICING_CLAIM, /white-label/i);
 });

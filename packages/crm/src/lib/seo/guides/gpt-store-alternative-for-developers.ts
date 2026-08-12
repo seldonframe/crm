@@ -1,3 +1,4 @@
+import { AGENCY_PRICING_CLAIM } from "../../marketing/public-claims";
 import type { Guide } from "./types";
 
 export const guide: Guide = {
@@ -68,7 +69,8 @@ export const guide: Guide = {
     },
     {
       h2: "Where SeldonFrame fits (disclosed: we build this product)",
-      body: "This is the sales pitch section, so weigh it accordingly. SeldonFrame is built for exactly the gap this piece describes: you build an agent in one conversation, deploy it for a real business across voice, chat, SMS, or email connected to that business's own CRM and calendar data, and then either publish it to the SeldonFrame marketplace, rent it out via a signed MCP key, or white-label it for an agency serving its own clients.\n\nThe commercial terms, stated plainly rather than buried: **$29/mo flat**, first workspace free, and *BYOK* for model costs — so the platform's own costs stay near zero and pricing doesn't drift with usage.\n\nSeldonFrame only takes a cut — a *GMV fee* stepping down from **5% to 3% to 2%** — when SeldonFrame itself is the channel that brought the buyer. Sell directly and just use the platform to build and host, and that fee doesn't apply.\n\nNone of that replaces the GPT Store's distribution — a store listing still gets you discovered by people already inside ChatGPT. It's a way to convert a GPT you've already validated into something a specific business pays for every month.",
+      body:
+        `This is the sales pitch section, so weigh it accordingly. SeldonFrame is built for exactly the gap this piece describes: you build an agent in one conversation, deploy it for a real business across voice, chat, SMS, or email connected to that business's own CRM and calendar data, and then either publish it to the SeldonFrame marketplace, rent it out via a signed MCP key, or white-label it for an agency serving its own clients.\n\nThe commercial terms, stated plainly rather than buried: ${AGENCY_PRICING_CLAIM} Builder is $29/mo for a business you operate yourself and does not include client resale. The first workspace is free, and *BYOK* for model costs keeps the platform's own costs near zero and pricing from drifting with usage.\n\nSeldonFrame only takes a cut — a *GMV fee* stepping down from **5% to 3% to 2%** — when SeldonFrame itself is the channel that brought the buyer. Sell directly and just use the platform to build and host, and that fee doesn't apply.\n\nNone of that replaces the GPT Store's distribution — a store listing still gets you discovered by people already inside ChatGPT. It's a way to convert a GPT you've already validated into something a specific business pays for every month.`,
       callout: {
         kind: "analogy",
         text: "A GMV fee is a referral commission, not rent — SeldonFrame only takes a cut of a sale it actually helped bring in, the way a realtor gets paid on the house they showed you, not on the one you found yourself.",

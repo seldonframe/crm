@@ -32,6 +32,7 @@ import {
   SHARED_FAQ,
   LAST_UPDATED,
   sfPriceAnchor,
+  sfPriceAnchorMonthlyPrice,
   type Competitor,
   type AltFaqItem,
 } from "@/lib/seo/alternative-pages";
@@ -98,7 +99,13 @@ export function SeldonFrameVsPage({ competitor }: { competitor: Competitor }): R
     name: "SeldonFrame",
     applicationCategory: "BusinessApplication",
     description: `SeldonFrame builds the whole AI front office — website, CRM, booking, and an AI receptionist — ${sfPriceAnchor(c.audience)}.`,
-    offers: { "@type": "Offer", price: "29", priceCurrency: "USD" },
+    offers: {
+      "@type": "Offer",
+      name: c.audience === "agency" ? "Agency Starter" : "Builder",
+      price: String(sfPriceAnchorMonthlyPrice(c.audience)),
+      priceCurrency: "USD",
+      description: sfPriceAnchor(c.audience),
+    },
     provider: { "@type": "Organization", name: "SeldonFrame", url: "https://seldonframe.com" },
   };
   const articleJsonLd = articleLd({

@@ -138,6 +138,29 @@ describe("PricingShell — SF_TIER_LADDER OFF (legacy dark single-card view)", (
   });
 });
 
+describe("/pricing production default", () => {
+  test("uses the current ladder when SF_TIER_LADDER is unset", () => {
+    const source = readFileSync(
+      path.join(__dirname, "../../../src/app/pricing/page.tsx"),
+      "utf8",
+    );
+    assert.match(
+      source,
+      /return env\.SF_TIER_LADDER\?\.trim\(\) !== [\"']0[\"']/,
+      "unset SF_TIER_LADDER must select the plan-aware ladder",
+    );
+  });
+
+  test("legacy rollback copy does not promise client resale at Builder pricing", () => {
+    const source = readFileSync(
+      path.join(__dirname, "../../../src/app/pricing/pricing-shell.tsx"),
+      "utf8",
+    );
+    assert.doesNotMatch(source, /sell it to your clients/i);
+    assert.doesNotMatch(source, /Whitelabel \+ resell each workspace/i);
+  });
+});
+
 describe("PricingShellMarketing — SF_TIER_LADDER ON (light marketing-branded view)", () => {
   test("carries the light-theme marker (data-pricing-theme=marketing)", () => {
     const html = renderToString(

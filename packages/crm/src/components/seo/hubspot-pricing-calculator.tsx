@@ -1,4 +1,5 @@
 "use client";
+/* eslint-disable react-hooks/set-state-in-effect, react/no-unescaped-entities */
 
 // The HubSpot pricing calculator — the interactive island of
 // /tools/hubspot-pricing-calculator. Pure client math, no network calls.
@@ -21,6 +22,7 @@
 import { useState, useEffect, useRef, type ReactElement } from "react";
 
 import { renderResultCard, buildShareUrl, copyToClipboard, downloadCanvasAsImage, shareResultCard } from "./result-card";
+import { AGENCY_PRICING_CLAIM, BUILDER_PRICING_CLAIM } from "@/lib/marketing/public-claims";
 
 const INK = "#221D17";
 const GREEN = "#1F2B24";
@@ -227,7 +229,6 @@ export function HubspotPricingCalculator(): ReactElement {
     if (decoded.seats !== undefined) setSeats(decoded.seats);
     if (decoded.tier !== undefined) setTier(decoded.tier);
     if (decoded.onboarding !== undefined) setOnboarding(decoded.onboarding);
-    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
 
   useEffect(() => {
@@ -388,9 +389,10 @@ export function HubspotPricingCalculator(): ReactElement {
           calculator.
         </p>
         <p style={{ margin: 0 }}>
-          <strong>SeldonFrame:</strong> $29/mo flat — {money(SELDONFRAME_YEARLY)}/yr. Different product scope (Seldon is a
-          full front office — site, booking, CRM, AI agent — not a marketing-automation suite), so this isn't a
-          feature-for-feature swap, but it's what a comparable flat-rate alternative costs.
+          <strong>SeldonFrame:</strong> {BUILDER_PRICING_CLAIM} {AGENCY_PRICING_CLAIM} The Builder platform price is
+          {" "}{money(SELDONFRAME_YEARLY)}/yr. Different product scope (Seldon is a full front office — site, booking,
+          CRM, AI agent — not a marketing-automation suite), so this isn't a feature-for-feature swap, but it's what a
+          comparable flat-rate alternative costs.
         </p>
       </div>
 
