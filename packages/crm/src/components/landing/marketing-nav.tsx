@@ -28,6 +28,8 @@ import { BrandMark } from "./brand-mark";
  *  crawlers/LLMs. */
 const RESOURCE_LINKS = [
   { href: "/alternatives", label: "Compare & pricing breakdowns" },
+  { href: "/guides", label: "Guides" },
+  { href: "/guides/gohighlevel", label: "GoHighLevel diagnostics" },
   { href: "/best", label: "Best-of guides" },
   { href: "/tools", label: "Free tools" },
   { href: "/ai-agents", label: "AI agent library" },
