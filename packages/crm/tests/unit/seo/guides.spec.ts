@@ -5,6 +5,8 @@
 
 import { test } from "node:test";
 import assert from "node:assert/strict";
+import { existsSync } from "node:fs";
+import { join } from "node:path";
 
 import {
   GUIDES,
@@ -127,6 +129,47 @@ test("allGuideSlugs matches GUIDES length with no duplicates", () => {
   const slugs = allGuideSlugs();
   assert.equal(slugs.length, GUIDES.length);
   assert.equal(new Set(slugs).size, slugs.length);
+});
+
+const GOHIGHLEVEL_DIAGNOSTIC_SLUGS = [
+  "gohighlevel-client-onboarding-takes-too-long",
+  "gohighlevel-agency-model-not-passive-saas",
+  "gohighlevel-support-problems",
+  "gohighlevel-bugs-and-outages",
+  "why-gohighlevel-emails-go-to-spam",
+  "gohighlevel-sms-not-delivering",
+  "gohighlevel-wallets-and-rebilling",
+  "gohighlevel-workflow-problems",
+  "can-you-export-gohighlevel",
+  "who-owns-a-gohighlevel-subaccount",
+] as const;
+
+test("GoHighLevel diagnostic cluster is long-form, balanced, sourced, and agent-readable", () => {
+  for (const slug of GOHIGHLEVEL_DIAGNOSTIC_SLUGS) {
+    const guide = getGuide(slug);
+    const headings = guide.sections.map((section) => section.h2);
+    const readerCopy = [guide.dek, ...guide.sections.map((section) => section.body), ...guide.faq.flatMap((item) => [item.q, item.a])].join(" ");
+    const wordCount = readerCopy.trim().split(/\s+/).length;
+
+    assert.equal(guide.cluster, "gohighlevel", `${slug}: wrong cluster`);
+    assert.ok(guide.sections.length >= 6, `${slug}: expected at least 6 sections`);
+    assert.ok(guide.faq.length >= 4, `${slug}: expected at least 4 FAQs`);
+    assert.ok(wordCount >= 800, `${slug}: expected at least 800 words, got ${wordCount}`);
+    assert.ok(headings.includes("Where SeldonFrame helps"), `${slug}: missing SeldonFrame fit section`);
+    assert.ok(headings.includes("Where SeldonFrame cannot help"), `${slug}: missing SeldonFrame non-fit section`);
+    assert.ok(
+      guide.sources.some((source) => /(?:help\.)?gohighlevel\.com/i.test(source.url)),
+      `${slug}: missing official HighLevel source`,
+    );
+    assert.ok(
+      guide.sources.some((source) => /reddit\.com|g2\.com/i.test(source.url)),
+      `${slug}: missing community or aggregate review source`,
+    );
+    assert.ok(
+      existsSync(join(process.cwd(), "src", "app", "guides", `${slug}.md`, "route.ts")),
+      `${slug}: missing static Markdown route`,
+    );
+  }
 });
 
 // ─── per-guide structure + never-lies ───────────────────────────────────────

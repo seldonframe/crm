@@ -61,6 +61,16 @@ import { guide as gohighlevelVsSeldonframe } from "./gohighlevel-vs-seldonframe"
 import { guide as bestGohighlevelAlternativeForSolopreneurs } from "./best-gohighlevel-alternative-for-solopreneurs";
 import { guide as gohighlevelVsHubspot } from "./gohighlevel-vs-hubspot";
 import { guide as whyAgenciesLeaveGohighlevel } from "./why-agencies-leave-gohighlevel";
+import { guide as gohighlevelClientOnboardingTakesTooLong } from "./gohighlevel-client-onboarding-takes-too-long";
+import { guide as gohighlevelAgencyModelNotPassiveSaas } from "./gohighlevel-agency-model-not-passive-saas";
+import { guide as gohighlevelSupportProblems } from "./gohighlevel-support-problems";
+import { guide as gohighlevelBugsAndOutages } from "./gohighlevel-bugs-and-outages";
+import { guide as whyGohighlevelEmailsGoToSpam } from "./why-gohighlevel-emails-go-to-spam";
+import { guide as gohighlevelSmsNotDelivering } from "./gohighlevel-sms-not-delivering";
+import { guide as gohighlevelWalletsAndRebilling } from "./gohighlevel-wallets-and-rebilling";
+import { guide as gohighlevelWorkflowProblems } from "./gohighlevel-workflow-problems";
+import { guide as canYouExportGohighlevel } from "./can-you-export-gohighlevel";
+import { guide as whoOwnsAGohighlevelSubaccount } from "./who-owns-a-gohighlevel-subaccount";
 import { guide as isGohighlevelWorthItForSmallBusiness } from "./is-gohighlevel-worth-it-for-small-business";
 import { guide as isGohighlevelHardToLearn } from "./is-gohighlevel-hard-to-learn";
 import { guide as doINeedGohighlevel } from "./do-i-need-gohighlevel";
@@ -175,6 +185,16 @@ export const GUIDES: Guide[] = [
   bestGohighlevelAlternativeForSolopreneurs,
   gohighlevelVsHubspot,
   whyAgenciesLeaveGohighlevel,
+  gohighlevelClientOnboardingTakesTooLong,
+  gohighlevelAgencyModelNotPassiveSaas,
+  gohighlevelSupportProblems,
+  gohighlevelBugsAndOutages,
+  whyGohighlevelEmailsGoToSpam,
+  gohighlevelSmsNotDelivering,
+  gohighlevelWalletsAndRebilling,
+  gohighlevelWorkflowProblems,
+  canYouExportGohighlevel,
+  whoOwnsAGohighlevelSubaccount,
   isGohighlevelWorthItForSmallBusiness,
   isGohighlevelHardToLearn,
   doINeedGohighlevel,

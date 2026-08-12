@@ -30,11 +30,11 @@
 - Consumes: `GUIDES`, `getGuide`, and the repository filesystem.
 - Produces: a ten-slug contract enforcing registration, six sections, four FAQs, long-form copy, named fit/non-fit sections, official and community evidence, and static Markdown routes.
 
-- [ ] **Step 1: Add the ten expected slugs and assertions**
+- [x] **Step 1: Add the ten expected slugs and assertions**
 
 Add one test that loops over the approved slugs. For each guide, assert `cluster === "gohighlevel"`, at least six sections, at least four FAQs, at least 800 whitespace-delimited words across dek/sections/FAQ, exact fit and non-fit H2s, a `help.gohighlevel.com` or `gohighlevel.com` source, a Reddit or G2 source, and an existing `src/app/guides/<slug>.md/route.ts` file.
 
-- [ ] **Step 2: Run the focused test and verify the new contract fails**
+- [x] **Step 2: Run the focused test and verify the new contract fails**
 
 Run: `cd packages/crm && node --import tsx --test tests/unit/seo/guides.spec.ts`
 
@@ -51,11 +51,11 @@ Expected: FAIL because the ten guide slugs and Markdown routes do not exist.
 - Consumes: `Guide`, public pricing claim constants where required, existing GoHighLevel guides for internal links.
 - Produces: three complete `guide: Guide` exports.
 
-- [ ] **Step 1: Write each answer-first article**
+- [x] **Step 1: Write each answer-first article**
 
 Use six or more sections: quick answer/evidence, platform-versus-setup diagnosis, action plan, `Where SeldonFrame helps`, `Where SeldonFrame cannot help`, and decision/next steps. Cite G2, relevant Reddit threads, HighLevel Agency Launchpad, support options, and pricing documentation.
 
-- [ ] **Step 2: Check article-specific truth boundaries**
+- [x] **Step 2: Check article-specific truth boundaries**
 
 Confirm the onboarding guide does not compete with the broad `is-gohighlevel-hard-to-learn` keyword; the SaaS guide does not imply software acquires clients; and the support guide acknowledges HighLevel's documented 24/7 support while distinguishing access from resolution experience.
 
@@ -70,11 +70,11 @@ Confirm the onboarding guide does not compete with the broad `is-gohighlevel-har
 - Consumes: `Guide` and official HighLevel reliability, email-deliverability, phone, and A2P documentation.
 - Produces: three complete diagnostic guides.
 
-- [ ] **Step 1: Write reliability as an incident-classification playbook**
+- [x] **Step 1: Write reliability as an incident-classification playbook**
 
 Separate configuration, provider, and platform incidents. Include evidence capture, status checking, client communication, rollback, and continuity steps. State that no platform promises zero outages.
 
-- [ ] **Step 2: Write email and SMS as channel-specific decision trees**
+- [x] **Step 2: Write email and SMS as channel-specific decision trees**
 
 Email must cover SPF, DKIM, DMARC, reputation, list quality, content, and volume. SMS must cover consent, A2P registration, carrier filtering, number health, workflow filters, and logs. Neither article may imply a platform switch bypasses external rules.
 
@@ -90,11 +90,11 @@ Email must cover SPF, DKIM, DMARC, reputation, list quality, content, and volume
 - Consumes: `Guide`, HighLevel wallet/rebilling, workflow, contact export, cancellation, and sub-account transfer documentation.
 - Produces: four complete diagnostic guides.
 
-- [ ] **Step 1: Explain billing and workflow mechanics without sensationalism**
+- [x] **Step 1: Explain billing and workflow mechanics without sensationalism**
 
 Use the wallet guide to map who is charged, what rebilling changes, and where markup is available. Use the workflow guide to diagnose re-entry, trigger filters, waits, time zones, stale test contacts, and integration failures.
 
-- [ ] **Step 2: Publish an asset-level portability and control model**
+- [x] **Step 2: Publish an asset-level portability and control model**
 
 The export guide must distinguish CSV-exportable records, transferable sub-account assets, reconnect-required integrations, and non-portable history/configuration. The ownership guide must distinguish legal ownership from practical administrative control and explain transfer authorization and contract safeguards.
 
@@ -108,15 +108,15 @@ The export guide must distinguish CSV-exportable records, transferable sub-accou
 - Consumes: ten `guide` exports and `renderGuideMarkdown(slug)`.
 - Produces: canonical registry discovery, sitemap/`llms.txt` inclusion, and ten explicit Markdown endpoints.
 
-- [ ] **Step 1: Import and append all ten guides in the GoHighLevel registry block**
+- [x] **Step 1: Import and append all ten guides in the GoHighLevel registry block**
 
 Keep the articles adjacent to existing GoHighLevel guides so the hub cluster remains coherent.
 
-- [ ] **Step 2: Add ten static dotted Markdown routes**
+- [x] **Step 2: Add ten static dotted Markdown routes**
 
 Each route must log an explicit Markdown fetch, call `renderGuideMarkdown` with its fixed slug, return UTF-8 Markdown, and advertise the HTML alternate in the `Link` header.
 
-- [ ] **Step 3: Run the focused guide suite**
+- [x] **Step 3: Run the focused guide suite**
 
 Run: `cd packages/crm && node --import tsx --test tests/unit/seo/guides.spec.ts`
 
@@ -131,11 +131,11 @@ Expected: all guide tests pass with `fail 0`.
 - Consumes: rendered Markdown for all ten guides.
 - Produces: a non-cannibalizing, source-labelled, internally linked corpus.
 
-- [ ] **Step 1: Render and inspect all ten Markdown articles**
+- [x] **Step 1: Render and inspect all ten Markdown articles**
 
 Use `renderGuideMarkdown` to confirm every article has one H1, answer-first dek, descriptive H2s, self-contained FAQs, sources, and internal next steps.
 
-- [ ] **Step 2: Run a claim and duplication audit**
+- [x] **Step 2: Run a claim and duplication audit**
 
 Search for unsupported absolutes (`always`, `never`, `guaranteed`, invented percentages), missing anecdote labels, raw HTML, duplicate titles, and accidental targeting of existing broad primary keywords. Correct each finding in the source guide.
 
@@ -148,7 +148,7 @@ Search for unsupported absolutes (`always`, `never`, `guaranteed`, invented perc
 - Consumes: the implemented cluster and validation output.
 - Produces: a reusable evidence-to-content method and one objective pass/fail verdict.
 
-- [ ] **Step 1: Write the learning note**
+- [x] **Step 1: Write the learning note**
 
 Capture the evidence hierarchy, platform-versus-setup distinction, cannibalization avoidance, explicit non-fit section, and static Markdown-twin requirement.
 
@@ -159,4 +159,3 @@ Run `pnpm build` from the repository root. Run the focused guide unit suite, Typ
 - [ ] **Step 3: Inspect the final diff and status**
 
 Confirm only the specification, plan, learning note, guide tests, ten guide modules, registry, and ten Markdown routes changed. Do not merge, push, or deploy without a separate user request.
-
