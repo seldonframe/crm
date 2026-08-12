@@ -1,4 +1,5 @@
 "use client";
+/* eslint-disable react-hooks/set-state-in-effect, react/no-unescaped-entities */
 
 // The missed-call cost calculator — the interactive island of
 // /tools/missed-call-calculator. Pure client math, no network calls: sliders →
@@ -15,6 +16,7 @@ import {
   downloadCanvasAsImage,
   shareResultCard,
 } from "./result-card";
+import { AGENCY_PRICING_CLAIM, BUILDER_PRICING_CLAIM } from "@/lib/marketing/public-claims";
 
 const INK = "#221D17";
 const GREEN = "#1F2B24";
@@ -39,7 +41,6 @@ export function MissedCallCalculator(): ReactElement {
     if (decoded.missedPerWeek !== undefined) setMissedPerWeek(decoded.missedPerWeek);
     if (decoded.jobValue !== undefined) setJobValue(decoded.jobValue);
     if (decoded.closeRate !== undefined) setCloseRate(decoded.closeRate);
-    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
 
   // Keep the address bar in sync with the current inputs (throttled) so the
@@ -171,7 +172,7 @@ export function MissedCallCalculator(): ReactElement {
 
       <p style={{ margin: "16px 0 0", fontSize: 12.5, color: "rgba(34,29,23,0.55)", lineHeight: 1.5 }}>
         *"Calls you get" is an estimate — we assume about half of your calls already get answered. Assumes ~80% of missed
-        calls get answered, qualified and booked or texted back by an AI receptionist that picks up 24/7. SeldonFrame is $29/mo flat — at these numbers it pays for itself with{" "}
+        calls get answered, qualified and booked or texted back by an AI receptionist that picks up 24/7. {BUILDER_PRICING_CLAIM} {AGENCY_PRICING_CLAIM} At these numbers Builder pays for itself with{" "}
         <strong>
           {lostMonthly > 0 ? (jobValue * (closeRate / 100) >= 29 ? "the first saved call" : "a handful of saved calls") : "a single saved call"}
         </strong>

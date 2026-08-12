@@ -62,9 +62,10 @@
 
 "use client";
 
-import { useState } from "react";
+import { useEffect, useRef, useState } from "react";
 import Link from "next/link";
 import { Check } from "lucide-react";
+import posthog from "posthog-js";
 
 const BOOK_A_DEMO_URL = "https://app.seldonframe.com/book/seldonframes-workspace-7798/default";
 
@@ -142,14 +143,26 @@ export type PricingShellMarketingProps = {
    *  (`available`) is already computed — this component never touches
    *  process.env, PLANS, or a Stripe price id. */
   tiers: LadderTier[];
+  initialPlan?: LadderTierId | null;
+  resumeCheckout?: boolean;
 };
 
-export function PricingShellMarketing({ isAuthed, tiers }: PricingShellMarketingProps) {
+export function PricingShellMarketing({ isAuthed, tiers, initialPlan = null, resumeCheckout = false }: PricingShellMarketingProps) {
   const [audience, setAudience] = useState<Audience>("personal");
   const [error, setError] = useState<string | null>(null);
   const [starting, setStarting] = useState<LadderTierId | null>(null);
+  const resumeAttempted = useRef(false);
 
-  async function startTierCheckout(tier: LadderTier) {
+  useEffect(() => {
+    if (!isAuthed || !resumeCheckout || !initialPlan || resumeAttempted.current) return;
+    resumeAttempted.current = true;
+    const tier = tiers.find((candidate) => candidate.id === initialPlan);
+    if (tier?.available) {
+      void startTierCheckout(tier, "signup_resume");
+    }
+  }, [initialPlan, isAuthed, resumeCheckout, tiers]);
+
+  async function startTierCheckout(tier: LadderTier, checkoutSource: "pricing" | "signup_resume" = "pricing") {
     setError(null);
     setStarting(tier.id);
     try {
@@ -158,6 +171,7 @@ export function PricingShellMarketing({ isAuthed, tiers }: PricingShellMarketing
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({
           tier: tier.id,
+          checkout_source: checkoutSource,
           successPath: "/dashboard?upgraded=1&session_id={CHECKOUT_SESSION_ID}",
           cancelPath: "/pricing",
         }),
@@ -172,8 +186,18 @@ export function PricingShellMarketing({ isAuthed, tiers }: PricingShellMarketing
         return;
       }
       setError(data.error ?? "Couldn't start checkout. Try again in a moment.");
+      if (checkoutSource === "signup_resume") {
+        const url = new URL(window.location.href);
+        url.searchParams.delete("resume_checkout");
+        window.history.replaceState({}, "", url.toString());
+      }
     } catch {
       setError("Couldn't reach Stripe. Check your connection and try again.");
+      if (checkoutSource === "signup_resume") {
+        const url = new URL(window.location.href);
+        url.searchParams.delete("resume_checkout");
+        window.history.replaceState({}, "", url.toString());
+      }
     } finally {
       setStarting(null);
     }
@@ -340,7 +364,16 @@ export function PricingShellMarketing({ isAuthed, tiers }: PricingShellMarketing
                         <button
                           type="button"
                           data-tier-cta={tier.id}
-                          onClick={() => startTierCheckout(tier)}
+                          onClick={() => {
+                            posthog.capture("pricing_plan_selected", {
+                              plan_id: tier.id,
+                              billing_period: "monthly",
+                              audience: aud,
+                              is_authenticated: true,
+                              is_internal: false,
+                            });
+                            void startTierCheckout(tier);
+                          }}
                           disabled={starting !== null}
                           className="inline-flex h-10 w-full items-center justify-center gap-2 rounded-[11px] bg-[#1F2B24] px-4 text-[13.5px] font-[500] text-[#F6F2EA] shadow-[0_1px_2px_rgba(34,29,23,.10),0_6px_16px_rgba(34,29,23,.10),inset_0_1.5px_0_rgba(255,255,255,.12)] transition-all hover:-translate-y-px disabled:cursor-not-allowed disabled:opacity-60 focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-[#1F2B24]"
                         >
@@ -350,6 +383,13 @@ export function PricingShellMarketing({ isAuthed, tiers }: PricingShellMarketing
                         <Link
                           href={`/signup?plan=${tier.id}`}
                           data-tier-cta={tier.id}
+                          onClick={() => posthog.capture("pricing_plan_selected", {
+                            plan_id: tier.id,
+                            billing_period: "monthly",
+                            audience: aud,
+                            is_authenticated: false,
+                            is_internal: false,
+                          })}
                           className="inline-flex h-10 w-full items-center justify-center gap-2 rounded-[11px] bg-[#1F2B24] px-4 text-[13.5px] font-[500] text-[#F6F2EA] shadow-[0_1px_2px_rgba(34,29,23,.10),0_6px_16px_rgba(34,29,23,.10),inset_0_1.5px_0_rgba(255,255,255,.12)] transition-all hover:-translate-y-px focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-[#1F2B24]"
                         >
                           Get started

@@ -17,6 +17,7 @@ import type { LimitDecision } from "@/lib/billing/limits";
 import type { ExtractedBusinessFacts } from "./extraction-prompt";
 import { runR1LandingStep } from "@/lib/landing/r1-landing-step";
 import { applyLandingTemplateForWorkspace } from "@/lib/landing/apply-landing-template";
+import { captureServerEvent } from "@/lib/analytics/capture";
 
 export type RunPasteDeps = {
   enforceWorkspaceLimit: (args: { primaryOrgId: string | null; ownedWorkspaceCount: number }) => Promise<LimitDecision>;
@@ -76,6 +77,12 @@ export async function runCreateFromPaste(input: RunPasteInput): Promise<RunPaste
         return;
       }
       const pastedText = rawText.trim();
+      captureServerEvent({
+        event: "workspace_build_started",
+        distinctId: input.sessionUser.id,
+        groups: input.sessionUser.primaryOrgId ? { workspace: input.sessionUser.primaryOrgId } : undefined,
+        properties: { build_source: "web_paste", input_type: "paste", is_internal: false },
+      });
 
       // 3. Workspace limit
       const ownedCount = await input.deps.getOwnedWorkspaceCount(
@@ -151,6 +158,12 @@ export async function runCreateFromPaste(input: RunPasteInput): Promise<RunPaste
 
       // 7. Link workspace + post-creation side effects
       if (result.workspace_id) {
+        captureServerEvent({
+          event: "workspace_created",
+          distinctId: input.sessionUser.id,
+          groups: { workspace: result.workspace_id },
+          properties: { workspace_id: result.workspace_id, creation_path: "web_paste", is_internal: false },
+        });
         try {
           await input.deps.linkWorkspaceToOperator(result.workspace_id, input.sessionUser.id);
         } catch (err) {

@@ -148,8 +148,9 @@ describe("renderAiAgentJobMarkdown (Tier-1)", () => {
     assert.match(md, /### How does it answer my calls\?/);
     // A value-frame question (appended by composePageCopy for every page).
     assert.match(md, /### How much does it cost\?/);
-    // The real pricing fact carried in the value-frame answer.
-    assert.match(md, /\$29\/mo flat/);
+    // The real agency-first pricing ladder carried in the value-frame answer.
+    assert.match(md, /Agency Starter at \$99\/mo/);
+    assert.match(md, /Builder is \$29\/mo/);
   });
 
   test("rent-via-MCP hint + marketplace cross-link render when a listing exists", () => {
@@ -183,12 +184,14 @@ describe("renderAiAgentJobVerticalMarkdown (Tier-2)", () => {
 
     // Tier-2 H1 is "<job> for <Plural>".
     assert.match(md, /^# AI Receptionist for Plumbers/);
-    // The intro weaves the vertical pain hook + plural.
-    assert.match(md, /For plumbers,/);
+    // The intro preserves the trade query while speaking to the agency buyer.
+    assert.match(md, /For agencies serving plumbers,/);
     // Industry line in Details.
     assert.match(md, /\*\*Industry:\*\* plumbers/);
     // The cited stat is still present with its source.
     assert.match(md, /> "An estimated 62% of calls/);
+    assert.match(md, /\*\*Pricing:\*\* First workspace free; Agency Starter \$99\/mo/);
+    assert.doesNotMatch(md, /\*\*Pricing:\*\* \$29\/mo flat, unlimited workspaces/);
     assert.match(md, /> — Source: \[BrightLocal/);
   });
 

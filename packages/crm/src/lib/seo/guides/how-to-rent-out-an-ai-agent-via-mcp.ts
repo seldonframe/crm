@@ -1,4 +1,5 @@
 import type { Guide } from "./types";
+import { AGENCY_PRICING_CLAIM, BUILDER_PRICING_CLAIM } from "../../marketing/public-claims";
 
 export const guide: Guide = {
   slug: "how-to-rent-out-an-ai-agent-via-mcp",
@@ -45,7 +46,17 @@ export const guide: Guide = {
     },
     {
       h2: "Two honest paths: DIY or a marketplace",
-      body: "The **DIY path** is real, fully-yours plumbing. Stand up your agent behind a Streamable HTTP endpoint, wire OAuth or a simpler API-key scheme for per-customer auth, build the usage-logging table, connect Stripe for billing, and write your own terms of use.\n\nNothing here is exotic — it's the same shape of work as standing up any metered API. But it is real, ongoing work: keys need a rotation and revocation flow, usage data needs to reconcile against invoices, and none of it stays done once you ship it once.\n\nThe **marketplace path** trades that plumbing for listing overhead. You publish once, and the marketplace handles discovery, key issuance, metering, and payouts.\n\nDisclosed plainly, since we build this product: SeldonFrame is one such marketplace. Publish an agent and it becomes rentable via MCP with **signed rental keys** the platform issues and can revoke — you don't build the auth layer yourself.\n\nThe base platform is **$29/mo flat**, [BYOK](/guides/what-is-byok-ai) (bring your own model-provider keys, so there's no markup on tokens baked into the base price), with the first workspace free.\n\nNeither path is objectively correct. If you want full control over pricing, terms, and the customer relationship, DIY is legitimate and not much harder than building any other metered API. If getting listed and getting paid matters more than owning every layer, starting from a [marketplace](/guides/what-is-an-mcp-marketplace) gets you there faster.",
+      body: `The **DIY path** is real, fully-yours plumbing. Stand up your agent behind a Streamable HTTP endpoint, wire OAuth or a simpler API-key scheme for per-customer auth, build the usage-logging table, connect Stripe for billing, and write your own terms of use.
+
+Nothing here is exotic — it's the same shape of work as standing up any metered API. But it is real, ongoing work: keys need a rotation and revocation flow, usage data needs to reconcile against invoices, and none of it stays done once you ship it once.
+
+The **marketplace path** trades that plumbing for listing overhead. You publish once, and the marketplace handles discovery, key issuance, metering, and payouts.
+
+Disclosed plainly, since we build this product: SeldonFrame is one such marketplace. Publish an agent and it becomes rentable via MCP with **signed rental keys** the platform issues and can revoke — you don't build the auth layer yourself. ${AGENCY_PRICING_CLAIM}
+
+${BUILDER_PRICING_CLAIM} The first workspace is free, and [BYOK](/guides/what-is-byok-ai) (bring your own model-provider keys) means there's no markup on tokens baked into the base price. SeldonFrame only takes a **flat 2% GMV fee** when it is actually the sales channel that brought the buyer, and agency plans are 0% GMV; direct sales don't incur that marketplace fee.
+
+Neither path is objectively correct. If you want full control over pricing, terms, and the customer relationship, DIY is legitimate and not much harder than building any other metered API. If getting listed and getting paid matters more than owning every layer, starting from a [marketplace](/guides/what-is-an-mcp-marketplace) gets you there faster.`,
       callout: {
         kind: "analogy",
         text: "A signed rental key works like a hotel key card: the issuer codes it to open exactly one room, and canceling the reservation deactivates the card instantly instead of forcing anyone to rekey the lock.",
@@ -62,7 +73,8 @@ export const guide: Guide = {
           items: [
             "Publish once, listed for discovery",
             "Signed rental keys issued & revoked for you",
-            "$29/mo flat, BYOK, first workspace free",
+            "Agency plans from $99/mo for client delivery",
+            "Builder $29/mo for businesses you own and operate",
           ],
         },
       },

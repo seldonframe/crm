@@ -1,3 +1,4 @@
+import { AGENCY_PRICING_CLAIM } from "../../marketing/public-claims";
 import type { Guide } from "./types";
 
 export const guide: Guide = {
@@ -14,7 +15,8 @@ export const guide: Guide = {
   sections: [
     {
       h2: "The quick verdict",
-      body: "GoHighLevel and SeldonFrame both promise an all-in-one home for client marketing and follow-up. But they're built for different jobs.\n\nGoHighLevel is a broad platform with deep funnel building, heavy email and SMS automation, and a large ecosystem. It's priced in base plans, with AI and usage added on top.\n\nSeldonFrame is an AI-first *front office* — the receptionist is the product. It bundles a site, CRM, booking, and reviews starting at a flat **$29 per month**, with white-label client reselling from $99/mo.\n\nThe short version: if you live in funnels and complex automations, GoHighLevel is the stronger tool and worth its complexity. If you want AI answering and booking for clients — included and resellable, with almost no setup — SeldonFrame is the better and cheaper fit.\n\nNeither is a trick answer. They genuinely serve different shapes of business.\n\nThe sections below compare them on the four things that decide most switches: **price, the AI receptionist, white-label and setup, and where GoHighLevel simply wins.** Read to the end before deciding, because the honest answer depends on which of those matters most to you.",
+      body:
+        `GoHighLevel and SeldonFrame both promise an all-in-one home for client marketing and follow-up. But they're built for different jobs.\n\nGoHighLevel is a broad platform with deep funnel building, heavy email and SMS automation, and a large ecosystem. It's priced in base plans, with AI and usage added on top.\n\nSeldonFrame is an AI-first *front office* — the receptionist is the product. Builder is for an own-business workspace; ${AGENCY_PRICING_CLAIM}\n\nThe short version: if you live in funnels and complex automations, GoHighLevel is the stronger tool and worth its complexity. If you want AI answering and booking for clients — included and resellable on an Agency plan, with almost no setup — SeldonFrame is the better and cheaper fit.\n\nNeither is a trick answer. They genuinely serve different shapes of business.\n\nThe sections below compare them on the four things that decide most switches: **price, the AI receptionist, white-label and setup, and where GoHighLevel simply wins.** Read to the end before deciding, because the honest answer depends on which of those matters most to you.`,
       diagram: {
         type: "compare",
         title: "Two different bets",
@@ -40,7 +42,8 @@ export const guide: Guide = {
     },
     {
       h2: "Pricing head to head",
-      body: "GoHighLevel's base plans run **$97 per month** for Starter, **$297** for Unlimited, and **$497** for the Agency Pro and SaaS Mode tier. Annual billing brings roughly two months free.\n\nThat's just the entry number. The AI Employee is a separate add-on, reported at around $50 to $97 per month per location.\n\nUsage gets rebilled on top of that: SMS around $0.0079 per segment, email around $0.675 per 1,000, and calls around $0.014 per minute. Rebilling comes without markup on the $297-and-up plans, and with markup on the $497 plan.\n\nSeldonFrame is one flat number: **$29 per month**, with unlimited workspaces and the first workspace free forever. Cancel anytime, no trial gate.\n\nThe AI receptionist is included, not added. Usage isn't marked up by a platform reseller margin, because SeldonFrame runs on your own AI keys and your own Twilio, so calls and messages bill at raw provider cost.\n\nThere is a marketplace sale fee, and a flat 2% GMV fee on solo plans like Builder, but only when SeldonFrame is the actual sales channel — it's 0% on agency-tier plans. It doesn't touch the base monthly cost.\n\nThe point isn't simply that $29 is smaller than $97. It's that the two prices behave differently as you grow.\n\nGoHighLevel's total rises with each location's AI seat and each client's usage, while SeldonFrame's monthly stays flat as you add workspaces. For a roster of clients, the difference compounds.\n\nOne booked job from an answered call usually covers a month — that's the frame that matters more than the sticker. [Run the numbers yourself](/tools/gohighlevel-cost-calculator) with your own client count.",
+      body:
+        `GoHighLevel's base plans run **$97 per month** for Starter, **$297** for Unlimited, and **$497** for the Agency Pro and SaaS Mode tier. Annual billing brings roughly two months free.\n\nThat's just the entry number. The AI Employee is a separate add-on, reported at around $50 to $97 per month per location.\n\nUsage gets rebilled on top of that: SMS around $0.0079 per segment, email around $0.675 per 1,000, and calls around $0.014 per minute. Rebilling comes without markup on the $297-and-up plans, and with markup on the $497 plan.\n\nFor agency delivery, ${AGENCY_PRICING_CLAIM} Builder is the separate own-business tier and does not include client resale. Cancel anytime, no trial gate.\n\nThe AI receptionist is included, not added. Usage isn't marked up by a platform reseller margin, because SeldonFrame runs on your own AI keys and your own Twilio, so calls and messages bill at raw provider cost.\n\nThere is a marketplace sale fee, and a flat 2% GMV fee on solo plans like Builder, but only when SeldonFrame is the actual sales channel — it's 0% on agency-tier plans. It doesn't touch the base monthly cost.\n\nThe point isn't simply that Builder's own-business tier is smaller than $97. It's that the two prices behave differently as you grow.\n\nGoHighLevel's total rises with each location's AI seat and each client's usage, while SeldonFrame's Agency monthly stays flat as you add workspaces. For a roster of clients, the difference compounds.\n\nOne booked job from an answered call usually covers a month — that's the frame that matters more than the sticker. [Run the numbers yourself](/tools/gohighlevel-cost-calculator) with your own client count.`,
       diagram: {
         type: "bars",
         title: "Base monthly price",
@@ -48,9 +51,9 @@ export const guide: Guide = {
           { label: "GoHighLevel Starter", value: 97, display: "$97/mo", domain: "gohighlevel.com" },
           { label: "GoHighLevel Unlimited", value: 297, display: "$297/mo", domain: "gohighlevel.com" },
           { label: "GoHighLevel Agency Pro / SaaS Mode", value: 497, display: "$497/mo", domain: "gohighlevel.com" },
-          { label: "SeldonFrame Agency (white-label, client sub-accounts)", value: 99, display: "$99+/mo agency ($29 solo)" },
+          { label: "SeldonFrame Agency (white-label, client sub-accounts)", value: 99, display: "$99+/mo agency (Builder own business)" },
         ],
-        note: "Base plan pricing only. GoHighLevel adds the AI Employee and usage on top; SeldonFrame includes the AI receptionist in the flat price. SeldonFrame's agency plans ($99-$299) bundle white-label and client sub-accounts; the $29 Builder tier is for an operator's own workspaces only.",
+        note: "Base plan pricing only. GoHighLevel adds the AI Employee and usage on top; SeldonFrame includes the AI receptionist in the flat price. SeldonFrame's agency plans ($99-$299) bundle white-label and client sub-accounts; Builder is for an operator's own workspaces only and does not include client resale.",
       },
     },
     {
@@ -81,11 +84,11 @@ export const guide: Guide = {
     },
     {
       q: "Can I white-label SeldonFrame like GHL SaaS mode?",
-      a: "Yes. SeldonFrame's Agency Starter plan gives you white-label reselling, a branded client portal, and 10 client sub-accounts on a custom domain, from **$99 per month flat** — a fraction of GoHighLevel's $497 Agency Pro tier for the same reselling rights, and the platform is reported to take one to three weeks to learn, whereas a branded SeldonFrame workspace is generated from one conversation in about three minutes. (At $29/mo, Builder covers your own workspaces with a custom domain, but not client sub-accounts or white-label reselling.)",
+      a: "Yes. SeldonFrame's Agency Starter plan gives you white-label reselling, a branded client portal, and 10 client sub-accounts on a custom domain, from **$99 per month flat** — a fraction of GoHighLevel's $497 Agency Pro tier for the same reselling rights, and the platform is reported to take one to three weeks to learn, whereas a branded SeldonFrame workspace is generated from one conversation in about three minutes. (Builder covers your own workspaces with a custom domain, but not client sub-accounts or white-label reselling.)",
     },
     {
       q: "Which is cheaper for a 10-client agency?",
-      a: "SeldonFrame stays flat as you add workspaces, since it is $29 per month with unlimited workspaces and the first free forever. GoHighLevel adds a base plan plus a per-location AI Employee seat reported at around $50 to $97 per client, plus usage; a 10-client agency on the flat-rate AI Employee is reported to reach **around $970 per month** in AI fees alone before the base plan and usage. For that roster, SeldonFrame is markedly cheaper.",
+      a: "SeldonFrame Agency starts at $99 per month for 10 client workspaces and stays flat as you add workspaces within the tier. Builder is for a business you own and operate; it does not include client resale. GoHighLevel adds a base plan plus a per-location AI Employee seat reported at around $50 to $97 per client, plus usage; a 10-client agency on the flat-rate AI Employee is reported to reach **around $970 per month** in AI fees alone before the base plan and usage. For that roster, SeldonFrame is markedly cheaper.",
     },
   ],
   sources: [

@@ -70,7 +70,7 @@ export function MarketingShell({ children }: { children: ReactNode }) {
           ))}
         </div>
         <div className="text-[11px] text-[#3f3f46]">
-          © 2026 SeldonFrame. Open source under MIT License.
+          © 2026 SeldonFrame. Open source under AGPL-3.0.
         </div>
       </footer>
     </>

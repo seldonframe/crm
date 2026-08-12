@@ -52,7 +52,7 @@ function getPaths(ungatedBuildEnabled: boolean): readonly Path[] {
           <em className="font-[Newsreader,Georgia,serif] font-normal not-italic">Describe it.</em>
         </>
       ),
-      steps: [describeItStep1(ungatedBuildEnabled), "Watch it build — site, booking, CRM, agent", "Go live on your client's domain"],
+      steps: [describeItStep1(ungatedBuildEnabled), "Brand the site, booking, CRM, and agent", "Run evals, publish, and hand it off"],
       mock: <ScanMock />,
       figure: <IntegrationBeam />,
     },
@@ -88,9 +88,9 @@ export function MarketingBuildSteps({ ungatedBuildEnabled }: { ungatedBuildEnabl
             How it works
           </div>
           <h2 className="mt-3.5 text-[clamp(27px,4.2vw,42px)] font-[500] leading-[1.08] tracking-[-0.025em] text-[#221D17]">
-            Two ways in.{" "}
+            From client URL to handoff.{" "}
             <em className="font-[Newsreader,Georgia,serif] font-normal not-italic">
-              Both live in minutes.
+              One repeatable delivery loop.
             </em>
           </h2>
         </div>

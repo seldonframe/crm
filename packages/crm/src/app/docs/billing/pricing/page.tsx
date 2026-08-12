@@ -8,7 +8,7 @@ export default function Page() {
       category="Billing & plans"
       categoryHref="/docs"
       title="Pricing"
-      lede="Five flat plans, no metered usage wallet — BYOK on Builder/Agency keeps AI cost at provider price, Managed runs on SeldonFrame's keys (fair use). You always know what the bill is."
+      lede="Five flat plans for operators and agencies. Managed runs on SeldonFrame's keys; Builder and Agency plans are BYOK. You always know what the platform bill is."
       githubPath="app/docs/billing/pricing/page.tsx"
     >
       <h2>The plans</h2>
@@ -65,9 +65,9 @@ export default function Page() {
       <h2>No contract</h2>
       <p>
         Plans are month-to-month — upgrade, downgrade, or cancel anytime.
-        Your front office is live in 60 seconds from a URL, and you only
-        move up a plan when you want more (client sub-accounts, white-label,
-        higher sub-account limits).
+        Your first client workspace can be built free. Move up when you need
+        client sub-accounts, white-labeling, higher sub-account limits, or
+        Managed AI.
       </p>
 
       <h2>Next</h2>

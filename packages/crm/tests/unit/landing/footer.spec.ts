@@ -50,7 +50,7 @@ describe("LandingFooter — Cut C Phase 7 refresh", () => {
     // The block heading + the View-on-GitHub link both signal the
     // top-of-footer treatment from the Phase 7 spec.
     assert.match(text, /Open source on GitHub/i);
-    assert.match(text, /github\.com\/seldonframe\/crm/);
+    assert.match(text, /github\.com\/seldonframe\/seldonframe/);
   });
 
   test("license line says AGPL-3.0 (not MIT)", () => {

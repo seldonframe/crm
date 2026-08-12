@@ -22,6 +22,7 @@ import { allBlogSlugs } from "@/lib/seo/blog";
 import { allPricingSlugs } from "@/lib/seo/competitor-pricing";
 import { listMarketplaceAgentsFromDb } from "@/lib/marketplace/agent-listings";
 import { MARKETPLACE_SEED } from "@/components/marketplace/marketplace-seed";
+import { GOHIGHLEVEL_COLLECTION_PATH } from "@/lib/seo/gohighlevel-discovery";
 
 /** The canonical public base URL — mirrors layout.tsx's metadataBase. */
 export function siteBaseUrl(): string {
@@ -210,6 +211,7 @@ export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
 
   // Guides (long-form articles / content engine).
   entries.push({ url: `${base}/guides`, lastModified: now, changeFrequency: "weekly", priority: 0.7 });
+  entries.push({ url: `${base}${GOHIGHLEVEL_COLLECTION_PATH}`, lastModified: now, changeFrequency: "weekly", priority: 0.8 });
   for (const slug of allGuideSlugs()) {
     entries.push({ url: `${base}/guides/${slug}`, lastModified: now, changeFrequency: "monthly", priority: 0.6 });
   }

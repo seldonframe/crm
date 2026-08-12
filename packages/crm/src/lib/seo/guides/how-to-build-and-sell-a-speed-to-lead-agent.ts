@@ -1,4 +1,5 @@
 import type { Guide } from "./types";
+import { AGENCY_PRICING_CLAIM, BUILDER_PRICING_CLAIM } from "../../marketing/public-claims";
 
 export const guide: Guide = {
   slug: "how-to-build-and-sell-a-speed-to-lead-agent",
@@ -57,7 +58,8 @@ export const guide: Guide = {
             "Agent, CRM, and calendar already wired",
             "A new lead source is a connection you turn on",
             "BYOK — no markup on model calls",
-            "$29/mo flat, first workspace free",
+            "Agency plans from $99/mo for client delivery",
+            "Builder $29/mo for businesses you own and operate",
           ],
         },
       },
@@ -98,7 +100,7 @@ export const guide: Guide = {
     },
     {
       q: "What does it actually cost to run, month to month?",
-      a: "The main variable cost is outbound SMS and, if you're using a paid model for the qualifying reply, LLM tokens — both small at typical small-business lead volumes. Twilio publishes outbound US SMS at $0.0083 per segment plus a modest carrier fee, and Anthropic's cheapest current model (Claude Haiku 4.5) runs $1 per million input tokens and $5 per million output tokens as of this writing — a single lead-qualification exchange is a few hundred tokens, so the per-lead cost is a fraction of a cent even before volume discounts. SeldonFrame is *BYOK*, so those provider costs are billed directly to whatever key you connect rather than marked up; the platform itself is $29/mo flat with the first workspace free.",
+      a: `The main variable cost is outbound SMS and, if you're using a paid model for the qualifying reply, LLM tokens — both small at typical small-business lead volumes. Twilio publishes outbound US SMS at $0.0083 per segment plus a modest carrier fee, and Anthropic's cheapest current model (Claude Haiku 4.5) runs $1 per million input tokens and $5 per million output tokens as of this writing — a single lead-qualification exchange is a few hundred tokens, so the per-lead cost is a fraction of a cent even before volume discounts. SeldonFrame is *BYOK*, so those provider costs are billed directly to whatever key you connect rather than marked up. ${AGENCY_PRICING_CLAIM} ${BUILDER_PRICING_CLAIM} The first workspace is free.`,
     },
   ],
   sources: [

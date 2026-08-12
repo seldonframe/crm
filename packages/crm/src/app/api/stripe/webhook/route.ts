@@ -22,6 +22,9 @@ import { trackEvent } from "@/lib/analytics/track";
 import { getPlan } from "@/lib/billing/plans";
 import { maxFullWorkspacesForTier } from "@/lib/billing/limits";
 import { sendPaidConversionAlert } from "@/lib/notifications/ops-notifications";
+import { captureServerEvent } from "@/lib/analytics/capture";
+import { sendGa4Event } from "@/lib/analytics/ga4";
+import { parseInternalIds } from "@/lib/super-admin/internal-exclusion";
 
 function getStripeClient() {
   const secretKey = process.env.STRIPE_SECRET_KEY;
@@ -309,6 +312,50 @@ export async function POST(req: NextRequest) {
       // May 1, 2026 — Measurement Layer 2. Plan-upgrade product event.
       // Fired only when the tier actually changed so we don't double-
       // count the same checkout firing multiple webhook events.
+      const wasPaid = Boolean(previousSubscription.tier && previousSubscription.tier !== "inactive" && previousSubscription.tier !== "free");
+      const isPaid = tier !== "inactive";
+      if (!wasPaid && isPaid) {
+        const [owner] = await db.select({ id: users.id }).from(users).where(eq(users.orgId, targetOrgId)).limit(1);
+        const [orgContext] = await db
+          .select({ parentAgencyId: organizations.parentAgencyId })
+          .from(organizations)
+          .where(eq(organizations.id, targetOrgId))
+          .limit(1);
+        const amount = subscription.items.data.reduce(
+          (sum, item) => sum + (item.price?.unit_amount ?? 0) * (item.quantity ?? 1),
+          0,
+        ) / 100;
+        const currency = subscription.items.data[0]?.price?.currency?.toUpperCase() ?? "USD";
+        if (owner?.id) {
+          const internalIds = parseInternalIds({
+            SF_INTERNAL_USER_IDS: process.env.SF_INTERNAL_USER_IDS,
+            SF_INTERNAL_AGENCY_ID: process.env.SF_INTERNAL_AGENCY_ID,
+          });
+          const isInternal = internalIds.userIds.includes(owner.id) ||
+            Boolean(orgContext?.parentAgencyId && orgContext.parentAgencyId === internalIds.agencyId);
+          captureServerEvent({
+            event: "subscription_started",
+            distinctId: owner.id,
+            groups: {
+              workspace: targetOrgId,
+              ...(orgContext?.parentAgencyId ? { agency: orgContext.parentAgencyId } : {}),
+            },
+            properties: {
+              plan_id: tier,
+              billing_period: subscription.items.data[0]?.price?.recurring?.interval === "year" ? "yearly" : "monthly",
+              currency,
+              value: amount,
+              is_internal: isInternal,
+            },
+          });
+          void sendGa4Event({
+            eventName: "purchase",
+            userId: owner.id,
+            params: { transaction_id: session.id, value: amount, currency, plan_id: tier },
+          });
+        }
+      }
+
       if (previousSubscription.tier !== tier) {
         trackEvent(
           "plan_upgraded",

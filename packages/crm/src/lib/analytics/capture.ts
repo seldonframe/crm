@@ -49,6 +49,7 @@ export type CaptureServerPropertyValue = string | number | boolean | null;
 export type CaptureServerEventInput = {
   event: string;
   distinctId: string;
+  groups?: Record<string, string>;
   /** Flat values, plus PostHog's nested $set for person-property writes. */
   properties?: Record<string, CaptureServerPropertyValue> & {
     $set?: Record<string, CaptureServerPropertyValue>;
@@ -69,6 +70,7 @@ export function captureServerEvent(input: CaptureServerEventInput): void {
       .captureImmediate({
         distinctId: input.distinctId,
         event: input.event,
+        groups: input.groups,
         properties: input.properties ?? {},
       })
       .catch(() => {

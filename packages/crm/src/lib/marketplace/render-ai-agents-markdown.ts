@@ -21,6 +21,14 @@ import {
   type AgentJob,
   type Vertical,
 } from "@/lib/seo/agent-pages";
+import { AGENCY_PLAN_FACTS } from "@/lib/marketing/public-claims";
+
+const agencyPricing = AGENCY_PLAN_FACTS.filter((plan) => plan.id.startsWith("agency_"))
+  .map((plan) => `${plan.name} $${plan.priceMonthly}/mo`)
+  .join(", ");
+const operatorPricing = AGENCY_PLAN_FACTS.filter((plan) => !plan.id.startsWith("agency_"))
+  .map((plan) => `${plan.name} $${plan.priceMonthly}/mo`)
+  .join(", ");
 
 /** The canonical public origin for absolute links in the Markdown. Mirrors the
  *  site's metadataBase (sitemap.siteBaseUrl / llms.txt), so a pasted `.md`
@@ -153,7 +161,7 @@ function renderAgentBody(job: AgentJob, vertical: Vertical | undefined, baseUrl:
   if (vertical) {
     lines.push(`- **Industry:** ${vertical.plural}`);
   }
-  lines.push("- **Pricing:** $29/mo flat, unlimited workspaces, cancel anytime (your AI key billed at cost by the provider).");
+  lines.push(`- **Pricing:** First workspace free; ${agencyPricing}. Running your own businesses: ${operatorPricing}.`);
   lines.push("");
 
   // FAQ — the SAME array the HTML FAQPage JSON-LD is built from (job FAQ +

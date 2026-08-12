@@ -10,6 +10,15 @@ import { describe, test } from "node:test";
 import assert from "node:assert/strict";
 
 import { buildPageMetadata } from "../../../src/lib/seo/page-metadata";
+import { getGuide } from "../../../src/lib/seo/guides";
+import { renderGuideMarkdown } from "../../../src/lib/seo/guide-markdown";
+import * as guidePageModule from "../../../src/app/(public)/guides/[slug]/page";
+
+const generateGuideMetadata = (
+  guidePageModule as unknown as {
+    generateMetadata: (input: { params: Promise<{ slug: string }> }) => Promise<import("next").Metadata>;
+  }
+).generateMetadata;
 
 describe("buildPageMetadata", () => {
   test("sets the title and description verbatim", () => {
@@ -78,5 +87,40 @@ describe("buildPageMetadata", () => {
     // …while the social card uses the cleaner override.
     assert.equal(og?.title, "Share Title");
     assert.equal(og?.description, "Share Desc");
+  });
+});
+
+describe("canonical AI front office guide publication", () => {
+  const slugs = [
+    "what-is-an-ai-front-office",
+    "ai-front-office-examples",
+    "ai-front-office-software-for-agencies",
+  ] as const;
+
+  test("each new guide has unique metadata and a canonical Markdown alternate", async () => {
+    const metadata = await Promise.all(
+      slugs.map((slug) => generateGuideMetadata({ params: Promise.resolve({ slug }) })),
+    );
+
+    assert.equal(new Set(metadata.map((item) => String(item.title))).size, slugs.length);
+    assert.equal(new Set(metadata.map((item) => String(item.description))).size, slugs.length);
+
+    for (const [index, slug] of slugs.entries()) {
+      const item = metadata[index];
+      assert.equal(item.alternates?.canonical, `/guides/${slug}`);
+      assert.deepEqual(item.alternates?.types, {
+        "text/markdown": `/guides/${slug}.md`,
+      });
+      assert.equal(getGuide(slug).title, item.title);
+    }
+  });
+
+  test("Markdown twins preserve the HTML canonical and never render an unknown guide", () => {
+    for (const slug of slugs) {
+      const markdown = renderGuideMarkdown(slug);
+      assert.match(markdown, new RegExp(`HTML version: https://www\\.seldonframe\\.com/guides/${slug}(?:\\r?\\n|$)`));
+      assert.ok(markdown.length > 500);
+      assert.doesNotMatch(markdown, /\b(?:undefined|null)\b/);
+    }
   });
 });

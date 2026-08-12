@@ -1,6 +1,6 @@
 // packages/crm/src/app/(public)/agencies/page.tsx
 //
-// Standalone builders/agencies page (2026-07-06 Shopify-homepage redesign).
+// Standalone agency page (agency-first public experience).
 // The builder/agency reseller pitch (MarketingAgencyMath — margin calculator
 // + "Build an agent once, sell it to thousands" section) was previously
 // embedded on the homepage; it's moved here to keep the homepage to one
@@ -16,13 +16,13 @@ import { MarketingAgencyOwnership } from "@/components/landing/marketing-agency-
 import { MarketingFooter } from "@/components/landing/marketing-footer";
 
 export const metadata: Metadata = {
-  title: "For builders & agencies — SeldonFrame",
+  title: "For agencies — SeldonFrame",
   // Pricing-truth fix 2026-07-15: white-label client sub-accounts are the
   // agency tiers ($99/$199/$299), not the $29 Builder tier — the old
   // "unlimited client workspaces under your own brand for $29" claim
   // described the retired grandfathered agency tier.
   description:
-    "Build an AI agent once, list it on the marketplace, or run client front offices. Build from $29/mo; white-label client workspaces + branded portals on agency plans from $99/mo with 0% GMV.",
+    "Sell AI front offices to local businesses with SeldonFrame. Deploy branded client workspaces, booking, CRM, intake, and agents from $99/mo with 0% GMV on agency plans.",
 };
 
 export default function AgenciesPage() {
@@ -32,6 +32,15 @@ export default function AgenciesPage() {
       <main id="main-content" className="pt-[100px]">
         <MarketingAgencyMath />
         <MarketingAgencyOwnership />
+
+        <section aria-label="Agency plans" className="border-t border-[rgba(34,29,23,.08)] bg-[#F6F2EA] px-5 py-12 text-center md:px-8 lg:px-12">
+          <Link
+            href="/pricing-public"
+            className="inline-flex items-center gap-2 rounded-[11px] bg-[#1F2B24] px-6 py-3.5 text-[15px] font-[600] text-[#F6F2EA] transition-transform hover:-translate-y-px"
+          >
+            See agency plans →
+          </Link>
+        </section>
 
         {/* Guides for agency builders — cross-links into the supply-side content library. */}
         <section aria-label="Guides for agency builders" className="border-t border-[rgba(34,29,23,.08)] px-5 py-16 md:px-8 lg:px-12">

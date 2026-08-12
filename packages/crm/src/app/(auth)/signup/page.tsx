@@ -31,6 +31,7 @@ import { buildSignupNextPath, toInternalRedirectPath } from "@/lib/auth/signup-r
 import { isGoogleAuthEnabled } from "@/lib/auth/google-enabled";
 import { isDemoReadonly } from "@/lib/demo/server";
 import { redirectToAppHostIfNeeded } from "@/lib/auth/app-host-redirect";
+import { buildPaidSignupRedirect } from "@/lib/auth/pricing-continuity";
 
 // 2026-07-15 — the app-host pin (normalizeHost/isExemptHost/
 // redirectToAppHostIfNeeded, incl. the 2026-07-04 prod-incident writeup) moved
@@ -49,6 +50,7 @@ export default async function SignupPage({
     // to a safe same-origin path it WINS over the default /clients/new redirect,
     // so a brand-new signup returns to the agent they were buying.
     callbackUrl?: string;
+    plan?: string;
   }>;
 }) {
   const params = await searchParams;
@@ -87,6 +89,8 @@ export default async function SignupPage({
     // new account straight back to the agent listing (with ?install=1) so they
     // can finish checkout. Safe + same-origin (toInternalRedirectPath).
     redirectTo = buyIntentRedirect;
+  } else if (buildPaidSignupRedirect(params.plan)) {
+    redirectTo = buildPaidSignupRedirect(params.plan)!;
   } else {
     redirectTo = buildSignupNextPath({
       url: typeof params.url === "string" ? params.url : null,

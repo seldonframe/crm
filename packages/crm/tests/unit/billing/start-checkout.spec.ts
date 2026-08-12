@@ -106,6 +106,16 @@ describe("startCheckout", () => {
     }
   });
 
+  test("marks a resumed signup checkout so it can be joined to the paid-intent funnel", async () => {
+    const calls: Array<{ init: RequestInit }> = [];
+    const fakeFetch = async (_url: string | URL | Request, init?: RequestInit) => {
+      calls.push({ init: init ?? {} });
+      return new Response(JSON.stringify({ url: "https://stripe.checkout/resumed" }), { status: 200 });
+    };
+    await startCheckout({ tier: "builder", checkoutSource: "signup_resume", fetchImpl: fakeFetch as unknown as typeof fetch });
+    assert.equal(JSON.parse(String(calls[0]!.init.body)).checkout_source, "signup_resume");
+  });
+
   test("throws with the API's error message when the API responds non-2xx", async () => {
     const fakeFetch = async () =>
       new Response(JSON.stringify({ error: "Unauthorized" }), {

@@ -193,7 +193,7 @@ export default function McpServersPage() {
               >
                 Star the repo &rarr;
               </a>
-              <span className="text-[#71717a]"> — open source under MIT</span>
+              <span className="text-[#71717a]"> — open source under AGPL-3.0</span>
             </li>
           </ul>
         </section>

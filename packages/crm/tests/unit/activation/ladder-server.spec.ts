@@ -116,9 +116,9 @@ describe("resolveLadderInputs", () => {
 });
 
 describe("stampLadderEvent", () => {
-  test("stamps + captures exactly once when the step was previously absent", async () => {
+  test("stamps + captures legacy and canonical events when the step was previously absent", async () => {
     let stamped: string | null = null;
-    const captured: Array<{ event: string; distinctId: string; properties?: Record<string, unknown> }> = [];
+    const captured: Array<{ event: string; distinctId: string; groups?: Record<string, string>; properties?: Record<string, unknown> }> = [];
 
     await stampLadderEvent("org_5", "test_booking", {
       wasStepStamped: async () => false,
@@ -131,11 +131,18 @@ describe("stampLadderEvent", () => {
     });
 
     assert.equal(stamped, "test_booking");
-    assert.equal(captured.length, 1);
+    assert.equal(captured.length, 2);
     assert.deepEqual(captured[0], {
       event: "activation_step_completed",
       distinctId: "org_5",
+      groups: { workspace: "org_5" },
       properties: { step: "test_booking" },
+    });
+    assert.deepEqual(captured[1], {
+      event: "first_test_booking_completed",
+      distinctId: "org_5",
+      groups: { workspace: "org_5" },
+      properties: { workspace_id: "org_5", booking_source: "workspace", is_internal: false },
     });
   });
 

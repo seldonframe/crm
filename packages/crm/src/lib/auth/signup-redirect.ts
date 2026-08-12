@@ -219,6 +219,7 @@ export function sanitizeNextPath(value: unknown): string {
 const SAFE_REDIRECT_PREFIXES = [
   "/clients/new",
   "/dashboard",
+  "/pricing",
   "/settings/domain",
   "/signup/connect-ai",
   "/signup/billing",

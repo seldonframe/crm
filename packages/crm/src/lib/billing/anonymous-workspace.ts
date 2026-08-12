@@ -13,6 +13,7 @@ import { ensureDefaultPipelineForOrg } from "@/lib/deals/pipeline-defaults";
 import { seedLandingFromSoul } from "@/lib/page-schema/seed-landing-from-soul";
 import { isReservedSlug } from "@/lib/utils/reserved-slugs";
 import { trackEvent } from "@/lib/analytics/track";
+import { captureServerEvent } from "@/lib/analytics/capture";
 import { classifyBusinessTypeFromSoul } from "@/lib/page-schema/classify-business";
 import { selectCRMPersonality } from "@/lib/crm/personality";
 import { inferTimezone } from "@/lib/workspace/infer-timezone";
@@ -169,6 +170,11 @@ export async function createAnonymousWorkspace(
 
   const baseSlug = slugify(name);
   const slug = await resolveUniqueSlug(baseSlug);
+  captureServerEvent({
+    event: "workspace_build_started",
+    distinctId: "anonymous",
+    properties: { build_source: input.source ?? "mcp", input_type: "structured", is_internal: false },
+  });
 
   // May 1, 2026 — if any structured Soul fields were provided, build
   // the seed Soul object up front. Written to organizations.soul on
@@ -537,6 +543,12 @@ export async function createAnonymousWorkspace(
     },
     { orgId: org.id }
   );
+  captureServerEvent({
+    event: "workspace_created",
+    distinctId: "anonymous",
+    groups: { workspace: org.id },
+    properties: { workspace_id: org.id, creation_path: "mcp", source: "mcp", is_internal: false },
+  });
 
   return {
     orgId: org.id,

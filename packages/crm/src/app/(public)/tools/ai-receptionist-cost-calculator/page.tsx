@@ -9,6 +9,7 @@ import { MarketplaceStyles } from "@/components/marketplace/marketplace-styles";
 import { MKT } from "@/components/marketplace/marketplace-data";
 import { AiReceptionistCostCalculator } from "@/components/seo/ai-receptionist-cost-calculator";
 import { buildOgUrl } from "@/lib/seo/og-card";
+import { AGENCY_PRICING_CLAIM, BUILDER_PRICING_CLAIM } from "@/lib/marketing/public-claims";
 
 /** FAQ answers use a few <strong> tags for readability; JSON-LD wants plain
  *  text, so strip tags before embedding in the schema. */
@@ -51,7 +52,7 @@ const FAQ = [
   },
   {
     q: "How does SeldonFrame's pricing work?",
-    a: "SeldonFrame is <strong>$29/month flat</strong> for the platform. You connect your own AI provider and Twilio account, so you pay them directly at their raw cost — usually a few cents per minute — with no markup on top.",
+    a: `${BUILDER_PRICING_CLAIM} ${AGENCY_PRICING_CLAIM} You connect your own AI provider and Twilio account, so you pay them directly at their raw cost — usually a few cents per minute — with no markup on top.`,
   },
 ];
 
@@ -82,6 +83,12 @@ export default function AiReceptionistCostCalculatorPage(): ReactElement {
           one really costs you per month.
         </p>
         <AiReceptionistCostCalculator />
+        <p style={{ margin: "18px 0 0", fontSize: 14.5, lineHeight: 1.6, color: "rgba(34,29,23,0.68)" }}>
+          Building front offices for clients?{" "}
+          <Link href="/pricing?plan=agency_starter" className="sf-link" style={{ color: MKT.green, fontWeight: 700 }}>
+            Agency plans start at $99/mo →
+          </Link>
+        </p>
 
         <section style={{ padding: "40px 0 0" }}>
           <h2 style={{ margin: "0 0 14px", fontSize: 24, fontWeight: 800, letterSpacing: "-0.02em" }}>How it works</h2>

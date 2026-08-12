@@ -13,6 +13,14 @@
 
 export const LAST_UPDATED = "July 2026";
 
+// Keep every comparison page on the same audience boundary as /pricing:
+// Builder is for one business the operator owns; client hand-off and
+// white-label resale require the Agency ladder.
+export const BUILDER_PRICE_BOUNDARY =
+  "Builder is $29/mo for one business you operate (your own business workspace; no client resale or white-label)";
+export const AGENCY_PRICE_BOUNDARY =
+  "Agency plans start at $99/mo for client workspaces and white-label delivery";
+
 export type AltFaqItem = { q: string; a: string };
 export type SwitchReason = { title: string; body: string };
 
@@ -94,8 +102,8 @@ export type Competitor = {
 
 /** SeldonFrame's side of the comparison table — identical on every page. */
 export const SF_COLUMN = {
-  bestFor: "Agencies & builders running AI front offices for clients",
-  pricingModel: "From $29/mo flat — unlimited workspaces (agency whitelabel from $99/mo)",
+  bestFor: "Agencies delivering AI front offices to client businesses; builders running one business can use Builder",
+  pricingModel: "Builder is $29/mo for one business you operate (your own business workspace; no client resale or white-label). Managed is $49/mo. Agency plans start at $99/mo for client workspaces and white-label delivery.",
   aiReceptionist: "Native — AI receptionist answers, qualifies & books across voice, SMS & web chat",
   frontOffice: "Included — multi-page website, CRM, booking calendar, intake forms, review requests in every workspace",
   whitelabel: "Agency add-on from $99/mo — whitelabel client portal, per-client workspaces, custom domains, one-click multi-client deploy",
@@ -131,23 +139,33 @@ export function pairAudience(a: CompetitorAudience, b: CompetitorAudience): Comp
 export function sfPriceAnchor(audience: CompetitorAudience): string {
   switch (audience) {
     case "agency":
-      return "white-label agency plans from $99/mo ($99–$299, client sub-accounts included, 0% GMV) — solo builders from $29/mo flat";
+      return "white-label agency plans from $99/mo (Agency Starter starts at $99/mo for client workspaces; $99–$299, client sub-accounts included, 0% GMV). Builder is $29/mo for one business you operate (your own business workspace; no client resale or white-label)";
     case "solo":
-      return "$29/mo flat, unlimited workspaces, first workspace free forever";
+      return "Builder is $29/mo for one business you operate (your own business workspace; no client resale or white-label); unlimited workspaces, first workspace free forever. The Builder price is $29/mo flat.";
     case "mixed":
-      return "from $29/mo flat solo, or $99–$299/mo agency plans with white-label + client sub-accounts (0% GMV)";
+      return "Builder is $29/mo for one business you operate (your own business workspace; no client resale or white-label); Agency plans start at $99/mo for client workspaces and white-label delivery ($99–$299, 0% GMV). The Builder price is $29/mo flat.";
   }
+}
+
+/**
+ * The primary structured-data offer for a comparison surface. Agency-led
+ * pages use Agency Starter ($99); solo and mixed pages lead with Builder
+ * ($29), matching the visible `sfPriceAnchor` copy rather than claiming the
+ * cheapest tier for every audience.
+ */
+export function sfPriceAnchorMonthlyPrice(audience: CompetitorAudience): number {
+  return audience === "agency" ? 99 : 29;
 }
 
 /** FAQ items every page shares (appended after the competitor-specific ones). */
 export const SHARED_FAQ: AltFaqItem[] = [
   {
     q: "How can SeldonFrame be $29/mo flat when competitors charge per minute or per credit?",
-    a: "Because you use your own keys. Your agents run on your own AI key (Claude, ChatGPT or Gemini) and, for phone, your own Twilio account. You pay the providers at raw cost. SeldonFrame never marks up tokens or minutes. You pay for the platform, not a meter.",
+    a: "Because you use your own keys. Builder is $29/mo for one business you operate (your own business workspace; no client resale or white-label); Agency plans start at $99/mo for client workspaces and white-label delivery. Your agents run on your own AI key (Claude, ChatGPT or Gemini) and, for phone, your own Twilio account. You pay the providers at raw cost. SeldonFrame never marks up tokens or minutes.",
   },
   {
     q: "Do you take a cut of what I charge my clients?",
-    a: "SeldonFrame works like Shopify: Builder is $29/mo flat, and agency plans run $99–$299/mo with white-label and client sub-accounts included. Solo plans add a flat 2% only on sales made through SeldonFrame checkout — agency plans pay 0%. Selling agents on the marketplace carries 5%. Client retainers you bill outside SeldonFrame cost nothing extra.",
+    a: "SeldonFrame works like Shopify: Builder is $29/mo for one business you operate (your own business workspace; no client resale or white-label), while Agency plans run $99–$299/mo with white-label and client sub-accounts included. Solo plans add a flat 2% only on sales made through SeldonFrame checkout — agency plans pay 0%. Selling agents on the marketplace carries 5%. Client retainers you bill outside SeldonFrame cost nothing extra.",
   },
   {
     q: "How fast can I see it working?",
@@ -165,7 +183,7 @@ export const COMPETITORS: Competitor[] = [
     oneLiner:
       "GoHighLevel is an all-in-one white-label CRM and marketing-automation platform. Agencies use it to run funnels, email/SMS, and pipelines for local-business clients.",
     heroSub:
-      "Stop paying extra fees for AI that's just an add-on. SeldonFrame gives every client a complete AI front office — receptionist, website, CRM, booking — white-label agency plans from $99/mo (0% GMV); solo builders from $29/mo flat.",
+      "Stop paying extra fees for AI that's just an add-on. SeldonFrame gives every client a complete AI front office — receptionist, website, CRM, booking — on white-label agency plans from $99/mo (0% GMV). Builder is $29/mo for one business you own and operate.",
     intro: [
       "Most people looking for a GoHighLevel alternative hit the same wall: the AI isn't the platform, it's an add-on. Plans run $97–$497/mo. The AI Employee costs another $50–$97/mo per location. Outbound Voice AI is still billed per minute on top. Users say it takes 2–4 weeks to learn before the platform earns its keep. The costs are real, and they add up — for every single client.",
       "That said, GoHighLevel is impressive. It's the most complete agency toolbox ever built, with funnels, email, courses, a huge template library, and true white-label reselling. If your business is funnels and email campaigns, it's hard to beat. But if your clients just need an AI that answers the phone, qualifies the lead, and books the job into a real calendar and CRM, you're buying a whole toolbox to get one receptionist.",
@@ -182,7 +200,7 @@ export const COMPETITORS: Competitor[] = [
     switchReasons: [
       {
         title: "AI is an add-on, not the platform",
-        body: "The AI Employee costs $50–$97/mo per location on top of your $97–$497 base plan. Outbound Voice AI still bills per minute. On SeldonFrame, the AI receptionist IS the product — included in the flat $29/mo.",
+        body: "The AI Employee costs $50–$97/mo per location on top of your $97–$497 base plan. Outbound Voice AI still bills per minute. On SeldonFrame, Builder is $29/mo for one business you operate; Agency plans start at $99/mo for client delivery.",
       },
       {
         title: "Costs pile up per client",
@@ -269,7 +287,7 @@ export const COMPETITORS: Competitor[] = [
     oneLiner:
       "Vapi is a developer-first API platform for building custom voice AI agents. You assemble and host your own voice stack.",
     heroSub:
-      "Skip the engineering project. SeldonFrame ships a working receptionist — plus the website, CRM, and booking calendar it books into — from one conversation, for $29/mo flat on your own keys.",
+      "Skip the engineering project. SeldonFrame ships a working receptionist — plus the website, CRM, and booking calendar it books into — from one conversation. Builder is $29/mo for one business you operate; Agency plans start at $99/mo for client delivery.",
     intro: [
       "Most people looking for a Vapi alternative hit the same wall: the advertised $0.05/min is only Vapi's hosting fee. Real-world cost lands around $0.25–$0.33/min once you add speech-to-text, the LLM, text-to-speech, and telephony. And despite the no-code framing, most real setups still need actual coding to build and maintain. HIPAA alone costs $2,000/mo extra. After all that, you still have no CRM, no calendar, and no client dashboard — just a voice agent that needs a whole business system built around it.",
       "That said, Vapi is impressive. For engineering teams who want full control over every piece of a custom voice stack, it's one of the most flexible platforms out there, with a bring-your-own-API-key option and a big developer community. But agencies putting receptionists in front of local businesses don't need a voice stack. They need the whole front office.",
@@ -344,7 +362,7 @@ export const COMPETITORS: Competitor[] = [
       },
       {
         title: "Per-minute pieces add up",
-        body: "Infrastructure, TTS, LLM, telephony, knowledge base, guardrails, QA — each billed separately. SeldonFrame's flat $29/mo plus your own keys at raw cost makes per-client costs easy to predict.",
+        body: "Infrastructure, TTS, LLM, telephony, knowledge base, guardrails, QA — each billed separately. SeldonFrame's Builder is $29/mo for one business you operate; Agency plans start at $99/mo for client delivery, and your own keys remain raw provider cost.",
       },
       {
         title: "The agent has nowhere to put the job",
@@ -418,7 +436,7 @@ export const COMPETITORS: Competitor[] = [
       },
       {
         q: "What do voice minutes cost on SeldonFrame?",
-        a: "You connect your own Twilio number and AI key, so calls cost whatever the providers charge. SeldonFrame doesn't meter or mark up minutes on the $29/mo plan.",
+        a: "You connect your own Twilio number and AI key, so calls cost whatever the providers charge. SeldonFrame doesn't meter or mark up minutes: Builder is $29/mo for one business you operate; Agency plans start at $99/mo for client delivery.",
       },
     ],
   },
@@ -666,7 +684,7 @@ export const COMPETITORS: Competitor[] = [
     switchReasons: [
       {
         title: "Flat pricing vs minimum-spend math",
-        body: "Vendasta's pricing is a spend commitment you have to fill, and real bills run above the sticker price. SeldonFrame is a flat subscription — unlimited workspaces from $29/mo, agency client workspaces from $99/mo.",
+        body: "Vendasta's pricing is a spend commitment you have to fill, and real bills run above the sticker price. SeldonFrame's Builder is $29/mo for one business you operate; Agency plans start at $99/mo for client workspaces.",
       },
       {
         title: "AI receptionist for everyone, not just the top tier",
@@ -778,7 +796,7 @@ export const COMPETITORS: Competitor[] = [
       },
       {
         title: "No per-seat tax on your team",
-        body: "Every Voiceflow editor costs $50–$150/mo. SeldonFrame is $29/mo flat for the whole platform, unlimited workspaces — agency client workspaces from $99/mo.",
+        body: "Every Voiceflow editor costs $50–$150/mo. SeldonFrame's Builder is $29/mo for one business you operate; Agency plans start at $99/mo for client workspaces.",
       },
       {
         title: "One conversation replaces the flow diagram",
@@ -975,7 +993,7 @@ export const COMPETITORS: Competitor[] = [
     oneLiner:
       "Smith.ai is a North-America-based receptionist service that combines AI with human receptionists, billed per call.",
     heroSub:
-      "A service bills you per call, forever. SeldonFrame is a platform you (or your agency) own — AI receptionist, website, CRM, and booking for $29/mo flat, on your own keys.",
+      "A service bills you per call, forever. SeldonFrame is a platform you own — Builder is $29/mo for one business you operate; Agency plans start at $99/mo for client delivery, on your own keys.",
     intro: [
       "Most people looking for a Smith.ai alternative hit the same wall: per-call pricing and a quote gate. The public pricing page is now just a lead-capture form — no numbers until you talk to sales. And per-call billing, which users describe as a \"success tax,\" means your receptionist bill grows right along with your call volume, forever. It's also a service, not a platform: there's nothing to whitelabel, nothing to build on, and the CRM of record belongs to someone else.",
       "That said, Smith.ai is impressive. The human-in-the-loop model delivers genuinely polished conversations, and for high-stakes professional services — law firms especially — a human voice on complex intake is worth paying for. But most local service businesses need every call answered instantly and booked into their own system — a job AI now does 24/7 for one flat platform fee.",
@@ -1083,7 +1101,7 @@ export const COMPETITORS: Competitor[] = [
     oneLiner:
       "HubSpot is a premium all-in-one CRM and marketing platform that scales from a free tier to enterprise contracts.",
     heroSub:
-      "Skip the 40x price jump between Starter and Pro. SeldonFrame gives every client the AI receptionist, website, CRM, and booking system for $29/mo flat, with no mandatory onboarding fee.",
+      "Skip the 40x price jump between Starter and Pro. SeldonFrame Builder is $29/mo for one business you operate; Agency plans from $99/mo give client teams the AI receptionist, website, CRM, and booking system, with no mandatory onboarding fee.",
     intro: [
       "Most people looking for a HubSpot alternative hit the same wall: the jump from entry-level to real use is brutal. Marketing Starter runs $15/seat/mo, but Professional jumps to roughly $800/mo plus a mandatory $3,000 onboarding fee, and Enterprise runs $3,600/mo — roughly a 40x jump between the tier that gets you started and the tier that does real marketing automation. AI features are billed on credits on top of that, and there's no white-label option at any price. SMS and voice both need third-party add-ons.",
       "That said, HubSpot is impressive. Its CRM depth, reporting, and enterprise polish are genuinely best-in-class, and for a funded B2B sales team managing complex pipelines, it scales further than almost anything else. But local service businesses don't need enterprise pipeline reporting. They need their phone answered and the job booked.",
@@ -1100,7 +1118,7 @@ export const COMPETITORS: Competitor[] = [
     switchReasons: [
       {
         title: "No 40x pricing jump",
-        body: "HubSpot's jump from Starter to Pro is roughly $15/seat to $800/mo plus $3,000 for onboarding. SeldonFrame is $29/mo flat — no onboarding fee, no per-seat multiplier.",
+        body: "HubSpot's jump from Starter to Pro is roughly $15/seat to $800/mo plus $3,000 for onboarding. SeldonFrame Builder is $29/mo for one business you operate; Agency plans start at $99/mo for client workspaces — no onboarding fee or per-seat multiplier.",
       },
       {
         title: "A phone-answering agent, not just a smarter CRM",
@@ -1112,7 +1130,7 @@ export const COMPETITORS: Competitor[] = [
       },
       {
         title: "Whitelabel for agencies serving local clients",
-        body: "HubSpot has no agency resale model. SeldonFrame gives every client a branded workspace under your agency's own domain.",
+        body: "HubSpot has no agency resale model. SeldonFrame gives every client a branded workspace under your agency's own domain on Agency plans from $99/mo.",
       },
     ],
     whenTheyWin:
@@ -1124,7 +1142,7 @@ export const COMPETITORS: Competitor[] = [
       },
       {
         q: "Does SeldonFrame have a free tier like HubSpot's free CRM?",
-        a: "SeldonFrame lets you build the full workspace — site, CRM, booking, agent — free in about 3 minutes, before you ever create an account. The $29/mo subscription starts when you claim it and go live.",
+        a: "SeldonFrame lets you build the full workspace — site, CRM, booking, agent — free in about 3 minutes, before you ever create an account. Builder is $29/mo when you claim a workspace for one business you operate; Agency client delivery starts at $99/mo.",
       },
     ],
   },
@@ -1137,7 +1155,7 @@ export const COMPETITORS: Competitor[] = [
     oneLiner:
       "ClickFunnels is a funnel-building platform for offer-sellers, built around ready-made sales pages and checkout flows.",
     heroSub:
-      "A funnel converts a click — it doesn't answer a phone. SeldonFrame pairs the front office with an AI receptionist that answers, qualifies, and books, for $29/mo flat with no contact caps.",
+      "A funnel converts a click — it doesn't answer a phone. SeldonFrame pairs the front office with an AI receptionist that answers, qualifies, and books. Builder is $29/mo for one business you operate; Agency plans start at $99/mo for client delivery, with no contact caps.",
     intro: [
       "Most people looking for a ClickFunnels alternative hit the same wall: contact caps and a missing back office. Launch runs $97/mo (10,000 contacts), Scale $197/mo, Optimize $297/mo — every tier caps how many contacts you can have, so growth means an upgrade. There's no white-label or agency option, the CRM is thin, and there's no built-in SMS or voice. If a lead calls instead of clicking, ClickFunnels has nothing for that.",
       "That said, ClickFunnels is impressive. Its converting templates, fast solo-launch workflow, and the Brunson ecosystem of courses and community are genuinely valuable for a single offer-seller. But local service businesses aren't selling a digital offer through a funnel — they're answering calls and booking jobs, and that calls for a different tool.",
@@ -1154,7 +1172,7 @@ export const COMPETITORS: Competitor[] = [
     switchReasons: [
       {
         title: "No contact caps to run into",
-        body: "Every ClickFunnels tier caps how many contacts you can have. SeldonFrame is $29/mo flat with unlimited workspaces — growth doesn't force a plan change.",
+        body: "Every ClickFunnels tier caps how many contacts you can have. SeldonFrame Builder is $29/mo for one business you operate; Agency plans start at $99/mo for client workspaces — growth doesn't force a contact-based plan change.",
       },
       {
         title: "Answers the phone a funnel can't",
@@ -1178,7 +1196,7 @@ export const COMPETITORS: Competitor[] = [
       },
       {
         q: "Does SeldonFrame have contact caps like ClickFunnels?",
-        a: "No. $29/mo is flat no matter how many contacts or how big your list is.",
+        a: "No contact cap applies to Builder for the business you operate or to Agency client workspaces. Builder is $29/mo; Agency plans start at $99/mo.",
       },
     ],
   },
@@ -1191,7 +1209,7 @@ export const COMPETITORS: Competitor[] = [
     oneLiner:
       "Keap (owned by Thryv since October 2024) is a veteran small-business CRM and automation platform with invoicing and payments.",
     heroSub:
-      "Skip the 3x-GHL entry price for a platform in the middle of an acquisition. SeldonFrame gives every client an AI receptionist, website, CRM, and booking system for $29/mo flat.",
+      "Skip the 3x-GHL entry price for a platform in the middle of an acquisition. SeldonFrame Builder is $29/mo for one business you operate; Agency plans from $99/mo give client teams an AI receptionist, website, CRM, and booking system.",
     intro: [
       "Most people looking for a Keap alternative hit the same wall: the price and the timing. Plans start from $299/mo ($249 annual) for just 2 users and 1,500 contacts, plus $39 per extra user and a paid setup package to get going — roughly 3x GoHighLevel's entry price for a narrower set of features. Keap was bought by Thryv in October 2024, and its features are gradually folding into the Thryv product line, which leaves its future roadmap unclear. There's no white-label option and no AI receptionist.",
       "That said, Keap is impressive. Its automation maturity, invoicing and payments tools, and onboarding support have built real loyalty over nearly two decades. If you're already deep in Keap and the acquisition-era changes don't bother you, switching costs may outweigh the savings. But for a business that just needs its phone answered and jobs booked, $299/mo plus per-user fees is a lot of platform for one job.",
@@ -1208,7 +1226,7 @@ export const COMPETITORS: Competitor[] = [
     switchReasons: [
       {
         title: "A third of the entry price",
-        body: "Keap starts at $299/mo for 2 users. SeldonFrame is $29/mo flat, unlimited use — no per-user fee, no paid setup package required.",
+        body: "Keap starts at $299/mo for 2 users. SeldonFrame Builder is $29/mo for one business you operate; Agency plans start at $99/mo for client workspaces — no per-user fee or paid setup package required.",
       },
       {
         title: "An AI receptionist Keap doesn't have",
@@ -1299,7 +1317,7 @@ export const COMPETITORS: Competitor[] = [
     oneLiner:
       "Kartra is an all-in-one platform for creators and coaches selling courses, memberships, and video content, with contact-capped tiers.",
     heroSub:
-      "500 contacts on the entry tier isn't a real local-business CRM. SeldonFrame gives every client an AI receptionist, website, CRM, and booking system for $29/mo flat, with no contact caps.",
+      "500 contacts on the entry tier isn't a real local-business CRM. SeldonFrame Builder is $29/mo for one business you operate; Agency plans from $99/mo give client teams an AI receptionist, website, CRM, and booking system, with no contact caps.",
     intro: [
       "Most people looking for a Kartra alternative hit the same wall: contact caps everywhere. Essentials runs $59/mo but caps at just 500 contacts, Starter $119/mo, Growth $229/mo, Pro $549/mo — every tier has a ceiling that forces an upgrade as your list grows. There's no white-label or sub-account option for agencies, and no phone or local-business tools at all. Kartra is built for selling courses and memberships, not answering calls and booking jobs.",
       "That said, Kartra is impressive. Its course, membership, video, and affiliate tools and built-in helpdesk are genuinely deep for a creator-economy business. If you're selling a course with an affiliate program, it's a strong fit. But local service businesses don't sell memberships. They answer phones and book jobs, and a 500-contact cap won't survive a busy month.",
@@ -1316,7 +1334,7 @@ export const COMPETITORS: Competitor[] = [
     switchReasons: [
       {
         title: "No contact cap to outgrow",
-        body: "Kartra's Essentials tier caps at 500 contacts. SeldonFrame is $29/mo flat, unlimited contacts, unlimited workspaces.",
+        body: "Kartra's Essentials tier caps at 500 contacts. SeldonFrame Builder is $29/mo for one business you operate; Agency plans start at $99/mo for unlimited contacts and client workspaces.",
       },
       {
         title: "An AI receptionist for a phone Kartra ignores",
@@ -1340,7 +1358,7 @@ export const COMPETITORS: Competitor[] = [
       },
       {
         q: "Will I hit a contact cap on SeldonFrame like Kartra's tiers?",
-        a: "No. $29/mo is flat with no contact cap, at any tier.",
+        a: "No contact cap applies to Builder for the business you operate or to Agency client workspaces. Builder is $29/mo; Agency plans start at $99/mo.",
       },
     ],
   },
@@ -1353,7 +1371,7 @@ export const COMPETITORS: Competitor[] = [
     oneLiner:
       "SharpSpring is an agency-focused marketing automation platform, now operating under Constant Contact and reported to be in maintenance mode after the acquisition.",
     heroSub:
-      "A platform in maintenance mode with quote-gated pricing is a place to migrate FROM, not to. SeldonFrame is publicly priced: white-label agency plans from $99/mo (0% GMV), solo from $29/mo flat — AI receptionist, website, CRM, and booking included.",
+      "A platform in maintenance mode with quote-gated pricing is a place to migrate FROM, not to. SeldonFrame is publicly priced: white-label Agency plans start at $99/mo (0% GMV) for client delivery — AI receptionist, website, CRM, and booking included. Builder is $29/mo for one business you operate (your own business workspace; no client resale or white-label).",
     intro: [
       "Most people looking for a SharpSpring alternative hit the same wall: nobody publishes the price, and the brand's future is unclear. Pricing is quote-gated — the number commonly cited by agencies is around $449/mo per 1,000 contacts, but SharpSpring won't confirm it publicly. Since the Constant Contact acquisition, the brand has been reported as being phased toward retirement, with little visible product investment, and there's no local-business toolkit at all — no phone answering, no booking system, no intake forms.",
       "That said, SharpSpring is impressive. Unlimited users on a flat agency plan and VisitorID website tracking were genuinely ahead of their time, and its agency roots run deep. But a platform being wound down under its acquirer isn't where you want to build a client's front office for the next five years.",
@@ -1370,7 +1388,7 @@ export const COMPETITORS: Competitor[] = [
     switchReasons: [
       {
         title: "A published price, not a sales call",
-        body: "SharpSpring won't tell you the price until you talk to sales. SeldonFrame's price is public: $29/mo flat.",
+        body: "SharpSpring won't tell you the price until you talk to sales. SeldonFrame's Builder price is public at $29/mo for one business you operate; Agency plans start at $99/mo for client delivery.",
       },
       {
         title: "An AI receptionist SharpSpring never built",
@@ -1390,7 +1408,7 @@ export const COMPETITORS: Competitor[] = [
     faq: [
       {
         q: "Why isn't SharpSpring's price listed anywhere?",
-        a: "SharpSpring pricing is quote-gated — agencies commonly report being quoted around $449/mo per 1,000 contacts, but the vendor doesn't publish a number. SeldonFrame's $29/mo flat price is public everywhere.",
+        a: "SeldonFrame publishes Builder at $29/mo for one business you operate; Agency plans start at $99/mo for client delivery. SharpSpring pricing is quote-gated — agencies commonly report being quoted around $449/mo per 1,000 contacts, but the vendor doesn't publish a number.",
       },
       {
         q: "Is SharpSpring being discontinued?",
@@ -1515,7 +1533,7 @@ export const COMPETITORS: Competitor[] = [
     oneLiner:
       "Salesforce is the enterprise CRM standard, now also selling to small businesses through Starter and Pro Suite editions.",
     heroSub:
-      "Enterprise CRM admin overhead doesn't fit a local service business. SeldonFrame gives every client an AI receptionist, website, CRM, and booking system for $29/mo flat, no admin required.",
+      "Enterprise CRM admin overhead doesn't fit a local service business. SeldonFrame Builder is $29/mo for one business you operate; Agency plans from $99/mo give client teams an AI receptionist, website, CRM, and booking system, with no admin required.",
     intro: [
       "Most people looking for a Salesforce alternative for a local service business hit the same wall: it's built for enterprise, and it shows even in the cheaper editions. Starter runs $25/user/mo, Pro Suite $100/user/mo, and Agentforce editions are listed at up to $550/user/mo — with extra add-ons and real admin work needed just to set up and maintain even the entry tiers. There's no white-label option, thin native marketing, funnel, and SMS tools for local businesses, and per-user pricing that hurts a small team.",
       "That said, Salesforce is impressive. Its brand trust, compliance standing, near-limitless customization through AppExchange, and its Agentforce AI agent platform are genuinely unmatched at enterprise scale. If you're building for a large, complex sales org, nothing goes further. But a local service business doesn't need an admin-managed enterprise CRM. It needs its phone answered and its jobs booked, this week.",
@@ -1536,7 +1554,7 @@ export const COMPETITORS: Competitor[] = [
       },
       {
         title: "Flat $29, not per-user enterprise editions",
-        body: "Salesforce pricing climbs per user, per edition, with Agentforce add-ons on top. SeldonFrame is $29/mo flat.",
+        body: "Salesforce pricing climbs per user, per edition, with Agentforce add-ons on top. SeldonFrame Builder is $29/mo for one business you operate; Agency plans start at $99/mo for client workspaces.",
       },
       {
         title: "A receptionist built in, not a custom Agentforce build",
@@ -1569,7 +1587,7 @@ export const COMPETITORS: Competitor[] = [
     oneLiner:
       "Claude Projects is Anthropic's persistent-workspace feature — standing instructions plus a knowledge base that load into every conversation, which many agencies hand-build once per client.",
     heroSub:
-      "One hand-built Claude Project per client is the DIY version of an AI front office. SeldonFrame generates the brief, the knowledge base and the retrieval tests — and attaches the website, CRM, booking calendar and receptionist that actually do the work — per client, automatically, at $29/mo flat.",
+      "One hand-built Claude Project per client is the DIY version of an AI front office. SeldonFrame generates the brief, the knowledge base and the retrieval tests — and attaches the website, CRM, booking calendar and receptionist that actually do the work — on Agency plans from $99/mo for client delivery. Builder is $29/mo for one business you operate.",
     intro: [
       "Most agencies who run client work through Claude Projects hit the same wall: everything the setup guides prescribe — write the standing brief, curate tight 1–3 page knowledge docs, test retrieval, review quarterly — is manual labor, repeated per client, forever. Conversations inside a project don't share history with each other, the output is chat text you still have to carry into other tools by hand, nothing answers the client's phone or books a job while you sleep, and the whole thing lives inside YOUR Claude account — there's nothing a client can log into, nothing to whitelabel, and a per-person subscription that doesn't scale into a book of business.",
       "That's not to say Claude Projects isn't excellent — for your OWN context-rich work (research, writing, strategy) it's the best manual setup there is, and the discipline it teaches (standing briefs, tight grounded knowledge, testing retrieval before trusting it) is exactly the right philosophy. SeldonFrame's honest pitch is that it automates that same philosophy per client and attaches the business system: the Soul is the standing brief, the grounded FAQ/services are the tight docs, and auto-evals are 'test retrieval before you trust it' made mechanical.",

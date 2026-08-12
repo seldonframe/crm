@@ -1,3 +1,4 @@
+import { AGENCY_PRICING_CLAIM } from "../../marketing/public-claims";
 import type { Guide } from "./types";
 
 export const guide: Guide = {
@@ -64,7 +65,8 @@ export const guide: Guide = {
     },
     {
       h2: "Where SeldonFrame fits in this (disclosed)",
-      body: "We build SeldonFrame, so weigh this section as the vendor's answer it partly is. SeldonFrame's marketplace lets a builder rent an agent out to a client over MCP with a signed rental key and usage metering behind the scenes.\n\nBut the money itself moves on the boring, working rails from the section above: a **$29/month flat subscription** with the first workspace free, keys the builder brings themselves (*BYOK*, so there's no markup to hide in usage costs), and a **GMV fee that steps down from 5% to 3% to 2%** — and only applies when SeldonFrame is actually the sales channel that closed the deal.\n\nNo stablecoins, no per-request machine settlement — deliberately, because that's not what pays anyone's bills yet.",
+      body:
+        `We build SeldonFrame, so weigh this section as the vendor's answer it partly is. SeldonFrame's marketplace lets a builder rent an agent out to a client over MCP with a signed rental key and usage metering behind the scenes.\n\nFor that client-facing path, ${AGENCY_PRICING_CLAIM} The Builder plan is the separate $29/mo path for a business the operator owns, not for resale. Keys the builder brings themselves (*BYOK*, so there's no markup to hide in usage costs), and a **GMV fee that steps down from 5% to 3% to 2%** — and only applies when SeldonFrame is actually the sales channel that closed the deal.\n\nNo stablecoins, no per-request machine settlement — deliberately, because that's not what pays anyone's bills yet.`,
       callout: {
         kind: "analogy",
         text: "A percentage cut that only applies when the platform closed the sale works like a *real-estate referral fee* — the referring party only gets paid on deals that actually closed through the referral, not on everything the buyer does afterward.",

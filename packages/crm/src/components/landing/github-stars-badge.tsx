@@ -10,9 +10,7 @@
 // parse fail). The badge renders gracefully without a count — the
 // link itself is the value, the count is a nice-to-have proof.
 //
-// Repo path: seldonframe/crm (verified May 2026 against nav.tsx and
-// LICENSE — the public mirror's name is `crm`, not the older
-// `seldonframe/seldonframe` placeholder some early docs used).
+// Repo path: seldonframe/seldonframe.
 
 import Link from "next/link";
 import { Star, GitFork } from "lucide-react";
@@ -25,7 +23,7 @@ function formatStars(stars: number): string {
     const k = stars / 1000;
     // 1.0k–99.9k → one decimal ("1.2k", "12.4k"); 100k+ → integer
     // ("134k") to keep the badge from getting wider than the
-    // "seldonframe/crm" slug it sits next to.
+    // "seldonframe/seldonframe" slug it sits next to.
     return k >= 100 ? `${Math.round(k)}k` : `${k.toFixed(1)}k`;
   }
   return String(stars);
@@ -34,13 +32,13 @@ function formatStars(stars: number): string {
 export function GitHubStarsBadge({ stars }: { stars: number | null }) {
   return (
     <Link
-      href="https://github.com/seldonframe/crm"
+      href="https://github.com/seldonframe/seldonframe"
       target="_blank"
       rel="noopener noreferrer"
       aria-label={
         stars !== null
-          ? `Star seldonframe/crm on GitHub — ${stars} stars`
-          : "View seldonframe/crm on GitHub"
+          ? `Star seldonframe/seldonframe on GitHub — ${stars} stars`
+          : "View seldonframe/seldonframe on GitHub"
       }
       // design-critique May 2026: demoted from CTA-styled button to
       // chip — transparent surface, thin border. Reads as proof of
@@ -49,7 +47,7 @@ export function GitHubStarsBadge({ stars }: { stars: number | null }) {
       className="inline-flex items-center gap-2 rounded-[11px] border border-zinc-700/60 bg-transparent px-4 py-2.5 text-sm font-medium text-zinc-300 transition-colors hover:border-zinc-500 hover:text-zinc-100 focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-[#1F2B24]"
     >
       <GitFork size={16} aria-hidden="true" />
-      <span>seldonframe/crm</span>
+      <span>seldonframe/seldonframe</span>
       {stars !== null ? (
         <span
           className="flex items-center gap-1 text-zinc-400"
@@ -70,7 +68,7 @@ export function GitHubStarsBadge({ stars }: { stars: number | null }) {
  */
 export async function fetchStarCount(): Promise<number | null> {
   try {
-    const res = await fetch("https://api.github.com/repos/seldonframe/crm", {
+    const res = await fetch("https://api.github.com/repos/seldonframe/seldonframe", {
       next: { revalidate: 3600 }, // 1 hour
       headers: { Accept: "application/vnd.github+json" },
     });

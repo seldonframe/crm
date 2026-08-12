@@ -31,6 +31,7 @@ import type { TierId } from "@/lib/billing/plans";
 
 export type StartCheckoutInput = {
   tier: TierId;
+  checkoutSource?: "upgrade_modal" | "pricing" | "signup_resume";
   /** Test seam — production callers omit and fall back to global `fetch`. */
   fetchImpl?: typeof fetch;
 };
@@ -46,6 +47,7 @@ export async function startCheckout(input: StartCheckoutInput): Promise<StartChe
     headers: { "content-type": "application/json" },
     body: JSON.stringify({
       tier: input.tier,
+      checkout_source: input.checkoutSource ?? "upgrade_modal",
       successPath: `/dashboard?upgraded=${input.tier}`,
       cancelPath: "/clients",
     }),

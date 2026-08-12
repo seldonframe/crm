@@ -10,6 +10,7 @@ import { MKT } from "@/components/marketplace/marketplace-data";
 import { AgencyMarginCalculator } from "@/components/seo/agency-margin-calculator";
 import { BuildWidget } from "@/components/seo/build-widget";
 import { ChatGptCtaCard } from "@/components/seo/chatgpt-cta";
+import { AGENCY_PRICING_CLAIM, BUILDER_PRICING_CLAIM } from "@/lib/marketing/public-claims";
 import { buildOgUrl } from "@/lib/seo/og-card";
 import { isWebUngatedBuildOn } from "@/lib/web-build/policy";
 
@@ -54,7 +55,7 @@ const FAQ = [
   },
   {
     q: "How does SeldonFrame change the math?",
-    a: "SeldonFrame is a flat platform fee ($29/month builder, up to $299/month agency), amortized across all your clients, plus raw BYOK usage (you pay your AI and telephony provider directly, at cost). That per-client software cost <strong>shrinks as you add clients</strong> instead of multiplying.",
+    a: `${AGENCY_PRICING_CLAIM} ${BUILDER_PRICING_CLAIM} Agency platform cost is the relevant resale input; Builder is for one business you operate, not a client roster. BYOK usage is raw (you pay your AI and telephony provider directly, at cost), so model your per-client margin against the Agency tier rather than amortizing Builder across clients.`,
   },
 ];
 

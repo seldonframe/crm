@@ -1,3 +1,4 @@
+import { AGENCY_PRICING_CLAIM } from "../../marketing/public-claims";
 import type { Guide } from "./types";
 
 export const guide: Guide = {
@@ -63,7 +64,8 @@ export const guide: Guide = {
     },
     {
       h2: "Where SeldonFrame fits (disclosed)",
-      body: "We build SeldonFrame, so read this section as the sales pitch it partly is.\n\nThe demo-as-lead-magnet approach above is only cheap at volume if producing each demo doesn't cost you real time or money. SeldonFrame's first workspace is free, so building a working agent, CRM, and booking flow on a prospect's actual business — to use as your outreach hook — costs you nothing to produce before you've closed a single deal.\n\nDeploys are white-label, so the relationship — and the trust you're compounding through the flywheel in section two — stays attached to your agency's brand, not ours.\n\nBeyond the free first workspace, SeldonFrame is **$29/month flat** with *BYOK* for the model calls, so your margin on each client isn't taxed by usage the way many category tools structure pricing.\n\nNone of that replaces the actual channel-building work above. It just removes one excuse — cost of producing the proof — from the list of reasons pipeline-building gets postponed.",
+      body:
+        `We build SeldonFrame, so read this section as the sales pitch it partly is.\n\nThe demo-as-lead-magnet approach above is only cheap at volume if producing each demo doesn't cost you real time or money. SeldonFrame's first workspace is free, so building a working agent, CRM, and booking flow on a prospect's actual business — to use as your outreach hook — costs you nothing to produce before you've closed a single deal.\n\nDeploys are white-label, so the relationship — and the trust you're compounding through the flywheel in section two — stays attached to your agency's brand, not ours.\n\n${AGENCY_PRICING_CLAIM} The $29/mo Builder plan is for a business you operate yourself; it does not include the client resale layer. With the agency tier, *BYOK* for the model calls keeps your margin from being taxed by usage the way many category tools structure pricing.\n\nNone of that replaces the actual channel-building work above. It just removes one excuse — cost of producing the proof — from the list of reasons pipeline-building gets postponed.`,
     },
   ],
   faq: [

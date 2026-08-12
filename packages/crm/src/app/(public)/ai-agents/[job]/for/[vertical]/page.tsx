@@ -44,8 +44,8 @@ export async function generateMetadata({ params }: RouteParams): Promise<Metadat
   return {
     title: copy.title,
     description: copy.metaDescription,
-    // canonical + the Markdown twin so DOM-parsing crawlers discover the `.md`.
-    alternates: { canonical, types: { "text/markdown": `${canonical}.md` } },
+    // Do not advertise a Markdown twin until this dynamic route serves one.
+    alternates: { canonical },
     openGraph: {
       title: `${job.name} for ${vertical.plural}`,
       description: copy.metaDescription,

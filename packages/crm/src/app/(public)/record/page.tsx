@@ -29,12 +29,10 @@ import { isDraftApprovalsOn } from "@/lib/agent-drafts/policy";
 import { redirectToAppHostIfNeeded } from "@/lib/auth/app-host-redirect";
 import { UnifiedLanding } from "../unified-landing";
 
-/** SF_TIER_LADDER (2026-07-08) — same strict-"1" contract as the other
- *  dark-by-default flags. Duplicated locally (also in app/(public)/page.tsx
- *  and app/pricing/page.tsx) rather than added to lib/web-build/policy.ts,
- *  which is outside this task's touched-files list. */
+/** Public marketing uses the current agency ladder by default. Set the
+ *  flag explicitly to "0" only for a controlled legacy rollback. */
 function isTierLadderOn(env: { SF_TIER_LADDER?: string | undefined }): boolean {
-  return env.SF_TIER_LADDER?.trim() === "1";
+  return env.SF_TIER_LADDER?.trim() !== "0";
 }
 
 export const metadata: Metadata = {
