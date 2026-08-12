@@ -82,6 +82,7 @@ export default function GohighlevelGuidesPage(): ReactElement {
       }}
     >
       <MarketplaceStyles />
+      <style>{`@media (max-width:720px){.sf-ghl-group-grid{grid-template-columns:1fr!important}}`}</style>
       <script type="application/ld+json" dangerouslySetInnerHTML={{ __html: JSON.stringify(collectionJsonLd) }} />
       <script type="application/ld+json" dangerouslySetInnerHTML={{ __html: JSON.stringify(itemListJsonLd) }} />
       <script type="application/ld+json" dangerouslySetInnerHTML={{ __html: JSON.stringify(breadcrumbJsonLd) }} />
@@ -159,7 +160,7 @@ export default function GohighlevelGuidesPage(): ReactElement {
 
         {groups.map((group, groupIndex) => (
           <section id={group.id} key={group.id} style={{ marginTop: 58, scrollMarginTop: 100 }}>
-            <div style={{ display: "grid", gridTemplateColumns: "minmax(0, 0.72fr) minmax(260px, 1fr)", gap: 28, alignItems: "start" }}>
+            <div className="sf-ghl-group-grid" style={{ display: "grid", gridTemplateColumns: "minmax(0, 0.72fr) minmax(260px, 1fr)", gap: 28, alignItems: "start" }}>
               <div>
                 <span style={{ fontFamily: MKT.fontMono, fontSize: 12, color: "rgba(34,29,23,0.46)" }}>0{groupIndex + 1}</span>
                 <h2 style={{ margin: "8px 0 0", fontSize: 28, lineHeight: 1.14, letterSpacing: "-0.03em" }}>{group.heading}</h2>

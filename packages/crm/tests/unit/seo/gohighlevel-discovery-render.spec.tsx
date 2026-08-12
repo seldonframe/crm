@@ -32,6 +32,7 @@ describe("GoHighLevel guide collection routes", () => {
     assert.match(html, /"@type":"BreadcrumbList"/);
     assert.match(html, /Diagnose an operating problem/);
     assert.match(html, /Compare the alternatives honestly/);
+    assert.match(html, /\.sf-ghl-group-grid\{grid-template-columns:1fr!important\}/);
   });
 
   test("serves the same collection as agent-readable Markdown", async () => {
