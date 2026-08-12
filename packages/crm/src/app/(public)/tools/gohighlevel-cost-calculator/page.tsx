@@ -13,6 +13,7 @@ import { ChatGptCtaCard } from "@/components/seo/chatgpt-cta";
 import { buildOgUrl } from "@/lib/seo/og-card";
 import { isWebUngatedBuildOn } from "@/lib/web-build/policy";
 import { AGENCY_PRICING_CLAIM, BUILDER_PRICING_CLAIM } from "@/lib/marketing/public-claims";
+import { GOHIGHLEVEL_COLLECTION_PATH } from "@/lib/seo/gohighlevel-discovery";
 
 /** FAQ answers use a few <strong> tags for readability; JSON-LD wants plain
  *  text, so strip tags before embedding in the schema. */
@@ -92,6 +93,15 @@ export default function GohighlevelCostCalculatorPage(): ReactElement {
             See Agency Starter at $99/mo →
           </Link>
         </p>
+        <aside style={{ marginTop: 18, padding: "18px 20px", borderRadius: 12, border: `1px solid ${MKT.ink10}`, background: "rgba(255,255,255,0.55)" }}>
+          <strong style={{ display: "block", fontSize: 15.5 }}>Diagnose the operating problems behind the bill</strong>
+          <p style={{ margin: "6px 0 11px", fontSize: 14, lineHeight: 1.6, color: "rgba(34,29,23,0.68)" }}>
+            Cost is only one failure mode. Check onboarding, support, outages, email and SMS delivery, wallets, workflows, export limits, and sub-account ownership before deciding whether to repair or replace the stack.
+          </p>
+          <Link href={GOHIGHLEVEL_COLLECTION_PATH} className="sf-link" style={{ color: MKT.green, fontSize: 14, fontWeight: 750 }}>
+            Browse all GoHighLevel diagnostics →
+          </Link>
+        </aside>
 
         <section style={{ padding: "40px 0 0" }}>
           <h2 style={{ margin: "0 0 14px", fontSize: 24, fontWeight: 800, letterSpacing: "-0.02em" }}>How it works</h2>

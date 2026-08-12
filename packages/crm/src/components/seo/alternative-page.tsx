@@ -22,6 +22,7 @@ import { BuildWidget } from "@/components/seo/build-widget";
 import { AuthorByline, articleLd } from "@/components/seo/author-byline";
 import { monthYearToIso } from "@/lib/seo/month-iso";
 import { isWebUngatedBuildOn } from "@/lib/web-build/policy";
+import { GOHIGHLEVEL_COLLECTION_PATH } from "@/lib/seo/gohighlevel-discovery";
 import { emphasize } from "@/lib/seo/emphasize";
 import {
   COMPETITORS,
@@ -291,6 +292,17 @@ export function AlternativePage({ competitor }: { competitor: Competitor }): Rea
         <section style={{ padding: "30px 0 8px" }}>
           <h2 style={{ margin: "0 0 14px", fontSize: 20, fontWeight: 800, letterSpacing: "-0.01em" }}>{`More on ${c.name}`}</h2>
           <CompetitorCrossLinks slug={c.slug} current="alternative" />
+          {c.slug === "gohighlevel" && (
+            <div style={{ marginTop: 16, padding: "18px 20px", borderRadius: 12, border: `1px solid ${MKT.ink10}`, background: "rgba(255,255,255,0.55)" }}>
+              <strong style={{ display: "block", fontSize: 15.5 }}>Troubleshoot before you switch</strong>
+              <p style={{ margin: "6px 0 12px", fontSize: 14, lineHeight: 1.6, color: "rgba(34,29,23,0.68)" }}>
+                Work out whether the real problem is configuration, deliverability, provider policy, client onboarding, platform ownership, or the agency model itself.
+              </p>
+              <Link href={GOHIGHLEVEL_COLLECTION_PATH} className="sf-link" style={{ color: MKT.green, fontSize: 14, fontWeight: 750 }}>
+                Open the GoHighLevel agency field guide →
+              </Link>
+            </div>
+          )}
         </section>
 
         {/* ── MORE COMPARISONS (flywheel) ── */}
