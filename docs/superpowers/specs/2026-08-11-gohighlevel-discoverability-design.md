@@ -1,7 +1,7 @@
 # GoHighLevel Article Discoverability Design
 
-**Date:** 2026-08-11  
-**Status:** Approved design  
+**Date:** 2026-08-11
+**Status:** Approved design
 **Branch:** `codex/ghl-discoverability`
 
 ## Objective
