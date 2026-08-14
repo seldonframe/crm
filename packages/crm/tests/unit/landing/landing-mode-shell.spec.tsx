@@ -50,6 +50,7 @@ const STUB_ROUTER = {
   push: () => {},
   replace: () => {},
   prefetch: () => {},
+  bfcacheId: "test-stub-router",
 };
 
 function renderUnifiedLanding(opts: {
