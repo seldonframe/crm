@@ -195,26 +195,8 @@ export async function GET(request: Request): Promise<Response> {
   const url = new URL(request.url).searchParams.get("url");
   const ip = getClientIp(request);
 
-  const gate = await resolveWebBuildGate({ SF_WEB_UNGATED_BUILD: process.env.SF_WEB_UNGATED_BUILD }, ip, () =>
-    checkRateLimit(
-      `web-build:${ip}`,
-      resolveWebBuildRateLimit({ SF_WEB_BUILD_RATE_LIMIT: process.env.SF_WEB_BUILD_RATE_LIMIT }),
-      WEB_BUILD_RATE_WINDOW_MS,
-    ),
-  );
-
-  if (gate.kind === "not_found") {
+  if (!isWebUngatedBuildOn({ SF_WEB_UNGATED_BUILD: process.env.SF_WEB_UNGATED_BUILD })) {
     return new Response(null, { status: 404 });
-  }
-
-  if (gate.kind === "rate_limited") {
-    const sse = createSseStream();
-    sse.emit("error", {
-      code: "rate_limited",
-      message: "You've built a few workspaces today — sign up to keep building.",
-    });
-    sse.close();
-    return new Response(sse.stream, { headers: SSE_RESPONSE_HEADERS });
   }
 
   // SSRF hardening on the now-public path (final review 2026-07-04): resolve +
@@ -228,6 +210,15 @@ export async function GET(request: Request): Promise<Response> {
   // rejects it (generic "Something broke" for any schemeless direct paste on
   // /try — the hero always passed full https URLs, masking it). The build must
   // receive the SAME normalized URL we vetted.
+  //
+  // 2026-08-23 persona-loop fix: this validation now runs BEFORE the rate
+  // limit check below (previously after). A malformed or unreachable URL is
+  // rejected here at zero cost — no Firecrawl/Anthropic call is ever made —
+  // so it must not consume one of the visitor's 3/24h free tries. Before this
+  // fix, checkRateLimit() ran unconditionally ahead of this block, meaning a
+  // mistyped domain or a copy-pasted bad link burned a real attempt on
+  // nothing, silently shrinking the "free to try, no signup required" promise
+  // for exactly the visitors most likely to fat-finger a URL on a phone.
   let buildUrl = url;
   if (url) {
     const trimmed = url.trim();
@@ -244,6 +235,22 @@ export async function GET(request: Request): Promise<Response> {
       return new Response(sse.stream, { headers: SSE_RESPONSE_HEADERS });
     }
     buildUrl = candidate;
+  }
+
+  const allowed = await checkRateLimit(
+    `web-build:${ip}`,
+    resolveWebBuildRateLimit({ SF_WEB_BUILD_RATE_LIMIT: process.env.SF_WEB_BUILD_RATE_LIMIT }),
+    WEB_BUILD_RATE_WINDOW_MS,
+  );
+
+  if (!allowed) {
+    const sse = createSseStream();
+    sse.emit("error", {
+      code: "rate_limited",
+      message: "You've built a few workspaces today — sign up to keep building.",
+    });
+    sse.close();
+    return new Response(sse.stream, { headers: SSE_RESPONSE_HEADERS });
   }
 
   return runAnonymousBuild(buildUrl);
