@@ -77,7 +77,7 @@ export const guide: Guide = {
             domain: "stammer.ai",
           },
           {
-            cells: ["SeldonFrame (we build this)", "Flat 2% GMV on the $29 and $49 solo plans, and only when SeldonFrame is the sales channel. 0% on agency plans. Flat 5% on marketplace transactions", "Published, not negotiated per partner. See the section below for the crossover math"],
+            cells: ["SeldonFrame (we build this)", "Flat 2% GMV on the $29 and $49 solo plans, and only when SeldonFrame is the sales channel. Agency plans at $99/mo and up pay 0%. Flat 5% on marketplace transactions", "Published, not negotiated per partner. See the section below for the crossover math"],
             domain: "seldonframe.com",
           },
         ],
@@ -117,7 +117,7 @@ export const guide: Guide = {
     },
     {
       q: "What does SeldonFrame itself charge?",
-      a: "Disclosure first: we build SeldonFrame. Plans are Builder $29/mo, Managed $49/mo, and Agency at $99, $199, or $299/mo depending on how many client workspaces you need. There are exactly two percentage fees. A flat 2% GMV fee applies only on the solo plans ($29 and $49) and only when SeldonFrame is the sales channel that brought the buyer; agency plans at $99/mo and up pay 0%. A flat 5% marketplace fee applies to agents, souls, and blocks sold or rented through the SeldonFrame marketplace, and it attaches to the marketplace transaction rather than to your plan. The 2% is deliberately an upgrade escalator: past roughly $3,500/mo of GMV it costs more than the $99/mo agency plan, so the agency tier becomes the cheaper option.",
+      a: "Disclosure first: we build SeldonFrame. Builder is $29/mo for businesses you own and operate yourself. Managed is $49/mo. Client sub-accounts, white-label delivery, and agency resale start at $99/mo, with Agency Growth at $199/mo and Agency Scale at $299/mo. There are exactly two percentage fees. A flat 2% GMV fee applies only on the solo plans ($29 and $49) and only when SeldonFrame is the sales channel that brought the buyer; agency plans at $99/mo and up pay 0%. A flat 5% marketplace fee applies to agents, souls, and blocks sold or rented through the SeldonFrame marketplace, and it attaches to the marketplace transaction rather than to your plan. The 2% is deliberately an upgrade escalator: past roughly $3,500/mo of GMV it costs more than the $99/mo agency plan, so the agency tier becomes the cheaper option.",
     },
     {
       q: "Is a 0% marketplace fee actually the best deal?",

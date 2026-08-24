@@ -126,7 +126,7 @@ export const guide: Guide = {
       diagram: {
         type: "table",
         title: "Worked example: SeldonFrame solo plan against the agency plan",
-        columns: ["Monthly GMV through SeldonFrame", "Solo plan total ($29 + 2%)", "Agency Starter total ($99 + 0%)", "Cheaper"],
+        columns: ["Monthly GMV through SeldonFrame", "Solo plan total (plan + 2% GMV)", "Agency Starter total (plan + 0% GMV)", "Cheaper"],
         rows: [
           { cells: ["$1,000", "$49", "$99", "Solo plan"] },
           { cells: ["$2,000", "$69", "$99", "Solo plan"] },
@@ -135,7 +135,7 @@ export const guide: Guide = {
           { cells: ["$10,000", "$229", "$99", "Agency plan"] },
           { cells: ["$25,000", "$529", "$99", "Agency plan"] },
         ],
-        note: "Arithmetic on the published $29 solo price, the flat 2% GMV fee, and the $99 Agency Starter price. This is a worst case: the 2% applies only to sales where SeldonFrame is the sales channel, so revenue you close yourself carries no fee at all and pushes the crossover further out.",
+        note: "Arithmetic on the published $29 solo price and the flat 2% GMV fee. Agency Starter is $99/mo and carries no GMV fee. This is a worst case: the 2% applies only to sales where SeldonFrame is the sales channel, so revenue you close yourself carries no fee at all and pushes the crossover further out.",
       },
       callout: {
         kind: "tip",
