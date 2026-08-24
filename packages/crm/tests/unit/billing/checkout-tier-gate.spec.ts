@@ -22,6 +22,10 @@ import assert from "node:assert/strict";
 
 import { resolveCheckoutTierGate } from "@/lib/billing/checkout-items";
 import { getPlan, type TierId } from "@/lib/billing/plans";
+import {
+  DOMAIN_UNLOCK_TIER_CLIENT_WORKSPACE,
+  DOMAIN_UNLOCK_TIER_OWN_WORKSPACE,
+} from "@/components/billing/domain-unlock-tiers";
 
 /** Every tier id a UI surface can currently POST to /api/stripe/checkout,
  *  annotated with WHERE it comes from. If a future UI change adds a new
@@ -41,6 +45,14 @@ const UI_REACHABLE_TIERS: Array<{ tier: TierId; source: string }> = [
   // upgrade-modal.tsx flag ON (the new ladder comparison).
   { tier: "managed", source: "upgrade-modal.tsx flag ON" },
   { tier: "agency_starter", source: "upgrade-modal.tsx flag ON" },
+  // domain-upgrade-button.tsx (settings/domain UpsellCard) — 2026-08-23.
+  // This button POSTed the frozen "workspace" tier from 2026-07-04 until
+  // this fix (the 2026-07-08 ladder wave repointed pricing-shell and
+  // upgrade-modal but missed it), so EVERY domain-unlock click 409'd.
+  // These entries import the button's REAL tier constants so the audit
+  // list can't drift from what the component actually POSTs.
+  { tier: DOMAIN_UNLOCK_TIER_OWN_WORKSPACE, source: "domain-upgrade-button.tsx own workspace" },
+  { tier: DOMAIN_UNLOCK_TIER_CLIENT_WORKSPACE, source: "domain-upgrade-button.tsx client workspace" },
 ];
 
 describe("resolveCheckoutTierGate — every UI-reachable tier is NEVER rejected for being non-sellable", () => {
