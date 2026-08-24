@@ -417,7 +417,7 @@ export default async function PublicSPage({ params }: PageProps) {
               backgroundColor: "color-mix(in oklab, var(--sf-bg) 92%, var(--sf-accent) 8%)",
             }}
           >
-            <PoweredByBadge />
+            <PoweredByBadge source="workspace_site" />
           </div>
         ) : null}
         {chatbotEmbed ? (

@@ -52,13 +52,29 @@ function SeldonFrameMark({ className = "" }: { className?: string }) {
   );
 }
 
+// Default outbound href for the badge, UTM-tagged so clicks from other
+// people's surfaces are attributable back to the surface that sent them.
+// `source` maps to utm_content (e.g. "workspace_site", "embed_widget") —
+// pass it whenever the caller knows which surface is rendering the badge.
+function buildDefaultHref(source?: string): string {
+  const url = new URL("https://seldonframe.com");
+  url.searchParams.set("utm_source", "powered_by");
+  url.searchParams.set("utm_medium", "badge");
+  if (source) {
+    url.searchParams.set("utm_content", source);
+  }
+  return url.toString();
+}
+
 export function PoweredByBadge({
-  href = "https://seldonframe.com",
+  href,
+  source,
   label = "Powered by SeldonFrame",
   removeBranding = false,
   variant = "light",
 }: {
   href?: string;
+  source?: string;
   label?: string;
   removeBranding?: boolean;
   variant?: "light" | "dark";
@@ -73,7 +89,7 @@ export function PoweredByBadge({
 
   return (
     <a
-      href={href}
+      href={href ?? buildDefaultHref(source)}
       target="_blank"
       rel="noopener noreferrer"
       aria-label={label}

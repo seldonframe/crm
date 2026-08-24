@@ -93,7 +93,7 @@ export function renderDeviceAuthEmailHtml(req: DeviceAuthEmailRequest): string {
 <p style="margin:24px 0 0;color:#999;font-size:12px;">If the button doesn't work, paste this URL into your browser:<br /><span style="word-break:break-all;">${safeUrl}</span></p>
 </td></tr>
 </table>
-<p style="margin:16px 0 0;color:#999;font-size:12px;">SeldonFrame · <a href="https://seldonframe.com" style="color:#666;">seldonframe.com</a></p>
+<p style="margin:16px 0 0;color:#999;font-size:12px;">SeldonFrame · <a href="https://seldonframe.com?utm_source=email&utm_medium=device_auth_footer" style="color:#666;">seldonframe.com</a></p>
 </td></tr>
 </table>
 </body>
@@ -113,7 +113,7 @@ export function renderDeviceAuthEmailText(req: DeviceAuthEmailRequest): string {
     "",
     `Didn't make this request? You can safely ignore this email — without your click, nothing happens.`,
     "",
-    `— SeldonFrame · seldonframe.com`,
+    `— SeldonFrame · seldonframe.com?utm_source=email&utm_medium=device_auth_footer`,
   ].join("\n");
 }
 

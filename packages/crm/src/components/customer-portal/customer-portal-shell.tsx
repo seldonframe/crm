@@ -167,7 +167,7 @@ export function CustomerPortalShell({
             <span>
               Powered by{" "}
               <a
-                href="https://seldonframe.com"
+                href="https://seldonframe.com?utm_source=customer_portal&utm_medium=footer"
                 style={{ color: "#666" }}
                 target="_blank"
                 rel="noopener noreferrer"

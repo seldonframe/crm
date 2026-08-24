@@ -177,6 +177,7 @@ export async function GET(
     googleFontUrl,
     orgName,
     logoUrl,
+    orgSlug: orgSlugPart,
   });
 
   return new NextResponse(script, {
@@ -196,6 +197,7 @@ function renderEmbedScript(input: {
   googleFontUrl: string | null;
   orgName: string;
   logoUrl: string | null;
+  orgSlug: string;
 }): string {
   // bodyFontStack is the CSS font-family value the panel uses. The
   // workspace's body font (from the archetype OR stored theme.fontFamily)
@@ -218,6 +220,7 @@ function renderEmbedScript(input: {
     googleFontUrl: input.googleFontUrl,
     orgName: input.orgName,
     logoUrl: input.logoUrl,
+    orgSlug: input.orgSlug,
   };
   // The embed runs as an IIFE. Self-contained — no framework deps.
   // Renders shadow-DOM-free for max compatibility (works inside iframes,
@@ -378,7 +381,7 @@ function renderEmbedScript(input: {
     '<textarea class="sf-agent-input" id="sf-agent-input" rows="1" placeholder="Type a message..." aria-label="Type a message"></textarea>',
     '<button class="sf-agent-send" type="submit" aria-label="Send message">Send</button>',
     '</form>',
-    '<div class="sf-agent-footer">Powered by <a href="https://seldonframe.com" target="_blank" rel="noopener">SeldonFrame</a></div>'
+    '<div class="sf-agent-footer">Powered by <a href="https://seldonframe.com?utm_source=chat_widget&utm_medium=embed&utm_content=' + encodeURIComponent(CFG.orgSlug) + '" target="_blank" rel="noopener">SeldonFrame</a></div>'
   ].join("");
 
   function escapeHtml(s){return String(s).replace(/[&<>"']/g, function(c){return ({"&":"&amp;","<":"&lt;",">":"&gt;","\\"":"&quot;","'":"&#39;"})[c];});}
