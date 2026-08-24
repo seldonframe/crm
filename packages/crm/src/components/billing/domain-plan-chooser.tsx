@@ -95,7 +95,11 @@ export function DomainPlanChooser({
       <p className="text-xs text-muted-foreground">Custom domains are included on every paid plan.</p>
 
       <Dialog open={open} onOpenChange={setOpen}>
-        <DialogContent className="max-h-[85vh] max-w-3xl overflow-y-auto">
+        {/* 2026-08-23 v2.2 (Max) — the dialog takes ~2/3 of the viewport on
+            desktop so the ladder reads at a glance; 4-across on large
+            screens, 2x2 on tablets, stacked on phones. Width classes win
+            over DialogContent's max-w-lg base via cn/tailwind-merge. */}
+        <DialogContent className="max-h-[88vh] w-[92vw] max-w-[92vw] overflow-y-auto sm:w-[85vw] sm:max-w-[85vw] lg:w-[66vw] lg:max-w-[66vw]">
           <DialogHeader>
             <DialogTitle>Choose your plan</DialogTitle>
             <DialogDescription>
@@ -103,7 +107,7 @@ export function DomainPlanChooser({
             </DialogDescription>
           </DialogHeader>
 
-          <div className="mt-2 grid gap-3 sm:grid-cols-2">
+          <div className="mt-2 grid gap-4 sm:grid-cols-2 lg:grid-cols-4">
             {plans.map((plan) => (
               <div
                 key={plan.tier}
@@ -113,8 +117,11 @@ export function DomainPlanChooser({
                     : "flex h-full flex-col rounded-xl border border-border bg-card p-4"
                 }
               >
-                <div className="flex min-w-0 items-center justify-between gap-2">
-                  <span className="truncate text-sm font-semibold text-foreground">{plan.name}</span>
+                {/* v2.2 — no `truncate` here: with the badge beside it the
+                    title squeezed down to "M..." on narrow cards. Wrap
+                    instead; the badge keeps its own line integrity. */}
+                <div className="flex flex-wrap items-center justify-between gap-x-2 gap-y-1">
+                  <span className="text-sm font-semibold text-foreground">{plan.name}</span>
                   {plan.recommended ? (
                     <Badge className="shrink-0 whitespace-nowrap">Recommended</Badge>
                   ) : null}
