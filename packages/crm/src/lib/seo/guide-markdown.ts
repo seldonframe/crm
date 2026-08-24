@@ -34,6 +34,11 @@ function itemLabel(item: GuideDiagramItem): string {
   return item.sub ? `${item.label} (${item.sub})` : item.label;
 }
 
+/** A literal "|" inside a cell would end the column early in a pipe table. */
+function escapeCell(cell: string): string {
+  return cell.replace(/\|/g, "\\|").replace(/\n/g, " ");
+}
+
 /** Degrade a typed diagram to a plain-text block under a bold title line. */
 function renderDiagramMarkdown(d: GuideDiagram): string {
   const lines: string[] = [];
@@ -74,6 +79,21 @@ function renderDiagramMarkdown(d: GuideDiagram): string {
       lines.push(`**${d.title ?? "Layers"}**`);
       lines.push("");
       d.layers.forEach((layer, i) => lines.push(`${i + 1}. ${itemLabel(layer)}`));
+      break;
+    }
+    case "table": {
+      // 2026-08-24 — the one diagram kind that does NOT degrade: a pipe table
+      // is the shape answer engines actually lift, so the twin carries the
+      // full matrix rather than a flattened list.
+      lines.push(`**${d.title ?? "Table"}**`);
+      lines.push("");
+      lines.push(`| ${d.columns.map(escapeCell).join(" | ")} |`);
+      lines.push(`| ${d.columns.map(() => "---").join(" | ")} |`);
+      for (const row of d.rows) lines.push(`| ${row.cells.map(escapeCell).join(" | ")} |`);
+      if (d.note) {
+        lines.push("");
+        lines.push(d.note);
+      }
       break;
     }
   }

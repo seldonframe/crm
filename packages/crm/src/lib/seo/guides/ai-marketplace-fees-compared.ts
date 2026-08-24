@@ -39,6 +39,50 @@ export const guide: Guide = {
     {
       h2: "The AI-agent platforms, one by one",
       body: "**OpenAI GPT Store.** OpenAI has discussed testing a usage-based program to compensate GPT builders since early 2024, and access to build and publish to the store itself is free.\n\nBut current public material does not confirm whether a payout program is fully live today, what the revenue share is, or how usage is measured. Wikipedia's own summary of the store, sourced from OpenAI's public statements, describes creators having \"the opportunity to monetize\" without confirming the program's operational status.\n\n**Verdict: not publicly disclosed.**\n\n**Poe (by Quora), creator monetization.** Poe's own creator site confirms a \"Creator Monetization\" program and a \"How We Cover Your Costs\" mechanism exist, with dedicated docs promising to explain \"how to earn revenue from your creations.\"\n\nThe introductory page we fetched does not itself state a specific *revenue-share* percentage or payout formula — that detail lives deeper in Poe's creator documentation, not on the front page.\n\n**Verdict: program confirmed, exact split not publicly disclosed on the page we checked.**\n\n**AWS Marketplace — AI Agents and Tools.** AWS's category page describes a real listing model: pre-built agents, agent tools, and professional services sold as SaaS, containers, APIs, or via Amazon Bedrock AgentCore, with sellers going through a formal \"Sign up as a Seller\" application.\n\nOn the buyer side the page states pricing runs \"pay-as-you-go and contract subscriptions, or negotiate custom pricing and terms.\" It does not state AWS's take rate anywhere on the public page.\n\n**Verdict: not publicly disclosed** — you'll see the actual number in seller onboarding, not the marketing page.\n\n**Salesforce AgentExchange.** The rebrand of AppExchange for the agent era: the page confirms \"Salesforce AppExchange is now AgentExchange\" but contains no financial or commercial terms at all — no revenue-share percentage, no listing fee.\n\nHistorically AppExchange has run on negotiated *ISV* (independent software vendor) partner agreements rather than one public rate.\n\n**Verdict: not publicly disclosed**; expect a partner-application process, not a self-serve rate card.\n\n**White-label platforms, where the \"fee\" is a subscription, not a cut.** GoHighLevel publishes its pricing outright: Starter at **$97/month** (3 sub-accounts), Unlimited at **$297/month** (unlimited sub-accounts, its most popular tier), and Agency Pro at **$497/month** (adds SaaS-mode resale), plus usage-based charges for telephony and AI beyond the base plan.\n\nStammer.ai also publishes its tiers: Agency at **$197/month** and Full SaaS Mode at **$497/month**, both with unlimited client resale and no revenue share on top — agencies instead mark up a usage-based wallet system.\n\nOperators describe reselling Stammer's usage costs to clients at a multiple, though those resale figures come from agency reports rather than Stammer's published pages — treat them as reported, not guaranteed.\n\nNeither platform takes a cut of what you charge your client. The fee is the subscription plus whatever markup you choose.",
+      diagram: {
+        type: "table",
+        title: "What each platform publishes about a builder's cut",
+        columns: ["Platform", "Cut of what a builder sells", "What the public page actually discloses"],
+        rows: [
+          {
+            cells: ["Apple App Store", "30% standard, 15% on the Small Business Program", "A full published rate card, including 10% on year-two subscriptions under the EU alternative terms"],
+            domain: "apple.com",
+          },
+          {
+            cells: ["Google Play", "15% on the first $1M/yr and on all auto-renewing subscriptions, 30% above that on other transactions", "A full published rate card, plus a 10-20% structure rolling out in the EEA, UK and US"],
+            domain: "google.com",
+          },
+          {
+            cells: ["OpenAI GPT Store", "Not publicly disclosed", "Building and publishing are free. Whether a builder payout program is live, and at what split, is not confirmed in current public material"],
+            domain: "openai.com",
+          },
+          {
+            cells: ["Poe (Quora)", "Not publicly disclosed on the page checked", "A creator monetization program and a cost-coverage mechanism are confirmed to exist. The split is not on the introductory page"],
+            domain: "poe.com",
+          },
+          {
+            cells: ["AWS Marketplace", "Not publicly disclosed", "A real seller application and buyer-side pricing models (pay-as-you-go, contract, custom). No take rate anywhere on the public page"],
+            domain: "aws.amazon.com",
+          },
+          {
+            cells: ["Salesforce AgentExchange", "Not publicly disclosed", "The rebrand is confirmed. No revenue share, no listing fee, no commercial terms at all on the public page"],
+            domain: "salesforce.com",
+          },
+          {
+            cells: ["GoHighLevel", "None disclosed", "Published tiers at $97, $297 and $497 per month. Telephony and AI usage bill separately on top"],
+            domain: "gohighlevel.com",
+          },
+          {
+            cells: ["Stammer.ai", "None disclosed", "Published tiers at $197/mo (Agency) and $497/mo (Full SaaS Mode). Usage draws down a prepaid wallet on top"],
+            domain: "stammer.ai",
+          },
+          {
+            cells: ["SeldonFrame (we build this)", "Flat 2% GMV on the $29 and $49 solo plans, and only when SeldonFrame is the sales channel. Agency plans at $99/mo and up pay 0%. Flat 5% on marketplace transactions", "Published, not negotiated per partner. See the section below for the crossover math"],
+            domain: "seldonframe.com",
+          },
+        ],
+        note: "\"None disclosed\" and \"not publicly disclosed\" are different claims. The first means the vendor publishes a subscription and no percentage; the second means the vendor publishes nothing either way. Absence of a published rake is not proof there is no rake. Vendor pages checked 2026-08-24 unless the row says otherwise.",
+      },
     },
     {
       h2: "The hidden-fee taxonomy: how to read a pricing page like a seller",
@@ -47,7 +91,7 @@ export const guide: Guide = {
     {
       h2: "SeldonFrame's fees, stated plainly",
       body:
-        `We build this product, so weigh this section as the disclosure it is.\n\n${AGENCY_PRICING_CLAIM}\n\nFor an agency, that is the relevant ladder: white-label delivery and client capacity begin at Agency Starter rather than Builder. Model costs run *BYOK*, at cost, so they're not a hidden markup on our end.\n\nWe take a *GMV fee* that steps down from **5% to 3% to 2%** as volume grows, and it only applies when SeldonFrame is actually the sales channel that brought the buyer — if you close the deal yourself and just use Seldon to build and host, that fee doesn't apply.\n\nOn top of that there's a marketplace usage fee for agents rented through the Seldon marketplace specifically.\n\nAll of it is published, not negotiated per partner, because the thesis is that a platform shouldn't tax a builder's growth. **The subscription and the volume-scaling GMV rate are supposed to make the platform cheaper per client as you add more of them** — the opposite of the per-sub-account model above.`,
+        `We build this product, so weigh this section as the disclosure it is.\n\n${AGENCY_PRICING_CLAIM}\n\nFor an agency, that is the relevant ladder: white-label delivery and client capacity begin at Agency Starter rather than Builder. Model costs run *BYOK*, at cost, so they're not a hidden markup on our end.\n\nThe *GMV fee* is a flat **2%**, and it applies in exactly one situation: you are on a solo plan (Builder at $29/mo or Managed at $49/mo) *and* SeldonFrame is the sales channel that brought the buyer. Agency plans, $99/mo and up, pay **0% GMV**. If you close the deal yourself and only use Seldon to build and host, the fee doesn't apply on any plan.\n\nHere is the math behind that, stated rather than buried. The 2% is an *upgrade escalator*, not a rake: at roughly **$3,500/mo of GMV** the 2% starts costing more than the $99/mo Agency Starter plan, so at that point moving up the ladder is the cheaper choice. That crossover is the whole design. A fee whose job is to push you onto a plan that costs you less per client is a different object from a fee whose job is to grow with you forever.\n\nSeparately, a flat **5% marketplace fee** applies to agents, souls, and blocks sold or rented through the SeldonFrame marketplace. That one attaches to the marketplace transaction itself and never to your plan tier, so there's no cheaper bracket to reroute a sale into.\n\nAll of it is published, not negotiated per partner, because the thesis is that a platform shouldn't tax a builder's growth.`,
     },
     {
       h2: "How to actually choose on fees",
@@ -70,6 +114,10 @@ export const guide: Guide = {
     {
       q: "Why do enterprise marketplaces like AgentExchange and AWS Marketplace hide their fees?",
       a: "They're not hiding them so much as negotiating them — AppExchange/AgentExchange and AWS Marketplace both run on partner programs where terms are set per ISV agreement or per seller application, not a single public rate. Neither platform's public page states a take rate; the actual number shows up during partner or seller onboarding, which is standard for enterprise channels built around large deals rather than self-serve listings.",
+    },
+    {
+      q: "What does SeldonFrame itself charge?",
+      a: "Disclosure first: we build SeldonFrame. Builder is $29/mo for businesses you own and operate yourself. Managed is $49/mo. Client sub-accounts, white-label delivery, and agency resale start at $99/mo, with Agency Growth at $199/mo and Agency Scale at $299/mo. There are exactly two percentage fees. A flat 2% GMV fee applies only on the solo plans ($29 and $49) and only when SeldonFrame is the sales channel that brought the buyer; agency plans at $99/mo and up pay 0%. A flat 5% marketplace fee applies to agents, souls, and blocks sold or rented through the SeldonFrame marketplace, and it attaches to the marketplace transaction rather than to your plan. The 2% is deliberately an upgrade escalator: past roughly $3,500/mo of GMV it costs more than the $99/mo agency plan, so the agency tier becomes the cheaper option.",
     },
     {
       q: "Is a 0% marketplace fee actually the best deal?",

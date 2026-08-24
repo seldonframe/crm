@@ -18,18 +18,54 @@ export const guide: Guide = {
     },
     {
       h2: "The reseller/white-label landscape, as of this writing",
-      body: "**Vapi** (vapi.ai/pricing, checked this session) publishes a straightforward developer platform. The Build plan is usage-based at $0.05/min for Vapi's own hosting, plus model-provider costs passed through at actual cost (or free if you bring your own API keys).\n\nTen call-concurrency lines are included, with additional lines at $10/line/month. The Scale plan is an annual contract with a fixed platform fee, custom volume-based per-minute pricing, and enterprise features (SOC 2, HIPAA, PCI, SSO, RBAC).\n\nNothing on the pricing page names a white-label or reseller program. Vapi reads as a **developer platform** you build on top of, not a program you sign up for as an agency reseller.\n\n**Synthflow** (synthflow.ai/pricing, checked this session) is more direct about enterprise-scale deals but similarly light on reseller specifics. The only tier with published numbers is Enterprise, starting at $30,000 annually, with the page stating final pricing is \"scoped around call volume, concurrency, telephony setup, integrations, security needs, and launch support.\"\n\nNo dollar figures or margin terms for a white-label/reseller arrangement are published — you'd need to get on a call to find out what that actually costs and includes.\n\n**Retell AI** (retellai.com/pricing, checked this session) publishes the most granular per-minute breakdown of the three. Pay-as-you-go voice agents run $0.07–$0.31/minute, built from Retell's own voice infrastructure ($0.055/min), text-to-speech ($0.015/min on Retell platform voices), LLM cost ($0.003–$0.32/min depending on model), and telephony (~$0.015/min, varies by country), plus optional add-ons like a knowledge base ($0.005/min) or PII removal ($0.01/min).\n\nThe page also references a \"Solution Partner Program\" and a \"Creator Partner Program\" by name, but the pricing page itself gives no public margin, fee, or white-label terms for either. A dedicated partner-terms page was not reachable this session, so treat those two programs as *named-but-undocumented* until you get the details directly from Retell.",
+      body: "**Vapi** (vapi.ai/pricing, checked this session) publishes a straightforward developer platform. The Build plan is usage-based at $0.05/min for Vapi's own hosting, plus model-provider costs passed through at actual cost (or free if you bring your own API keys).\n\nTen call-concurrency lines are included, with additional lines at $10/line/month. The Scale plan is an annual contract with a fixed platform fee, custom volume-based per-minute pricing, and enterprise features (SOC 2, HIPAA, PCI, SSO, RBAC).\n\nNothing on the pricing page names a white-label or reseller program. Vapi reads as a **developer platform** you build on top of, not a program you sign up for as an agency reseller.\n\n**Synthflow** (synthflow.ai/pricing, checked this session) is more direct about enterprise-scale deals but similarly light on reseller specifics. The only tier with published numbers is Enterprise, starting at $30,000 annually, with the page stating final pricing is \"scoped around call volume, concurrency, telephony setup, integrations, security needs, and launch support.\"\n\nNo dollar figures or margin terms for a white-label/reseller arrangement are published — you'd need to get on a call to find out what that actually costs and includes.\n\n**Retell AI** (retellai.com/pricing, checked this session) publishes the most granular per-minute breakdown of the three. Pay-as-you-go voice agents run $0.07–$0.31/minute, built from Retell's own voice infrastructure ($0.055/min), text-to-speech ($0.015/min on Retell platform voices), LLM cost ($0.003/min for the cheapest nano model up to $0.16/min for the most expensive frontier one, re-checked 2026-08-24), and telephony (~$0.015/min, varies by country), plus optional add-ons like a knowledge base ($0.005/min) or PII removal ($0.01/min).\n\nFor the same numbers laid out beside Bland AI, ElevenLabs Agents and the raw Twilio floor, see [the real per-minute voice AI price table](/guides/voice-ai-pricing-compared).\n\nThe page also references a \"Solution Partner Program\" and a \"Creator Partner Program\" by name, but the pricing page itself gives no public margin, fee, or white-label terms for either. A dedicated partner-terms page was not reachable this session, so treat those two programs as *named-but-undocumented* until you get the details directly from Retell.",
+      // 2026-08-24 — was a `bars` chart, which plotted $0.05 next to $0.31 as
+      // if they measured the same thing. They don't: each vendor's headline
+      // rate bundles a different slice of the stack, so the honest primitive
+      // is a table with a "what's in the number" column.
       diagram: {
-        type: "bars",
-        title: "Published voice AI rates, as of this writing",
-        items: [
-          { label: "Vapi Build plan (per min)", value: 0.05, display: "$0.05/min", domain: "vapi.ai" },
-          { label: "Retell pay-as-you-go, low end (per min)", value: 0.07, display: "$0.07/min", domain: "retellai.com" },
-          { label: "Retell pay-as-you-go, high end (per min)", value: 0.31, display: "$0.31/min", domain: "retellai.com" },
-          { label: "Twilio US outbound local (per min)", value: 0.014, display: "$0.014/min", domain: "twilio.com" },
-          { label: "Twilio US inbound local (per min)", value: 0.0085, display: "$0.0085/min", domain: "twilio.com" },
+        type: "table",
+        title: "Published voice AI rates and what each one actually covers",
+        columns: ["Platform", "Published rate", "What that rate covers", "What still bills on top"],
+        rows: [
+          {
+            cells: [
+              "Vapi (Build)",
+              "$0.05 / min",
+              "Vapi's own platform layer, and nothing else",
+              "STT, LLM and TTS at cost ($0 with your own key), plus telephony. 10 concurrent lines included, then $10/line/mo",
+            ],
+            domain: "vapi.ai",
+          },
+          {
+            cells: [
+              "Retell AI (pay-as-you-go)",
+              "$0.07 to $0.31 / min headline",
+              "Voice infra at $0.055/min plus the TTS and LLM you pick, which is why the honest published figure is a range",
+              "Telephony at $0.015/min, knowledge base at $0.005/min, PII removal at $0.01/min, and other per-minute add-ons",
+            ],
+            domain: "retellai.com",
+          },
+          {
+            cells: [
+              "Synthflow",
+              "No per-minute rate published",
+              "Not stated. The only figure on the live pricing page is \"Enterprise contracts start at $30,000 annually\"",
+              "Unknown. Every non-enterprise cost routes to a sales call",
+            ],
+            domain: "synthflow.ai",
+          },
+          {
+            cells: [
+              "Twilio (the layer under all of them)",
+              "$0.0085 / min inbound local, $0.0140 / min outbound local",
+              "US PSTN carriage on Programmable Voice",
+              "$1.15/mo per local number. Elastic SIP Trunking is cheaper again, starting at $0.0011/min for termination",
+            ],
+            domain: "twilio.com",
+          },
         ],
-        note: "Synthflow's only published tier is Enterprise starting at $30,000/year, with no per-minute figure — its rate isn't comparable on this chart. All figures as of this writing, checked this session.",
+        note: "Every figure fetched from the vendor's own live pricing page on 2026-08-24. Only compare the rate column across rows if you also read the two columns beside it. For the full per-minute breakdown including Bland AI and ElevenLabs Agents, see the voice AI pricing comparison.",
       },
     },
     {

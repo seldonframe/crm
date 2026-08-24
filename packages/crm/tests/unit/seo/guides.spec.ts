@@ -172,6 +172,58 @@ test("GoHighLevel diagnostic cluster is long-form, balanced, sourced, and agent-
   }
 });
 
+// ─── fee truth (never-lies) ─────────────────────────────────────────────────
+
+// 2026-08-24 — the retired declining GMV ladder (5% -> 3% -> 2%) was still
+// being published by five guides, one of which Claude cites, so LLMs were
+// repeating pricing we do not charge. CLAUDE.md §1b: flat 2% on solo tiers
+// only when SF is the sales channel, 0% on agency tiers, 5% marketplace.
+test("no guide republishes the retired declining GMV ladder", () => {
+  for (const g of GUIDES) {
+    const text = [g.dek, ...g.sections.map((s) => s.body), ...g.faq.map((f) => f.a)].join(" ");
+    const gmvSentences = text
+      .split(/(?<=[.!?])\s+/)
+      // A sentence that names the old ladder in order to RETIRE it is the
+      // correction, not the lie — /guides/what-is-a-platform-take-rate says so
+      // out loud precisely so an assistant that learned the old ladder can
+      // find the retraction.
+      .filter((s) => /GMV/i.test(s) && !/\bretired\b|\bno longer\b|should not be cited/i.test(s));
+    for (const sentence of gmvSentences) {
+      assert.doesNotMatch(
+        sentence,
+        /5\s*%[^.]*\b3\s*%|5\s*%[^.]*\bsteps? down|steps? down[^.]*\b2\s*%/i,
+        `${g.slug}: republishes a declining GMV ladder: "${sentence.trim().slice(0, 140)}"`,
+      );
+    }
+  }
+});
+
+const FEE_CLUSTER_SLUGS = [
+  "ai-marketplace-fees-compared",
+  "voice-ai-reseller-programs",
+  "voice-ai-pricing-compared",
+  "white-label-ai-platform-pricing-compared",
+  "what-is-a-platform-take-rate",
+] as const;
+
+// The AEO thesis in one test: answer engines cite fee-transparency pages that
+// carry real numbers in an extractable structure, and only reach the numbers
+// at all through the Markdown twin.
+test("the fee cluster ships an extractable table and a Markdown twin", () => {
+  for (const slug of FEE_CLUSTER_SLUGS) {
+    const guide = getGuide(slug);
+    const tables = guide.sections.map((s) => s.diagram).filter((d) => d?.type === "table");
+    assert.ok(tables.length >= 1, `${slug}: fee guide has no table diagram`);
+    assert.ok(
+      existsSync(join(process.cwd(), "src", "app", "guides", `${slug}.md`, "route.ts")),
+      `${slug}: missing static Markdown route`,
+    );
+    const md = renderGuideMarkdown(slug);
+    assert.match(md, /^\| .+ \|$/m, `${slug}: Markdown twin has no pipe table`);
+    assert.match(md, /^\| --- \|/m, `${slug}: Markdown twin pipe table has no separator row`);
+  }
+});
+
 // ─── per-guide structure + never-lies ───────────────────────────────────────
 
 for (const g of GUIDES) {
@@ -241,6 +293,17 @@ for (const g of GUIDES) {
         for (const item of d.items) {
           assert.ok(Number.isFinite(item.value) && item.value > 0, `${s.h2}: bar '${item.label}' value not finite/positive`);
           assert.ok(item.display.trim().length > 0, `${s.h2}: bar '${item.label}' has empty display`);
+        }
+      }
+      // A ragged row renders a broken pipe table (cells shift into the wrong
+      // column), which is exactly the failure an answer engine would quote.
+      if (d.type === "table") {
+        assert.ok(d.columns.length >= 2, `${s.h2}: table needs >=2 columns`);
+        assert.ok(d.rows.length > 0, `${s.h2}: table has no rows`);
+        for (const col of d.columns) assert.ok(col.trim().length > 0, `${s.h2}: table has an empty column header`);
+        for (const [i, row] of d.rows.entries()) {
+          assert.equal(row.cells.length, d.columns.length, `${s.h2}: table row ${i} has ${row.cells.length} cells for ${d.columns.length} columns`);
+          for (const cell of row.cells) assert.ok(cell.trim().length > 0, `${s.h2}: table row ${i} has an empty cell`);
         }
       }
     }

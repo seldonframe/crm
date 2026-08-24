@@ -110,6 +110,9 @@ import { guide as whereToSellAiAgents } from "./where-to-sell-ai-agents";
 import { guide as sellingAiServicesOnFiverrVsOwningYourAgent } from "./selling-ai-services-on-fiverr-vs-owning-your-agent";
 import { guide as aiMarketplaceFeesCompared } from "./ai-marketplace-fees-compared";
 import { guide as voiceAiResellerPrograms } from "./voice-ai-reseller-programs";
+import { guide as voiceAiPricingCompared } from "./voice-ai-pricing-compared";
+import { guide as whiteLabelAiPlatformPricingCompared } from "./white-label-ai-platform-pricing-compared";
+import { guide as whatIsAPlatformTakeRate } from "./what-is-a-platform-take-rate";
 import { guide as howToRentOutAnAiAgentViaMcp } from "./how-to-rent-out-an-ai-agent-via-mcp";
 import { guide as whatIsByokAi } from "./what-is-byok-ai";
 import { guide as howDoAiAgentsGetPaid } from "./how-do-ai-agents-get-paid";
@@ -234,6 +237,9 @@ export const GUIDES: Guide[] = [
   sellingAiServicesOnFiverrVsOwningYourAgent,
   aiMarketplaceFeesCompared,
   voiceAiResellerPrograms,
+  voiceAiPricingCompared,
+  whiteLabelAiPlatformPricingCompared,
+  whatIsAPlatformTakeRate,
   howToRentOutAnAiAgentViaMcp,
   whatIsByokAi,
   howDoAiAgentsGetPaid,
