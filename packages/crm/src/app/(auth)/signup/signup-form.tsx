@@ -1,11 +1,13 @@
 "use client";
 
 import Link from "next/link";
-import { useActionState, useEffect } from "react";
+import { useActionState, useEffect, useState } from "react";
+import posthog from "posthog-js";
 import { sendMagicLinkAction } from "./actions";
 import { googleSignInAction } from "../oauth-actions";
 import { DEMO_BLOCK_MESSAGE } from "@/lib/demo/constants";
 import { useDemoToast } from "@/components/shared/demo-toast-provider";
+import { HEAR_ABOUT_OPTIONS, normalizeHearAbout } from "@/lib/analytics/signup-attribution";
 
 export function SignupForm({
   redirectTo,
@@ -16,6 +18,14 @@ export function SignupForm({
 }) {
   const { showDemoToast } = useDemoToast();
   const [state, action, pending] = useActionState(sendMagicLinkAction, {});
+  // 2026-08-23 — optional attribution question ("make the next wave
+  // attributable"). Analytics-only: the answer is captured straight to
+  // PostHog on the ANONYMOUS person ($set_once hear_about) the moment
+  // it's chosen, so it applies to both the Google and magic-link paths
+  // and never gates or delays signup. The anonymous person merges into
+  // the new user via the identity bridge and the server-side alias in
+  // events.createUser, so hear_about survives as a person property.
+  const [hearAbout, setHearAbout] = useState("");
   // 2026-07-04 — redirectTo is computed server-side in page.tsx from the
   // ?url= / ?biz= / ?intent= query params (or /claim?token=... for claim
   // flows). The default path lands the visitor on /clients/new with url/biz
@@ -31,6 +41,36 @@ export function SignupForm({
 
   return (
     <div className="space-y-5 text-foreground">
+      <div className="space-y-1">
+        <label htmlFor="hear-about" className="text-label text-foreground">
+          How did you hear about us?{" "}
+          <span className="font-normal text-[hsl(var(--color-text-secondary))]">(optional)</span>
+        </label>
+        <select
+          id="hear-about"
+          value={hearAbout}
+          onChange={(event) => {
+            const value = event.target.value;
+            setHearAbout(value);
+            const channel = normalizeHearAbout(value);
+            if (channel) {
+              posthog.capture("signup_survey_answered", {
+                channel,
+                $set_once: { hear_about: channel },
+              });
+            }
+          }}
+          className="crm-input h-10 w-full px-3"
+        >
+          <option value="">Choose one…</option>
+          {HEAR_ABOUT_OPTIONS.map((option) => (
+            <option key={option.value} value={option.value}>
+              {option.label}
+            </option>
+          ))}
+        </select>
+      </div>
+
       {googleEnabled ? (
         <>
           <form action={googleSignInAction}>
