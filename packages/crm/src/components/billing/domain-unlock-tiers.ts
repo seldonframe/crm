@@ -1,25 +1,26 @@
 // 2026-08-23 — fix for the domain-unlock 409 ("Tier 'workspace' is not
-// available for new checkout"). domain-upgrade-button.tsx (2026-07-04)
-// hardcoded tier:"workspace"; the 2026-07-08 pricing ladder froze that
-// tier (Plan.sellable=false) and repointed pricing-shell + upgrade-modal
-// but missed this button, so every domain-unlock click 409'd from Jul 8
-// on. The tier now depends on workspace context:
-//   - operator on their OWN workspace → "builder" ($29 — the catalog
-//     grants limits.customDomain on Builder)
-//   - agency operator switched INTO a client workspace →
-//     "agency_starter" ($99 — client domains are the whitelabel
-//     deliverable; Max's pricing call, 2026-08-23)
-// Kept in a plain module (no "use client", no JSX) so
-// tests/unit/billing/checkout-tier-gate.spec.ts can import the REAL
-// values the button POSTs — the audit list can't drift again.
+// available for new checkout"): the old button hardcoded the frozen
+// "workspace" tier from 2026-07-04 and the 2026-07-08 ladder wave missed
+// repointing it, so every click 409'd.
+//
+// v2, same day (Max's first-principles call): a new user unlocking a
+// domain should SEE the paid ladder and pick, not be direct-checkout'd
+// into one guessed tier. The CTA opens domain-plan-chooser.tsx offering
+// Managed $49 FIRST (zero-setup, runs on SF keys, custom domain
+// included — the honest first ask for a fresh operator with no API key),
+// then the agency tiers for client work.
+//
+// This module stays the single audit surface: every tier the chooser can
+// POST to /api/stripe/checkout is listed here, and
+// tests/unit/billing/checkout-tier-gate.spec.ts imports it directly so
+// the UI can never drift onto a non-sellable tier again.
 
 import type { TierId } from "@/lib/billing/plans";
 
-export const DOMAIN_UNLOCK_TIER_OWN_WORKSPACE: TierId = "builder";
-export const DOMAIN_UNLOCK_TIER_CLIENT_WORKSPACE: TierId = "agency_starter";
-
-export function domainUnlockTier(isInsideClientWorkspace: boolean): TierId {
-  return isInsideClientWorkspace
-    ? DOMAIN_UNLOCK_TIER_CLIENT_WORKSPACE
-    : DOMAIN_UNLOCK_TIER_OWN_WORKSPACE;
-}
+/** Order matters — rendered in this order in the chooser dialog. */
+export const DOMAIN_UNLOCK_TIERS: readonly TierId[] = [
+  "managed",
+  "agency_starter",
+  "agency_growth",
+  "agency_scale",
+];

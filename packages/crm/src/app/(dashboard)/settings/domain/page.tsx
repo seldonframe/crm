@@ -28,11 +28,11 @@
 import { auth } from "@/auth";
 
 import { getCustomDomainSettings, saveCustomDomainAction } from "@/lib/domains/actions";
-import { getCurrentUser, getOrgId } from "@/lib/auth/helpers";
+import { getOrgId } from "@/lib/auth/helpers";
 import { resolveDomainGate } from "@/lib/billing/domain-gate";
-import { getPlan, type TierId } from "@/lib/billing/plans";
-import { DomainUpgradeButton } from "@/components/billing/domain-upgrade-button";
-import { domainUnlockTier } from "@/components/billing/domain-unlock-tiers";
+import { getPlan } from "@/lib/billing/plans";
+import { DomainPlanChooser, type DomainPlanCard } from "@/components/billing/domain-plan-chooser";
+import { DOMAIN_UNLOCK_TIERS } from "@/components/billing/domain-unlock-tiers";
 
 export default async function DomainSettingsPage({
   searchParams,
@@ -65,27 +65,28 @@ export default async function DomainSettingsPage({
 
   const gate = await resolveDomainGate({ userId, orgId });
 
-  // 2026-08-23 — pick the upsell CTA's checkout tier by workspace
-  // context, using the same primary-vs-active org comparison the
-  // sidebar and other settings pages use (see settings/client-portal/
-  // page.tsx). An agency operator switched INTO a client workspace is
-  // buying client domains (whitelabel — Agency Starter $99); an
-  // operator on their own workspace unlocks their own domain (Builder
-  // $29, limits.customDomain). Prices come from the plan catalog so
-  // this page can never advertise a number checkout won't honor.
-  const currentUser = await getCurrentUser();
-  const isInsideClientWorkspace = Boolean(
-    currentUser?.orgId && orgId && currentUser.orgId !== orgId,
-  );
-  const unlockTier: TierId = domainUnlockTier(isInsideClientWorkspace);
-  const unlockPlan = getPlan(unlockTier);
-  const unlockPrice = unlockPlan ? `$${unlockPlan.price}/mo` : "";
-  const unlockLabel = isInsideClientWorkspace
-    ? `Unlock client domains — ${unlockPrice}`
-    : `Unlock your domain — ${unlockPrice}`;
-  const unlockSublabel = isInsideClientWorkspace
-    ? `Agency Starter — whitelabel, client portals, ${unlockPlan?.limits.maxSubAccounts ?? 10} client sub-accounts.`
-    : "One booked job pays for the year.";
+  // 2026-08-23 v2 (Max's first-principles call) — the upsell CTA opens a
+  // plan CHOOSER instead of direct-checkout of one guessed tier: Managed
+  // $49 first (zero-setup, runs on SF keys, custom domain included — the
+  // honest first ask for a fresh operator with no API key), then the
+  // agency tiers for client work. Cards are built server-side from the
+  // plan catalog (marketingFeatures is the single source of tier copy;
+  // prices can never drift from what checkout honors), and no catalog or
+  // price-id import ever reaches the client bundle.
+  const unlockPlans: DomainPlanCard[] = DOMAIN_UNLOCK_TIERS.flatMap((tier) => {
+    const plan = getPlan(tier);
+    if (!plan) return [];
+    return [
+      {
+        tier,
+        name: plan.name,
+        price: `$${plan.price}/mo`,
+        featuresHeader: plan.marketingFeatures?.header ?? null,
+        features: (plan.marketingFeatures?.items ?? []).slice(0, 4),
+        recommended: tier === "managed",
+      },
+    ];
+  });
 
   // Sanitize the workspace slug from query — only allow the org-slug
   // shape (lowercase alphanumerics + hyphens, max 60 chars) so a
@@ -163,12 +164,7 @@ export default async function DomainSettingsPage({
       </article>
 
       {gate?.kind === "render-upsell" ? (
-        <UpsellCard
-          onboardingWorkspaceSlug={onboardingWorkspaceSlug}
-          tier={unlockTier}
-          label={unlockLabel}
-          sublabel={unlockSublabel}
-        />
+        <UpsellCard onboardingWorkspaceSlug={onboardingWorkspaceSlug} plans={unlockPlans} />
       ) : (
         <article className="rounded-xl border bg-card p-5 space-y-5">
           <form action={saveCustomDomainAction} className="space-y-3">
@@ -263,14 +259,10 @@ export default async function DomainSettingsPage({
  *  bounces back to the Ready page with ?completed=1). */
 function UpsellCard({
   onboardingWorkspaceSlug,
-  tier,
-  label,
-  sublabel,
+  plans,
 }: {
   onboardingWorkspaceSlug: string;
-  tier: TierId;
-  label: string;
-  sublabel: string;
+  plans: DomainPlanCard[];
 }) {
   // Encode the slug into the success path so a successful checkout bounces
   // back here with the onboarding context intact, same round-trip contract
@@ -291,12 +283,7 @@ function UpsellCard({
         </p>
       </div>
 
-      <DomainUpgradeButton
-        successPath={successPath}
-        tier={tier}
-        label={label}
-        sublabel={sublabel}
-      />
+      <DomainPlanChooser successPath={successPath} plans={plans} />
     </article>
   );
 }
