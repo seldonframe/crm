@@ -63,7 +63,7 @@ export default async function PublicShareCardPage({
       </div>
 
       <a
-        href={`/record?ref=share-${encodeURIComponent(slug)}`}
+        href={`/record?ref=share-${encodeURIComponent(slug)}&utm_source=share_card&utm_medium=referral`}
         className="inline-flex items-center gap-2 rounded-[11px] bg-[#F6F2EA] px-6 py-3 text-sm font-semibold text-[#1F2B24] transition-opacity hover:opacity-90"
       >
         Build yours from a screen recording →

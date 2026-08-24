@@ -74,7 +74,7 @@ describe("buildPoweredByHref", () => {
     const href = buildPoweredByHref("ws_abc123");
     assert.equal(
       href,
-      "https://www.seldonframe.com/build?ref=ws_abc123&utm_source=powered_by",
+      "https://www.seldonframe.com/build?ref=ws_abc123&utm_source=powered_by&utm_medium=workspace_badge",
     );
   });
 
@@ -93,7 +93,7 @@ describe("buildPoweredByHref", () => {
     const href = buildPoweredByHref("ws-plain-slug-123");
     assert.equal(
       href,
-      "https://www.seldonframe.com/build?ref=ws-plain-slug-123&utm_source=powered_by",
+      "https://www.seldonframe.com/build?ref=ws-plain-slug-123&utm_source=powered_by&utm_medium=workspace_badge",
     );
   });
 
@@ -123,7 +123,7 @@ describe("PoweredByBadge", () => {
     const hrefs = links.map((el) => (el.props as { href: string }).href);
     assert.ok(
       hrefs.includes(
-        "https://www.seldonframe.com/build?ref=ws_abc123&utm_source=powered_by",
+        "https://www.seldonframe.com/build?ref=ws_abc123&utm_source=powered_by&utm_medium=workspace_badge",
       ),
       `expected a link to the ref-attributed build URL, got: ${JSON.stringify(hrefs)}`,
     );
@@ -190,7 +190,7 @@ describe("SiteShell — powered-by badge mount", () => {
     assert.equal(badgeLinks.length, 1, "expected exactly one powered-by link");
     assert.equal(
       (badgeLinks[0]?.props as { href: string }).href,
-      "https://www.seldonframe.com/build?ref=ws_shell_test&utm_source=powered_by",
+      "https://www.seldonframe.com/build?ref=ws_shell_test&utm_source=powered_by&utm_medium=workspace_badge",
     );
   });
 

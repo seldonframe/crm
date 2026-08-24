@@ -105,7 +105,7 @@ export default async function PublicIntakePage({
         <div dangerouslySetInnerHTML={{ __html: form.contentHtml! }} />
         {showBadge ? (
           <div className="flex justify-center py-2">
-            <PoweredByBadge />
+            <PoweredByBadge source="workspace_form" />
           </div>
         ) : null}
       </>
@@ -151,7 +151,7 @@ export default async function PublicIntakePage({
           />
           {showBadge ? (
             <div className="flex justify-center pt-2">
-              <PoweredByBadge />
+              <PoweredByBadge source="workspace_form" />
             </div>
           ) : null}
         </div>

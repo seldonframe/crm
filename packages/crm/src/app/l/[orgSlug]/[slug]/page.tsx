@@ -72,7 +72,7 @@ export default async function PublicLandingPage({
           <PageRenderer sections={sections} />
           {showBadge ? (
             <div className="flex justify-center py-4" style={{ borderTop: "1px solid var(--sf-border)", backgroundColor: "color-mix(in oklab, var(--sf-bg) 92%, var(--sf-accent) 8%)" }}>
-              <PoweredByBadge />
+              <PoweredByBadge source="workspace_landing" />
             </div>
           ) : null}
           <VisitBeacon pageId={payload.page.id} />
@@ -90,7 +90,7 @@ export default async function PublicLandingPage({
           <div dangerouslySetInnerHTML={{ __html: payload.page.contentHtml }} />
           {showBadge ? (
             <div className="flex justify-center py-4" style={{ borderTop: "1px solid var(--sf-border)", backgroundColor: "color-mix(in oklab, var(--sf-bg) 92%, var(--sf-accent) 8%)" }}>
-              <PoweredByBadge />
+              <PoweredByBadge source="workspace_landing" />
             </div>
           ) : null}
           <VisitBeacon pageId={payload.page.id} />
@@ -109,7 +109,7 @@ export default async function PublicLandingPage({
         <PageRenderer sections={[]} />
         {showBadge ? (
           <div className="flex justify-center py-4" style={{ borderTop: "1px solid var(--sf-border)", backgroundColor: "color-mix(in oklab, var(--sf-bg) 92%, var(--sf-accent) 8%)" }}>
-            <PoweredByBadge />
+            <PoweredByBadge source="workspace_landing" />
           </div>
         ) : null}
         <VisitBeacon pageId={payload.page.id} />

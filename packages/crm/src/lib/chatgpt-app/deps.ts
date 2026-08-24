@@ -114,7 +114,7 @@ async function buildWorkspace(
   const results = await Promise.all(checks.map((c) => checkRateLimit(c.key, c.limit, c.windowMs)));
   if (results.some((ok) => !ok)) {
     throw new FriendlyToolError(
-      "Workspace creation is limited to 3 per hour and 10 per day. Please try again later, or sign up at app.seldonframe.com to create more.",
+      "Workspace creation is limited to 3 per hour and 10 per day. Please try again later, or sign up at https://app.seldonframe.com/signup?utm_source=chatgpt_app&utm_medium=tool_message to create more.",
     );
   }
 
