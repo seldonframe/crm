@@ -429,8 +429,41 @@ export const authConfig = {
         const orgId = typeof (user as { orgId?: unknown }).orgId === "string" ? (user as { orgId: string }).orgId : null;
         const userId = typeof user.id === "string" ? user.id : null;
         const email = typeof user.email === "string" ? user.email : null;
-        const { buildSignedUpEvent, captureFunnelEvent } = await import("@/lib/analytics/funnel");
-        captureFunnelEvent(buildSignedUpEvent({ userId, orgId, email }));
+
+        // 2026-08-23 — first-touch attribution. posthog-js persists the
+        // anonymous distinct id + first-touch URL/referrer in a cookie on
+        // .seldonframe.com; reading it here lets signed_up carry
+        // $initial_utm_* server-side AND stitches the anonymous browser
+        // person to the new user without depending on the user surviving
+        // to a bridge-mounted page (the Aug-22 surge was 81% direct and
+        // unattributable partly because of this gap). Best-effort: the
+        // inner try means a cookie-read failure (e.g. outside a request
+        // scope) silently degrades to the pre-2026-08-23 behavior.
+        let attribution: { initialUrl?: string | null; initialReferrer?: string | null; utm?: Record<string, string> } | null = null;
+        let anonDistinctId: string | null = null;
+        try {
+          const { cookies } = await import("next/headers");
+          const { posthogCookieName, parsePosthogCookieValue, extractUtmParams } = await import(
+            "@/lib/analytics/signup-attribution"
+          );
+          const cookieName = posthogCookieName(process.env.NEXT_PUBLIC_POSTHOG_KEY);
+          const raw = cookieName ? (await cookies()).get(cookieName)?.value : undefined;
+          const info = parsePosthogCookieValue(raw);
+          anonDistinctId = info.anonDistinctId;
+          if (info.initialUrl || info.initialReferrer) {
+            attribution = {
+              initialUrl: info.initialUrl,
+              initialReferrer: info.initialReferrer,
+              utm: extractUtmParams(info.initialUrl),
+            };
+          }
+        } catch {
+          // Attribution is enrichment only — signup capture proceeds bare.
+        }
+
+        const { buildSignedUpEvent, captureFunnelEvent, aliasAnonToUser } = await import("@/lib/analytics/funnel");
+        captureFunnelEvent(buildSignedUpEvent({ userId, orgId, email, attribution }));
+        aliasAnonToUser(userId, anonDistinctId);
       } catch (err) {
         console.warn(
           `[auth][events.createUser] signed_up capture threw (swallowed): ${err instanceof Error ? err.message : String(err)}`,
