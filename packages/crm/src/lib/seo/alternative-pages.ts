@@ -1632,6 +1632,389 @@ export const COMPETITORS: Competitor[] = [
       },
     ],
   },
+  // 2026-08-24 wave — seven new competitors. Every price below was fetched
+  // from the vendor's own live pricing page on 2026-08-24; anything a vendor
+  // does not publish is carried as "reported" with the reporter named. See the
+  // appended 2026-08-24 section of
+  // docs/superpowers/specs/2026-07-08-competitor-pricing-facts.md.
+  {
+    slug: "bland-ai",
+    name: "Bland AI",
+    category: "voice AI API",
+    audience: "solo",
+    pricingSourceUrl: "https://www.bland.ai/pricing",
+    oneLiner:
+      "Bland AI is a developer-first platform for building AI phone agents, priced as a monthly platform fee plus an all-in per-minute rate.",
+    heroSub:
+      "Bland's per-minute rate really is all-in, but the platform fee sits underneath it and the agent still has nowhere to put the job. SeldonFrame ships the receptionist plus the website, CRM and booking calendar it books into. Builder is $29/mo for one business you operate; Agency plans start at $99/mo for client delivery.",
+    intro: [
+      "Most people looking for a Bland AI alternative hit the same wall: the platform fee is not a minute allowance. Build is $299 a month and Scale is $499 a month before your first minute, and talk time then meters on top at $0.12 or $0.11. Transferring a call to a human opens a second meter. Failed calls still bill at $0.015 each. Voices and knowledge bases are hard-capped per tier, so outgrowing a cap is a whole tier step rather than a small add-on. And after all of that you still have no CRM, no calendar and no client dashboard.",
+      "That said, Bland deserves credit on the thing most voice platforms fudge. Its page says \"No token charges. No model-provider pass-throughs.\" and the per-minute rate genuinely covers the model, transcription and voice in one number, which is more honest than the itemised stacks several rivals publish. If you're an engineering team building a custom voice product, that clarity is worth a lot. But an agency putting receptionists in front of local businesses needs the whole front office, not a clean per-minute rate.",
+    ],
+    them: {
+      bestFor: "Engineering teams building custom AI phone agents",
+      pricingModel: "$0/$299/$499 per month platform fee + $0.14/$0.12/$0.11 per minute talk time, with transfer time metered separately",
+      aiReceptionist: "Voice agents only — you design, wire and maintain them yourself",
+      frontOffice: "None — no CRM, website or booking calendar behind the agent",
+      whitelabel: "None — no agency dashboard or client workspaces published",
+      aiCosts: "Folded into the per-minute rate (no token pass-through), but the platform fee is charged on top of it",
+      resale: "No published reseller program",
+    },
+    switchReasons: [
+      {
+        title: "The platform fee isn't minutes",
+        body: "Build and Scale cost $299 or $499 a month before a single minute is spoken, and talk time meters on top. SeldonFrame takes no per-minute cut at all: usage runs on your own AI and Twilio keys at raw provider cost.",
+      },
+      {
+        title: "Transfers open a second meter",
+        body: "Handing a call to a human bills again at $0.05, $0.04 or $0.03 a minute unless you bring your own Twilio, and bridging your own Twilio in carries a $0.004 per minute SIP termination fee. On SeldonFrame the call path is yours end to end.",
+      },
+      {
+        title: "A voice agent isn't a front office",
+        body: "After the Bland agent takes the call, the CRM record, the calendar slot and the client's website are still your problem. SeldonFrame's receptionist books straight into the workspace's own calendar and CRM.",
+      },
+      {
+        title: "Nothing to hand your clients",
+        body: "Bland publishes no whitelabel layer or client workspaces. SeldonFrame gives every client a branded portal your agency runs, from $99/mo.",
+      },
+    ],
+    whenTheyWin:
+      "Choose Bland if you're an engineering team building a custom voice product and you want one all-in per-minute rate with no model pass-through to reconcile.",
+    faq: [
+      {
+        q: "Does SeldonFrame charge a platform fee and a per-minute rate like Bland?",
+        a: "No. Calls run through your own Twilio number at carrier rates and your own AI key at provider cost, so there's no per-minute platform cut and no separate transfer meter. Builder is $29/mo for one business you operate; Agency plans start at $99/mo for client delivery.",
+      },
+      {
+        q: "Can I whitelabel it for my clients?",
+        a: "Yes, on the agency plan (from $99/mo). Per-client workspaces, a branded portal and custom domains are included, and an agent template deploys to every client in one click.",
+      },
+    ],
+  },
+  {
+    slug: "birdeye",
+    name: "Birdeye",
+    category: "reputation & messaging platform",
+    audience: "solo",
+    pricingSourceUrl: "https://birdeye.com/pricing/",
+    oneLiner:
+      "Birdeye is a reviews, messaging and reputation platform for local and multi-location businesses, sold entirely through a sales quote.",
+    heroSub:
+      "Birdeye won't tell you the price, and everything it sells is banded by location count. SeldonFrame's pricing is public and flat, and you can build the whole workspace free before you talk to anyone.",
+    intro: [
+      "Most people looking for a Birdeye alternative hit the same wall: there is no price to look at. The pricing page is a form behind a GET PRICING button, and even Birdeye's own blog post about what Birdeye costs names no number. What the page does reveal is the shape: you pick a location band, from 1 to 3 up to 1000 or more, so pricing is per location by the vendor's own admission and anything you add multiplies across your locations. Reviewers report an entry tier around $299 to $349 a month per location, a roughly 8% renewal fee, setup fees of $500 to $2,000 and a 12-month contract needing 90 days of written cancellation notice, but every one of those figures is reported by third parties rather than published by Birdeye.",
+      "That said, Birdeye is a serious product. It's one of the strongest review-generation and multi-location messaging platforms in the category, the location portal is mature, and a brand running dozens of storefronts on review volume gets real value from it. But a local service business that needs its phone answered and its jobs booked shouldn't have to sit through a discovery call to find out what the software costs.",
+    ],
+    them: {
+      bestFor: "Multi-location brands running on review volume and centralised messaging",
+      pricingModel: "Quote-only — no dollar figure published anywhere; the form bands buyers into 1-3, 4-9, 10-39, 40-249, 250-999 and 1000+ locations",
+      aiReceptionist: "Not verifiable from the pricing page — Birdeye publishes no per-tier feature list or price",
+      frontOffice: "Reviews, messaging and listings; the pricing page publishes no feature matrix to check what a tier includes",
+      whitelabel: "Not published — sold direct to businesses through a quote",
+      aiCosts: "Not disclosed; nothing on the pricing page itemises AI or messaging usage",
+      resale: "Not published",
+    },
+    switchReasons: [
+      {
+        title: "A public price beats a discovery call",
+        body: "Birdeye's pricing page is a lead form, and its own cost explainer names no number either. SeldonFrame's prices are on the page, flat, and cancel-anytime.",
+      },
+      {
+        title: "Per-location pricing multiplies everything",
+        body: "Birdeye's own form bands you by location count, and reviewers report add-on modules priced per location too. SeldonFrame's plan doesn't multiply by how many places you operate.",
+      },
+      {
+        title: "No 12-month contract",
+        body: "Reviewers describe a 12-month contract billed monthly, 90 days of written cancellation notice and early termination charged at the remaining balance. SeldonFrame is month-to-month, and the free build-first flow is the trial.",
+      },
+      {
+        title: "Reviews are included, not the whole product",
+        body: "SeldonFrame's review-request agent fires automatically once a job is completed, over the same SMS and email rails as the receptionist that booked it.",
+      },
+    ],
+    whenTheyWin:
+      "Choose Birdeye if you're a multi-location brand whose growth engine is review volume and centralised messaging at scale, and you have the procurement patience for a quoted contract.",
+    faq: [
+      {
+        q: "How much does Birdeye cost?",
+        a: "Birdeye publishes no price. Its pricing page is a lead form and its own blog post on the subject names no figure either. Third-party reviewers report roughly $299 to $349 a month per location for an entry tier, but one of those authors is explicit that the number came from a pricing-form screenshot and past-client feedback rather than any Birdeye document.",
+      },
+      {
+        q: "Can I try SeldonFrame without talking to sales?",
+        a: "Yes. Paste in your website and SeldonFrame builds the workspace free in about 3 minutes, before you ever create an account.",
+      },
+    ],
+  },
+  {
+    slug: "weave",
+    name: "Weave",
+    category: "practice communications platform",
+    audience: "solo",
+    pricingSourceUrl: "https://www.getweave.com/pricing/",
+    oneLiner:
+      "Weave is a phones, messaging, reviews and digital-forms platform built for dental, optometry and other small healthcare practices.",
+    heroSub:
+      "Weave advertises one number and quotes the rest. SeldonFrame's price is public at every tier, and the AI receptionist, website, CRM and booking calendar all live in the same workspace.",
+    intro: [
+      "Most people looking for a Weave alternative hit the same wall: only one number is public. The pricing page says plans start from $199 a month, then puts a Get Pricing button on Pro, Elite and Ultimate alike. Third parties consistently report the real entry tier higher, at $249 to $250 a month per location, and customer-reported spend at $300 to $500 a month for a small practice. Reviewers also report digital-forms migration at $200 up front and $20 per upload after that, a Power Pack analytics add-on at $25 per user per month, and renewal increases of 15 to 25%.",
+      "That said, Weave is a genuinely good fit for the practices it serves. Phones, texting, reviews and clinical forms in one system tuned to dental and optometry workflows is a real product, and practices like it. The honest criticism isn't the price, it's the disclosure: Weave lists expert onboarding as included with every plan while three independent third parties report a separate one-time setup fee, and no tier price, contract term or hardware cost appears anywhere on the page.",
+    ],
+    them: {
+      bestFor: "Dental, optometry and small healthcare practices wanting phones plus messaging in one system",
+      pricingModel: "Advertised from $199/mo; all three tiers are quote-gated, and third parties report the real entry tier at $249-$250/mo per location",
+      aiReceptionist: "Not verifiable from the pricing page — Weave publishes no per-tier feature pricing",
+      frontOffice: "Practice phones, messaging, reviews and digital forms; no website builder or agent-driven booking is published on the pricing page",
+      whitelabel: "Not published",
+      aiCosts: "Not disclosed on the pricing page",
+      resale: "Not published",
+    },
+    switchReasons: [
+      {
+        title: "One published number isn't pricing",
+        body: "Weave advertises from $199 a month and then quotes all three tiers. SeldonFrame's plan prices are on the page and don't change after a call.",
+      },
+      {
+        title: "Onboarding: included, or a fee?",
+        body: "Weave lists expert onboarding as included on every plan, while three independent third parties report a separate one-time setup fee anyway. SeldonFrame charges no setup fee, and the workspace builds itself from your website in about 3 minutes.",
+      },
+      {
+        title: "No per-item drip fees",
+        body: "Reviewers report $200 to migrate your existing digital forms and $20 for each upload after that, plus $25 per user per month for the analytics add-on. SeldonFrame's intake forms are part of the workspace.",
+      },
+      {
+        title: "Renewal shouldn't be a surprise",
+        body: "Customers report renewal increases of 15 to 25%. SeldonFrame is month-to-month at a published price, cancel anytime.",
+      },
+    ],
+    whenTheyWin:
+      "Choose Weave if you run a dental or optometry practice and want phones, texting, reviews and clinical forms tuned to that exact workflow from one vendor.",
+    faq: [
+      {
+        q: "How much does Weave actually cost?",
+        a: "Weave publishes exactly one figure: plans start from $199 a month. Every tier carries a Get Pricing button instead of a price. Third parties report the real entry tier at $249 to $250 a month per location and customer-reported spend at $300 to $500 a month for a small practice, but none of that comes from Weave.",
+      },
+      {
+        q: "Does SeldonFrame charge a setup fee?",
+        a: "No. Paste in your website and the workspace builds free in about 3 minutes, before you create an account. There's no onboarding fee and no forms-migration charge.",
+      },
+    ],
+  },
+  {
+    slug: "ruby-receptionist",
+    name: "Ruby Receptionist",
+    category: "virtual receptionist service",
+    audience: "solo",
+    pricingSourceUrl: "https://www.ruby.com/pricing/",
+    oneLiner:
+      "Ruby is a live virtual-receptionist service. Trained humans answer your calls, billed by the minute against a monthly plan.",
+    heroSub:
+      "Ruby's cheapest plan works out to $5.00 a minute, and the overage rate isn't published anywhere. SeldonFrame answers every call for a flat monthly fee, with minutes at carrier cost on your own Twilio number.",
+    intro: [
+      "Most people looking for a Ruby alternative hit the same wall: the arithmetic. Plans run $250, $395, $720 and $1,725 a month for 50, 100, 200 and 500 receptionist minutes, which works out to $5.00, $3.95, $3.60 and $3.45 a minute. Live chat is a separate subscription on top at $143, $335 or $520 a month. And the one number that decides a busy month, the per-minute overage rate, doesn't appear on Ruby's pricing page, its plans page or its FAQ, even though the pricing page says there are no additional or hidden fees.",
+      "That said, Ruby is genuinely good at what it does. Real trained receptionists handle messy, sensitive calls in a way no AI matches yet, its reputation with law firms and professional services is well earned, and the plan prices themselves are published openly, which more than half this category can't claim. If your intake is high-stakes and low-volume, a human service can be exactly right. But if the job is answering every call, qualifying the lead and booking it, $3.45 to $5.00 a minute is a lot of money for a receptionist that stops when the minutes run out.",
+    ],
+    them: {
+      bestFor: "Firms wanting trained humans on high-stakes, low-volume intake",
+      pricingModel: "$250-$1,725/mo for 50-500 receptionist minutes ($5.00 down to $3.45 a minute); live chat is a separate $143-$520/mo subscription; the overage rate is not published",
+      aiReceptionist: "Human receptionists rather than an AI agent; the page says optional AI enhancements are included at no extra cost",
+      frontOffice: "None — no CRM, website or booking calendar of its own",
+      whitelabel: "No — a service, not a platform you can resell",
+      aiCosts: "Not applicable — you're buying human minutes",
+      resale: "No",
+    },
+    switchReasons: [
+      {
+        title: "Minutes at carrier cost, not $3.45 to $5.00",
+        body: "Ruby's own plan prices divided by their own included minutes give $5.00 a minute at the bottom tier and $3.45 at the top. SeldonFrame's calls run through your own Twilio number at carrier rates, under a flat platform fee.",
+      },
+      {
+        title: "No unpublished overage rate",
+        body: "Ruby's pricing page, plans page and FAQ all publish no per-minute charge for going past your included minutes. On SeldonFrame there's no minute allowance to exceed in the first place.",
+      },
+      {
+        title: "Chat is included, not a second subscription",
+        body: "Ruby sells live chat as its own plan at $143 to $520 a month. SeldonFrame's agent handles voice, SMS and web chat on the same brain, with missed-call text-back included.",
+      },
+      {
+        title: "The call ends in a booked job",
+        body: "Ruby takes a message and passes it on. SeldonFrame's receptionist checks real availability, books into the workspace calendar and logs the lead in the CRM.",
+      },
+    ],
+    whenTheyWin:
+      "Choose Ruby if your intake is genuinely high-stakes and your volume is low enough that a trained human on every call is worth $3.45 to $5.00 a minute.",
+    faq: [
+      {
+        q: "How much does Ruby cost per minute?",
+        a: "Ruby publishes plan prices rather than per-minute rates, but the division is straightforward: $250 for 50 minutes is $5.00 a minute, $395 for 100 is $3.95, $720 for 200 is $3.60 and $1,725 for 500 is $3.45. The rate for going past your included minutes isn't published on any Ruby page I checked.",
+      },
+      {
+        q: "Does SeldonFrame use real people like Ruby?",
+        a: "No. SeldonFrame's receptionist is an AI agent with a deterministic tool bridge for the parts that must never be improvised — checking availability, booking, taking messages. When a call needs a person, it takes a structured message and notifies you instantly.",
+      },
+    ],
+  },
+  {
+    slug: "thryv",
+    name: "Thryv",
+    category: "small-business software suite",
+    audience: "solo",
+    pricingSourceUrl: "https://www.thryv.com/pricing/",
+    oneLiner:
+      "Thryv is an all-in-one small-business platform covering listings, websites, reviews, messaging and a light CRM.",
+    heroSub:
+      "Thryv publishes two prices and gates the rest. SeldonFrame's price is public at every tier, and the AI receptionist is the product rather than an unpriced Boost you have to ask about.",
+    intro: [
+      "Most people looking for a Thryv alternative hit the same wall: the published price isn't the whole price. Starter is $99 a month with 1 user and Signature is $399 a month with 5, and the page never says what a sixth user costs. Amplify has no price at all. Thryv Boosts, the done-for-you marketing services, carry no figure anywhere on the page. Third parties report a $250 one-time onboarding fee and a $9 monthly support fee on every package, plus Command Center seats at roughly $20 to $30 each and usage at $0.015 a text and $0.01 a voice minute, none of which Thryv publishes.",
+      "That said, Thryv covers a lot of ground for a small business. Listings syndication to 60-plus directories, an AI website builder, review management and trackable phone numbers inside one $99 plan is real value for a solo operator who wants a single vendor and a single bill. But if what you need is an AI that answers the phone and books the job, that shouldn't arrive as an unpriced Boost you have to book a demo to hear about.",
+    ],
+    them: {
+      bestFor: "Solo operators and small teams wanting listings, a website and reviews from one vendor",
+      pricingModel: "$99/mo (1 user) and $399/mo (5 users) published; Amplify, Boosts, extra seats and usage are all quote-gated",
+      aiReceptionist: "AI features across the website builder and review management; no flat-priced phone receptionist appears on the pricing page",
+      frontOffice: "Listings, AI website builder, reviews, trackable numbers and a light CRM",
+      whitelabel: "Not published",
+      aiCosts: "Not itemised on the pricing page",
+      resale: "Not published",
+    },
+    switchReasons: [
+      {
+        title: "Two published prices isn't a price list",
+        body: "Amplify is a demo call, Boosts carry no figure anywhere, and nothing on the page says what a sixth user costs. Every SeldonFrame tier is priced in the open.",
+      },
+      {
+        title: "No onboarding fee to discover later",
+        body: "Third parties report a $250 one-time onboarding fee and a $9 monthly support fee on every Thryv package. SeldonFrame charges neither, and the workspace builds free before you sign up.",
+      },
+      {
+        title: "The receptionist is the product",
+        body: "SeldonFrame's AI answers calls, SMS and web chat, qualifies the lead and books the job into a real calendar. It isn't a marketing service you buy separately.",
+      },
+      {
+        title: "Bring your own key, pay provider cost",
+        body: "Reviewers report Thryv metering SMS at $0.015 and voice at $0.01 a minute. On SeldonFrame those run through your own Twilio account at carrier rates, with no platform markup.",
+      },
+    ],
+    whenTheyWin:
+      "Choose Thryv if you want listings syndication, a website, reviews and a light CRM from one vendor on one bill, and $99 a month for a single user fits how you work.",
+    faq: [
+      {
+        q: "How much does Thryv really cost?",
+        a: "Thryv publishes $99 a month for Starter (1 user) and $399 a month for Signature (5 users). Amplify, the Boosts add-ons, extra seats and usage all have no published figure. Third parties report a $250 one-time onboarding fee and a $9 monthly support fee on top, but Thryv doesn't publish either.",
+      },
+      {
+        q: "Does SeldonFrame charge per user?",
+        a: "No. The plan price covers the workspace, not a seat count, so adding people to your team doesn't change the bill.",
+      },
+    ],
+  },
+  {
+    slug: "tidio",
+    name: "Tidio",
+    category: "customer service chat platform",
+    audience: "solo",
+    pricingSourceUrl: "https://www.tidio.com/pricing/",
+    oneLiner:
+      "Tidio is a live-chat and AI-agent platform for online stores and support teams, metered across conversations, AI conversations and automation visitors.",
+    heroSub:
+      "Tidio's plan price covers one of three meters. SeldonFrame's agent answers calls, SMS and web chat on one brain, with AI usage on your own key at raw provider cost.",
+    intro: [
+      "Most people looking for a Tidio alternative hit the same wall: three meters, one price. The plan covers billable conversations. Lyro AI conversations are counted separately and sold as an add-on from $32.50 a month for 50, which works out to $0.65 an AI conversation. Flows visitors reached are a third meter, from $24.17 a month for 2,000. The 50 free Lyro conversations on Free and Starter are labelled one-off rather than monthly. And the step from Growth at about $49 a month to Plus at $300 a month plus usage is roughly six-fold, with Premium carrying no published price at all.",
+      "That said, Tidio is a well-built product. Live chat, ticketing and an AI agent in one place with a real free tier and a genuinely cheap Starter plan is a good deal for a small store. Its Premium tier's guaranteed 50% Lyro resolution rate with pay-per-resolution billing is also a more honest way to sell AI than most of the category manages. But a local service business doesn't lose money on unanswered chats. It loses it on unanswered phones.",
+    ],
+    them: {
+      bestFor: "Online stores and support teams deflecting chat volume",
+      pricingModel: "Free, $24.17/mo Starter, from $49.17/mo Growth, from $300/mo plus usage on Plus, Premium quote-only; Lyro AI and Flows are separately metered add-ons",
+      aiReceptionist: "Chat only — no phone answering and no SMS receptionist",
+      frontOffice: "None — no CRM, website builder or booking calendar",
+      whitelabel: "No agency or whitelabel program published",
+      aiCosts: "Lyro AI conversations metered separately from plan conversations, sold in bundles from $32.50/mo",
+      resale: "No agency reseller program published",
+    },
+    switchReasons: [
+      {
+        title: "One meter, not three",
+        body: "Tidio counts billable conversations, Lyro AI conversations and Flows visitors separately, and running out of any one forces an upgrade or a paid add-on. SeldonFrame runs on your own AI key at provider cost, so there's no platform meter to exhaust.",
+      },
+      {
+        title: "Calls are where the money is",
+        body: "Tidio can't answer the phone. SeldonFrame's receptionist handles voice, SMS and web chat with the same brain, and missed-call text-back turns a missed ring into a booked job.",
+      },
+      {
+        title: "No six-fold plan cliff",
+        body: "Growth starts at about $49 a month and the next tier up starts at $300 plus usage. SeldonFrame's tiers step in flat, published increments with no usage billing on top.",
+      },
+      {
+        title: "The bot can actually book",
+        body: "SeldonFrame's agent reads real availability from the workspace calendar, books into it and logs the lead in the CRM. That's the whole point of it, not a custom action you build yourself.",
+      },
+    ],
+    whenTheyWin:
+      "Choose Tidio if you're running an online store where chat deflection is the goal, volume is predictable, and the Lyro resolution guarantee at the top tier is worth the price.",
+    faq: [
+      {
+        q: "How much does Tidio cost with the AI agent?",
+        a: "The plan price covers live-chat conversations only. Lyro AI is a separate add-on from $32.50 a month for 50 AI conversations, which works out to $0.65 each, and the 50 Lyro conversations included on Free and Starter are one-off rather than monthly. Flows visitors are a third meter from $24.17 a month for 2,000.",
+      },
+      {
+        q: "Is there a message limit on SeldonFrame?",
+        a: "SeldonFrame doesn't sell message credits. Conversations run on your own AI key at provider cost, so there's no platform allowance to outgrow.",
+      },
+    ],
+  },
+  {
+    slug: "elevenlabs",
+    name: "ElevenLabs Agents",
+    category: "voice AI platform",
+    audience: "solo",
+    pricingSourceUrl: "https://elevenlabs.io/pricing/agents",
+    oneLiner:
+      "ElevenLabs Agents is the conversational-agent product built on ElevenLabs' voice models, priced by agent minutes with the model and telephony billed on top.",
+    heroSub:
+      "The $0.08 a minute headline is a floor, not a total: ElevenLabs bills the model and the phone line separately on top and publishes no rate for either. SeldonFrame runs AI and telephony on your own keys at raw provider cost, with the front office included.",
+    intro: [
+      "Most people looking for an ElevenLabs Agents alternative hit the same wall: the headline rate isn't the bill. ElevenLabs states that the LLM model and any telephony are billed separately on top based on usage, and publishes no rate for either, so the all-in cost of a call can't be worked out from the pricing page. The bundled minutes carry no volume discount either: divide any paid tier by its included minutes and you land on exactly $0.080, the same as the published overage rate. And going past your concurrency limit doesn't block the call, it doubles the rate to $0.160 a minute, which happens precisely when volume spikes.",
+      "That said, ElevenLabs is exceptional at the thing it's famous for. The voices are the best in the category, the free tier is real, and the pricing page is unusually straight about the fact that the model and telephony bill on top, which plenty of rivals bury. If you're building a voice product and voice quality is the product, it's a strong choice. But an agency putting receptionists in front of local businesses needs the CRM, the calendar and the client portal too.",
+    ],
+    them: {
+      bestFor: "Teams building voice agents where voice quality is the product",
+      pricingModel: "$0-$990/mo for 15-12,375 agent minutes (exactly $0.080/min at every paid tier), $0.080/min overage, $0.160/min burst; LLM and telephony billed separately on top with no published rate",
+      aiReceptionist: "Voice agents you design, wire and maintain yourself",
+      frontOffice: "None — no CRM, website or booking calendar",
+      whitelabel: "None — no agency dashboard or client workspaces published",
+      aiCosts: "The LLM is billed separately on top, based on usage, with no published rate",
+      resale: "No published reseller program",
+    },
+    switchReasons: [
+      {
+        title: "The headline rate isn't the bill",
+        body: "ElevenLabs bills the model and telephony separately on top of $0.08 a minute and publishes no rate for either. On SeldonFrame you hold both accounts yourself, so you can see and cap every dollar.",
+      },
+      {
+        title: "Prepaid minutes at list price",
+        body: "Every paid ElevenLabs tier divides out to exactly $0.080 a minute, identical to the overage rate, so upgrading buys concurrency headroom rather than a cheaper minute. SeldonFrame's platform fee is flat and doesn't meter minutes at all.",
+      },
+      {
+        title: "Spikes shouldn't cost double",
+        body: "Exceeding your concurrency limit bills at $0.160 a minute, twice the standard rate, at exactly the moment the phone is busiest. SeldonFrame's concurrency is whatever your own Twilio account supports.",
+      },
+      {
+        title: "A voice agent isn't a front office",
+        body: "After the agent takes the call, the CRM record, the calendar slot and the client's website are still your problem. SeldonFrame includes all three in every workspace, and the agent books real jobs into them.",
+      },
+    ],
+    whenTheyWin:
+      "Choose ElevenLabs Agents if voice quality is the differentiator in what you're building and you already have the model, telephony and business system sorted out around it.",
+    faq: [
+      {
+        q: "Is SeldonFrame's voice quality comparable to ElevenLabs?",
+        a: "SeldonFrame's receptionist runs on modern realtime voice models with a deterministic tool bridge for the parts that must never be improvised — checking availability, booking, taking messages. ElevenLabs is still the benchmark for raw voice fidelity; SeldonFrame optimises for a call that ends in a booked job.",
+      },
+      {
+        q: "What do voice minutes cost on SeldonFrame?",
+        a: "You connect your own Twilio number and your own AI key, so calls cost whatever the providers charge. SeldonFrame doesn't meter minutes, doesn't mark them up, and has no burst rate.",
+      },
+    ],
+  },
 ];
 
 export function getCompetitor(slug: string): Competitor {

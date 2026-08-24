@@ -769,6 +769,199 @@ export const EXTRAS: Record<string, CompetitorExtras> = {
     switchNote:
       "Paste each client's website — SeldonFrame builds what your Project brief described (the Soul is the standing brief; grounded FAQ/services are the tight docs) and auto-tests retrieval on every publish. Keep your personal Projects for your own thinking; move the client-facing work to a system the client can live in.",
   },
+  // 2026-08-24 wave — extras for the seven new competitors. Same honesty rule
+  // as the rows above: a figure the vendor doesn't publish is labelled
+  // "reported", and where third-party sources disagree on a band we state the
+  // shape of the fee rather than a precise number.
+  "bland-ai": {
+    pros: [
+      "One all-in per-minute rate covering the model, transcription and voice, with no token pass-through",
+      "A genuinely free Start tier at a $0 platform fee, with no card required",
+      "Published concurrency, calls-per-day and knowledge-base limits at every tier",
+      "Enterprise options for on-prem/VPC, BAA, SSO and data residency",
+    ],
+    cons: [
+      "The $299 and $499 platform fees buy a lower rate, not minutes — you pay them before the first minute",
+      "Transfer time is a second meter at $0.05/$0.04/$0.03 a minute unless you bring your own Twilio",
+      "Failed and very short calls still bill at $0.015 each",
+      "Voice and knowledge-base caps (1/5/15 and 10/50/100) make outgrowing a tier a $299 or $499 step",
+    ],
+    chooseThem: [
+      "You're an engineering team building a custom voice product",
+      "You want one per-minute number with no model-provider reconciliation",
+      "Your CRM, calendar and client dashboard already exist somewhere else",
+    ],
+    chooseSf: [
+      "You want the CRM, website and booking calendar the agent books into",
+      "You'd rather pay the providers directly than a platform fee plus a per-minute cut",
+      "You need a whitelabel client layer, which Bland doesn't publish",
+      "You want a new client live in about 3 minutes instead of an integration project",
+    ],
+    switchNote:
+      "Your Bland agent's system prompt and knowledge base drop straight into the SeldonFrame agent's skill and knowledge. Re-point your Twilio number when you're ready to move call handling over.",
+  },
+  birdeye: {
+    pros: [
+      "One of the strongest review-generation and reputation products in the category",
+      "A mature multi-location portal with per-location rollups",
+      "One platform and one contract instead of stitching together point products",
+      "Established brand trust with multi-location businesses",
+    ],
+    cons: [
+      "No published price anywhere — the pricing page is a lead form and even Birdeye's own cost blog names no number",
+      "Priced per location by the vendor's own banding, so add-on modules multiply across your storefronts",
+      "Reviewers report a roughly 8% renewal 'Innovation Fee' and setup fees of $500–$2,000",
+      "Reviewers report a 12-month contract with 90-day cancellation notice and remaining-balance early termination",
+    ],
+    chooseThem: [
+      "Review volume across many locations is your growth engine",
+      "Centralised messaging across storefronts is the daily workflow",
+      "You have the procurement process to run a quoted annual contract",
+    ],
+    chooseSf: [
+      "You want a public, flat price you can read before any sales call",
+      "You don't want every add-on multiplied by your location count",
+      "You need the phone answered and the job booked, not just reviews collected",
+      "You want month-to-month with no 90-day cancellation window",
+    ],
+    switchNote:
+      "Export your Birdeye contacts and import them. Your review-request flow recreates as SeldonFrame's built-in review agent, firing after each completed booking.",
+  },
+  weave: {
+    pros: [
+      "Phones, texting, reviews and clinical forms in one system tuned to dental and optometry",
+      "Weave does publish a floor ($199/mo), which most of this category refuses to do",
+      "Expert onboarding and support are advertised as included on every plan",
+      "A mature product with deep practice-management integrations",
+    ],
+    cons: [
+      "All three tiers are quote-gated — the $199 floor is the only published number",
+      "Third parties report the real entry tier at $249–$250/mo per location, above Weave's own advertised floor",
+      "Onboarding is advertised as included, yet three independent third parties report a separate one-time setup fee",
+      "Reviewers report $200 to migrate existing digital forms plus $20 per upload, and 15–25% renewal increases",
+    ],
+    chooseThem: [
+      "You run a dental or optometry practice and want workflow-specific tooling",
+      "Phones and patient texting from one vendor matters more than price transparency",
+      "Your practice-management software is on Weave's integration list",
+    ],
+    chooseSf: [
+      "You want every tier priced on the page, not behind a Get Pricing button",
+      "You don't want a setup fee that isn't disclosed until the contract",
+      "You need an AI receptionist that books into a calendar you own",
+      "You're an agency — Weave has no published whitelabel layer",
+    ],
+    switchNote:
+      "Paste your practice website into SeldonFrame and the workspace rebuilds from it in about 3 minutes, intake forms included. Re-point your number once the agent is answering the way you want.",
+  },
+  "ruby-receptionist": {
+    pros: [
+      "Trained human receptionists handle messy, sensitive intake better than any AI does today",
+      "Plan prices are published openly, unlike most of this category",
+      "A strong reputation with law firms and professional services",
+      "The page states optional AI enhancements are included at no extra cost",
+    ],
+    cons: [
+      "Plan price divided by included minutes works out to $5.00 a minute at the bottom tier and $3.45 at the top",
+      "The per-minute overage rate isn't published on the pricing page, the plans page or the FAQ",
+      "Live chat is a separate $143–$520/mo subscription — receptionist minutes don't cover it",
+      "No CRM, website or booking calendar of its own, and nothing to whitelabel",
+    ],
+    chooseThem: [
+      "Your intake is high-stakes enough to need a trained human on every call",
+      "Call volume is low enough that per-minute pricing works out",
+      "You want to outsource the function rather than own a system",
+    ],
+    chooseSf: [
+      "You want every call answered instantly, 24/7, for a flat fee",
+      "You want minutes at carrier cost on your own Twilio, not $3.45–$5.00 a minute",
+      "You want calls to end in a booked job inside a CRM you own",
+      "You're an agency — you can resell SeldonFrame, you can't resell Ruby",
+    ],
+    switchNote:
+      "Run SeldonFrame as the first line (instant answer plus booking) and keep a human service for escalations if your intake needs it. The agent takes a structured message and notifies you instantly either way.",
+  },
+  thryv: {
+    pros: [
+      "Listings syndication to 60+ directories, an AI website builder and review management in one $99 plan",
+      "Two real published prices ($99 and $399), which more than half this category won't give you",
+      "24/7 support included at both published tiers",
+      "One vendor and one bill for a solo operator's whole web presence",
+    ],
+    cons: [
+      "Amplify, Boosts, extra seats and usage all have no published figure",
+      "The page never states what a user beyond the included 1 or 5 costs",
+      "Third parties report a $250 one-time onboarding fee and a $9 monthly support fee on every package",
+      "The annual/monthly toggle never says which basis the displayed $99 and $399 use",
+    ],
+    chooseThem: [
+      "Listings syndication and a business web presence are the main job",
+      "You want one vendor for website, reviews and directories",
+      "$99/mo for a single user fits how you actually work",
+    ],
+    chooseSf: [
+      "You want the AI receptionist as the core product, not an unpriced Boost",
+      "You want every tier priced on the page with no onboarding fee",
+      "You don't want to pay per seat as your team grows",
+      "You want SMS and voice at carrier cost on your own Twilio account",
+    ],
+    switchNote:
+      "Export your Thryv contacts to CSV and import them. Paste your Thryv-built site's URL and SeldonFrame rebuilds the workspace from its content, then move the domain over once it looks right.",
+  },
+  tidio: {
+    pros: [
+      "A real free tier and a genuinely cheap $24.17/mo Starter plan",
+      "Live chat, ticketing and an AI agent in one product",
+      "The Premium tier's guaranteed 50% Lyro resolution rate with pay-per-resolution billing is an honest way to sell AI",
+      "Entry pricing is published openly rather than quote-gated",
+    ],
+    cons: [
+      "Three separate meters — billable conversations, Lyro AI conversations and Flows visitors — and the plan price covers one",
+      "The 50 Lyro conversations on Free and Starter are one-off, not a monthly allowance",
+      "Growth at about $49/mo steps to Plus at $300/mo plus usage, roughly a six-fold cliff",
+      "Chat only — no phone answering, no SMS receptionist, no CRM or booking calendar",
+    ],
+    chooseThem: [
+      "You run an online store where chat deflection is the goal",
+      "Your conversation volume is predictable enough to plan around three meters",
+      "The Lyro resolution guarantee at the top tier is worth the price to you",
+    ],
+    chooseSf: [
+      "Your clients lose money on unanswered phones, not unanswered chats",
+      "You want one AI brain across voice, SMS and web chat",
+      "You want the bot to book into a real calendar and write to a real CRM",
+      "You don't want three meters to run out of",
+    ],
+    switchNote:
+      "Point SeldonFrame at the same website you trained Tidio on. The agent grounds itself on the same content, and the site, CRM and booking calendar build alongside it.",
+  },
+  elevenlabs: {
+    pros: [
+      "The best voice quality in the category, and a real free tier at 15 agent minutes",
+      "The pricing page says plainly that the LLM and telephony bill separately on top — plenty of rivals bury that",
+      "Published per-minute, burst and text-message rates you can check yourself",
+      "Concurrency limits are stated per tier rather than negotiated",
+    ],
+    cons: [
+      "The all-in cost of a call isn't determinable — no LLM or telephony rate is published anywhere",
+      "Bundled minutes carry no volume discount: every paid tier divides out to exactly $0.080/min, the same as overage",
+      "Burst pricing doubles the rate to $0.160/min the moment you exceed concurrency",
+      "No CRM, website, booking calendar or whitelabel layer",
+    ],
+    chooseThem: [
+      "Voice fidelity is the differentiator in what you're building",
+      "You already own the model, telephony and business system around the agent",
+      "You want a published per-minute rate you can verify without a sales call",
+    ],
+    chooseSf: [
+      "You want an all-in cost you can actually calculate before you quote a client",
+      "You want the CRM, website and booking calendar the agent books into",
+      "You don't want a burst rate that doubles at your busiest hour",
+      "You need a whitelabel client layer, which ElevenLabs doesn't publish",
+    ],
+    switchNote:
+      "Your agent's prompt and knowledge base carry across into the SeldonFrame agent's skill and knowledge. Bring your own AI key and Twilio number so the model and telephony bills land in accounts you control.",
+  },
 };
 
 export function getExtras(slug: string): CompetitorExtras {
@@ -817,6 +1010,10 @@ export const VS_PAIRS: VsPair[] = [
   { a: "hubspot", b: "clickfunnels", angle: "Enterprise CRM vs solo-operator funnel builder — completely different budgets and audiences, but neither ships a native phone or SMS receptionist." },
   { a: "klaviyo", b: "hubspot", angle: "Ecommerce email/SMS specialist vs general-purpose enterprise CRM — Klaviyo assumes a Shopify cart, HubSpot assumes a sales team; neither answers a phone." },
   { a: "kartra", b: "gohighlevel", angle: "Creator all-in-one vs agency toolbox — Kartra sells courses and memberships, GoHighLevel sells to agencies serving local businesses; neither has a native AI receptionist in the base plan." },
+  // 2026-08-24 — the two quote-gated local-business reputation platforms.
+  // Added to KEPT_VS_SLUGS below because it's a live head-to-head query, not a
+  // folded pair: both vendors refuse to publish a price, which is the story.
+  { a: "podium", b: "birdeye", angle: "The two quote-gated reputation platforms for local business: Podium's pricing page has no numbers and Birdeye's is a lead form — and Birdeye's own form bands you by location count, so both bills scale with how many places you operate." },
 ];
 
 export function vsSlug(pair: VsPair): string {
@@ -844,6 +1041,9 @@ export const KEPT_VS_SLUGS: string[] = [
   "keap-vs-activecampaign",
   "klaviyo-vs-hubspot",
   "vapi-vs-retell-ai",
+  // 2026-08-24 — new pair, kept from the start rather than folded: it's a
+  // fresh page with no 0-click history to consolidate away.
+  "podium-vs-birdeye",
 ];
 
 /** Whether a third-party `/compare/<a>-vs-<b>` pair keeps its standalone page. */

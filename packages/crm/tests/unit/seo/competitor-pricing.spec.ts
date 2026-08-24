@@ -13,8 +13,10 @@ import { renderCompetitorPricingMarkdown } from "../../../src/lib/seo/competitor
 
 // ─── registry shape ─────────────────────────────────────────────────────────
 
-test("PRICING has exactly 25 entries", () => {
-  assert.equal(PRICING.length, 25);
+// 25 → 32 on 2026-08-24: the seven-competitor wave (Bland AI, Birdeye, Weave,
+// Ruby Receptionist, Thryv, Tidio, ElevenLabs Agents).
+test("PRICING has exactly 32 entries", () => {
+  assert.equal(PRICING.length, 32);
 });
 
 test("PRICING slugs are unique", () => {

@@ -88,6 +88,14 @@ const COLUMNS: readonly Column[] = [
       { label: "Voiceflow Pricing", href: "/voiceflow-pricing" },
       { label: "Durable Pricing", href: "/durable-pricing" },
       { label: "Synthflow Pricing", href: "/synthflow-pricing" },
+      // 2026-08-24 wave — seven new competitor pricing breakdowns.
+      { label: "Bland AI Pricing", href: "/bland-ai-pricing" },
+      { label: "Birdeye Pricing", href: "/birdeye-pricing" },
+      { label: "Weave Pricing", href: "/weave-pricing" },
+      { label: "Ruby Receptionist Pricing", href: "/ruby-receptionist-pricing" },
+      { label: "Thryv Pricing", href: "/thryv-pricing" },
+      { label: "Tidio Pricing", href: "/tidio-pricing" },
+      { label: "ElevenLabs Agents Pricing", href: "/elevenlabs-pricing" },
     ],
   },
   {
