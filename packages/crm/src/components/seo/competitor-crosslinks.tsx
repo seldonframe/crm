@@ -7,7 +7,8 @@
 // surface it's rendering on, links to whichever OTHER surfaces exist for that
 // competitor. `pricing` is the only optional leg: /<slug>-pricing only exists
 // for competitors present in BOTH lib/seo/alternative-pages.ts (COMPETITORS,
-// 26 slugs) AND lib/seo/competitor-pricing.ts (PRICING, 25 slugs) — every
+// 33 slugs as of 2026-08-24) AND lib/seo/competitor-pricing.ts (PRICING,
+// 32 slugs) — every
 // PRICING slug has a matching COMPETITOR, but "claude-projects" has no pricing
 // page (an alternative-to-only comparison, no vendor pricing page to break down).
 

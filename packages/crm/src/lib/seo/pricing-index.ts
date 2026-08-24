@@ -83,6 +83,15 @@ export const SF_TIER_MAP: Record<string, { band: [SfTierId, SfTierId]; rationale
   durable: { band: ["builder", "builder"], rationale: "Solo AI website + mini-CRM — cheapest comparison tier." },
   "my-ai-front-desk": { band: ["builder", "managed"], rationale: "Single-location AI receptionist." },
   "smith-ai": { band: ["managed", "agency_starter"], rationale: "Per-call receptionist service scales with call volume/locations, small-agency shaped at the high end." },
+  // 2026-08-24 wave — seven new registry rows need their SF band here (1:1
+  // coverage is enforced by pricing-index.spec.ts).
+  "bland-ai": { band: ["builder", "builder"], rationale: "Usage-based voice API with a platform fee on top — not a front office; same shape as Vapi and Retell, cheapest comparison tier." },
+  birdeye: { band: ["agency_starter", "agency_growth"], rationale: "Priced per location by the vendor's own banding — multi-location rollups are the practical use case, same shape as Podium." },
+  weave: { band: ["builder", "managed"], rationale: "Single-practice communications suite (phones, messaging, forms) — solo/small-team shaped." },
+  "ruby-receptionist": { band: ["builder", "managed"], rationale: "Per-minute answering service for one business — solo/small-office shaped." },
+  thryv: { band: ["builder", "managed"], rationale: "SMB all-in-one with 1 or 5 users included — solo/small-team shaped." },
+  tidio: { band: ["builder", "managed"], rationale: "Solo/small-team chat + AI agent tool, same shape as Chatbase." },
+  elevenlabs: { band: ["builder", "builder"], rationale: "Usage-based voice agent minutes with LLM and telephony passed through — cheapest comparison tier, same as Vapi and Retell." },
 };
 
 // ─── chart series types ─────────────────────────────────────────────────────
@@ -121,8 +130,8 @@ export type SfBandPoint = {
 
 const DEFAULT_VISIBLE_SLUGS = new Set(["hubspot", "gohighlevel", "salesforce", "keap", "activecampaign"]);
 // pipedrive is named in the brief but has no competitor-pricing registry
-// entry (25-entry registry doesn't include it) — omitted rather than
-// fabricated; see the build report for the honest reason.
+// entry (the registry, 32 rows as of 2026-08-24, doesn't include it) —
+// omitted rather than fabricated; see the build report for the honest reason.
 
 /** Parse a lead numeric MONTHLY dollar amount out of a plan price string,
  *  e.g. "$97/mo" -> 97, "listed at ~$49/mo (annual, 1,000 contacts)" -> 49,
@@ -249,6 +258,13 @@ function vendorDisplayName(slug: string): string {
     durable: "Durable",
     "my-ai-front-desk": "My AI Front Desk",
     "smith-ai": "Smith.ai",
+    "bland-ai": "Bland AI",
+    birdeye: "Birdeye",
+    weave: "Weave",
+    "ruby-receptionist": "Ruby Receptionist",
+    thryv: "Thryv",
+    tidio: "Tidio",
+    elevenlabs: "ElevenLabs Agents",
   };
   return overrides[slug] ?? slug;
 }

@@ -331,3 +331,129 @@ public pricing URL, plans, stacked add-on costs, annual discount, quote-gating, 
 9. Linktree/Zoho USD figures — geo-served pages; hedged from 2026 sources
 
 **Rock-solid (fetched live 2026-07-08):** GoHighLevel, ClickFunnels, Keap, Kartra, Klaviyo free tier, HubSpot Pro/Enterprise, Vapi, Retell, Chatbase, Stammer, Goodcall, Vendasta, Lindy, Durable, ActiveCampaign plan names.
+
+---
+
+# Appendix — verified 2026-08-24 (seven-competitor wave)
+
+Facts for the 2026-08-24 wave: Bland AI, Birdeye, Weave, Ruby Receptionist, Thryv,
+Tidio, ElevenLabs Agents. Same rule as the July block: **no number appears on a
+page unless it appears here.** Every vendor page in this appendix was fetched
+twice on 2026-08-24 — once by a dedicated research agent, once again directly
+before publishing — and every third-party source cited was fetched too.
+
+**Verification legend for this appendix**
+- **FETCHED** = read off the vendor's own live page on 2026-08-24
+- **DERIVED** = pure arithmetic on two FETCHED numbers (e.g. plan price ÷ included minutes); never an estimate
+- **REPORTED** = third-party only; the vendor publishes no such figure. Every REPORTED number is hedged in page copy ("reported by reviewers", "third parties report") and never stated as vendor fact.
+
+---
+
+## 26. Bland AI ✅ FETCHED — quoteGated: false (Enterprise tier only)
+- pricingUrl: https://www.bland.ai/pricing (FETCHED 2026-08-24)
+- secondary vendor source: https://docs.bland.ai/platform/billing (FETCHED 2026-08-24)
+- plans (all FETCHED from the pricing page):
+  - Start — "$0/mo platform fee" + "$0.14/min" talk time + "$0.05/min" transfer time — 10 concurrent calls, 100 calls/day, 10 knowledge bases, 1 voice; includes 2 credits + an inbound number the page calls a "$15/mo value"; "No card required"
+  - Build — "$299/mo platform fee" + "$0.12/min" talk + "$0.04/min" transfer — 50 concurrent, 2,000 calls/day, 50 knowledge bases, 5 voices
+  - Scale — "$499/mo platform fee" + "$0.11/min" talk + "$0.03/min" transfer — 100 concurrent, 5,000 calls/day, 100 knowledge bases, 15 voices
+  - Enterprise — Custom, no figure published (QUOTE-GATED); platform fee "contracted to your volume"; unlimited concurrency/calls/knowledge bases/voices; on-prem/VPC, BAA, SSO, data residency available
+- meters (FETCHED from docs.bland.ai/platform/billing): SMS "$0.02" per message inbound or outbound; web widget agent messages "$0.01" each; outbound minimum "$0.015" per call; failed calls "$0.015" per call; SIP termination Twilio→Bland "$0.004/min"
+- vendor claim quoted verbatim on the page (FETCHED): "No token charges. No model-provider pass-throughs." — the per-minute rate covers LLM, STT and TTS
+- BYOT note (FETCHED): customers who bring their own Twilio pay no transfer fee
+- annualDiscount: none mentioned anywhere on the page — omitted rather than invented
+- freeTier: yes — Start plan at a $0 platform fee, pay per minute
+- ⛔ **DO NOT PUBLISH** the pre-restructure model that most third-party articles still describe (~$0.09/min base with custom voice +$0.02/min, KB lookup +$0.01/min, recording +$0.01/min). Bland restructured to plan-tiered all-in rates; neither vendor surface lists those add-ons today. The truthful "stacking" story is the platform fee, transfer time, the failed-call minimum and the SIP termination fee.
+- ⛔ dead URL, do not retry: https://docs.bland.ai/platform/pricing returns 404
+
+## 27. Birdeye ❌ QUOTE-GATED — vendor publishes ZERO dollar figures — quoteGated: true
+- pricingUrl: https://birdeye.com/pricing/ (FETCHED 2026-08-24, twice)
+- FETCHED: no dollar amount of any kind appears on the page. Headline verbatim: "Pricing built around outcomes, not seat counts." Positioning verbatim: "One platform, one contract - replace point products and pay only for what you deploy at your locations". Pricing sits behind a "GET PRICING" lead form.
+- FETCHED: the one hard structural fact — buyers self-select a **location band**: 1-3, 4-9, 10-39, 40-249, 250-999, 1000+. Pricing is per location by the vendor's own admission; no dollar amount attaches to any band.
+- FETCHED: no plan/tier NAMES are published either. The Starter/Growth/Dominate and Standard/Professional/Premium schemes circulating in the industry come from third parties and conflict with each other — **the pages use the vendor's own location bands as plan rows instead**.
+- FETCHED: https://birdeye.com/blog/what-does-birdeye-cost/ — Birdeye's own cost explainer contains zero dollar figures; describes pricing as "custom and flexible", determined by products, location count and contract structure.
+- REPORTED (https://wiserreview.com/blog/birdeye-pricing/, published 2025-11-28, updated 2026-07-09; FETCHED 2026-08-24):
+  - per-location bands "$299-$349" / "$399-$599" / "$449-$699+"
+  - volume pricing "$200-$250" per location at 10 locations
+  - "The 8% 'Innovation Fee' added at renewal"
+  - integration/setup "$500-$2,000 for complex CRM/POS integrations"
+  - add-on modules "$50-$200/month per location"
+  - SMS carrier pass-through "$0.01-$0.03 per message"
+  - "12-month annual contract billed monthly, with auto-renewal unless written cancellation notice 90 days before renewal"; early termination charges the remaining contract balance
+- REPORTED (https://www.reviewflowz.com/blog/how-much-does-birdeye-really-cost, published 2026-01-05; FETCHED 2026-08-24): $349/mo month-to-month vs $299/mo annual entry; $449/mo next tier; ~$3,600/yr single-brand. Author states outright these came from a pricing-form screenshot and past-client feedback, not documentation — **this weakness is stated in page copy**.
+- ⚠️ Source-quality note: both third parties sell against Birdeye. Where they disagree on a band (add-ons $50-$200 vs $50-$150), the pages state the SHAPE of the fee, never a precise figure.
+- freeTier: none — the pricing page is a lead form
+
+## 28. Weave ❌ MOSTLY QUOTE-GATED — one published number — quoteGated: true
+- pricingUrl: https://www.getweave.com/pricing/ (FETCHED 2026-08-24, twice with different prompts to confirm $199 is not a misread of $249)
+- FETCHED, verbatim: "Find just what you need and get the most out of Weave with simple plans and pricing, starting from $199 per month." **This $199 floor is the ONLY dollar figure Weave publishes.**
+- FETCHED: three tiers — Pro, Elite ("Most Popular"), Ultimate — each with a "Get Pricing" button and no price.
+- FETCHED, Ultimate detail verbatim: "up to 15 phones, 1:1 personalized training, and premium analytics tools"
+- FETCHED, all-plan inclusions: "Award-winning customer support" and "Expert onboarding"
+- FETCHED: no setup fee, hardware cost, per-location pricing or contract term is disclosed anywhere on the page.
+- ⚠️ **DISCREPANCY, carried explicitly in page copy:** every third party reports the Pro floor at $249-$250/mo per location, $50 ABOVE Weave's own live page. Neither figure may be published as "the price". Approved framing: *Weave advertises from $199/mo but quotes all three tiers; third parties report the real entry tier at $249-$250/mo per location and customer-reported spend at $300-$500/mo for a small practice.*
+- REPORTED (https://noshowcost.com/tools/weave-pricing, content verified 2026-04-28; FETCHED 2026-08-24 — best-sourced of the set, triangulated from G2/Capterra cost notes Jan 2025–May 2026, public webinars, and Reddit): actual spend "$300 to $400" (1-3 providers), "$400 to $500" (2-5), "$500 to $700" (multi-location), "$800 to $1,200" (enterprise multi-location); "$400 one-time port and setup"; customers "frequently mention 15 to 25 percent renewal price increases"
+- REPORTED (https://www.iplum.com/blog/weave-pricing-plans; FETCHED 2026-08-24; iPlum competes with Weave): Pro "$249/month" per location; setup "$500-$750"; forms migration "$200" upfront then "$20" per subsequent upload; "Power Pack" "$25 per user per month"; extra phone numbers "$5/month" per line; desk phones "$131.51" per device; bulk-message caps 1,500 / 3,000 / 15,000
+- REPORTED (https://emitrr.com/blog/weave-pricing/, updated 2026-08-13; Emitrr competes with Weave): "$250/month" base; setup "$750"; the same $200 / $20 forms fees; the same 1,500 / 3,000 / 15,000 caps; free Yealink VoIP phones on certain plans (**directly contradicts iPlum's $131.51 desk phones — neither hardware figure is published on any page**)
+- ⛔ **Setup-fee amount is NOT publishable.** Three sources report $400, $500-$750 and $750. The pages assert only that a one-time fee is *reported to exist* while Weave advertises onboarding as included — that gap is a DISCLOSURE claim we can make, not a fee amount we can quote.
+- ⛔ dead/blocked URLs, do not retry: https://www.g2.com/products/weave-weave/pricing (403), https://www.themolarreport.com/learn/weave-pricing (404 — the $249 figure attributed to it in search snippets was never verified against the page, so $249 rests on iPlum alone)
+- freeTier: none
+
+## 29. Ruby Receptionist ✅ FETCHED — quoteGated: false
+- pricingUrl: https://www.ruby.com/pricing/ (FETCHED 2026-08-24)
+- corroborating vendor pages: https://www.ruby.com/plans-and-pricing/ and https://www.ruby.com/faq/ (both FETCHED 2026-08-24)
+- plans, virtual receptionist (all FETCHED): "$250" / 50 minutes · "$395" / 100 minutes · "$720" / 200 minutes · "$1,725" / 500 minutes
+- plans, live chat (FETCHED, a SEPARATE meter): "$143" / 10 chats · "$335" / 30 chats · "$520" / 50 chats
+- bundles (FETCHED): receptionist + 10 chats "$115" · + 30 chats "$268" · + 50 chats "$416"; the page states the bundle is 20% off standalone chat
+- ⚠️ Two independent extractions of the same page disagreed on the middle tier NAMES (Starter/Standard/Popular/Enterprise vs Starter/Basic/Popular/Professional) while agreeing exactly on every price and minute count. **The pages therefore name each plan by its included minute count, never by a tier name.**
+- DERIVED per-minute (plan price ÷ vendor-published included minutes): $250/50 = **$5.00** · $395/100 = **$3.95** · $720/200 = **$3.60** · $1,725/500 = **$3.45**
+- DERIVED per-chat: $143/10 = **$14.30** · $335/30 = **$11.17** · $520/50 = **$10.40**
+- FETCHED vendor claim, quoted verbatim in page copy: "no additional or hidden fees for activation, onboarding, setup, customization"
+- FETCHED: optional AI enhancements are stated as available on all plans at no extra cost
+- ⛔ **Overage rate is NOT published** on /pricing/, /plans-and-pricing/ or /faq/ — all three checked and confirmed silent. Contract length, annual discount and minute-rounding method are also absent. The pages say so explicitly; that absence IS the story.
+- REPORTED, flagged stale in page copy (https://vida.io/blog/ruby-receptionists-pricing and https://oncrew.ai/blog/ruby-receptionist-alternatives-2026, both retrieved 2026-08-24): an overage ladder of $5.40 / $4.45 / $4.35 / $4.25 / $3.95 / $3.80 / $3.60 / $3.50 / $3.40 / $3.30 per minute — **quoted against a legacy lineup ("Call Ruby 50" through "Call Ruby 2,500") whose tier names and tier count do not match the four live plans.** Page copy carries only the $5.40-down-to-$3.30 range, labelled reported AND stale.
+- freeTier: none
+
+## 30. Thryv 🔶 PARTIALLY PUBLISHED — quoteGated: true (Amplify, Boosts, seats, usage)
+- pricingUrl: https://www.thryv.com/pricing/ (FETCHED 2026-08-24, twice with different prompts)
+- plans (FETCHED): Starter "$99 per month", 1 user — 60+ listing directories, digital marketing score, AI website builder, AI review management, trackable phone numbers, digital performance insights, 24/7 chat support · Signature "$399 per month" (marked "Recommended"), 5 users — adds social media management, SEO & AEO custom website, advanced listings, competitive insights & heatmap, AI lead insights, 24/7 phone & email support · Amplify "Custom", no amount displayed, button goes to demo scheduling (QUOTE-GATED)
+- ⚠️ FETCHED but UNRESOLVED: the page shows an "Annual Save 15%" / "Monthly" toggle and never states which basis the displayed $99/$399 use. Two fetches with different prompts failed to resolve it. **Page copy states the ambiguity rather than picking a side.**
+- FETCHED: Thryv Boosts (Ads, Search, Social, Brand) are described as done-for-you marketing services on Signature and Amplify — **no price disclosed anywhere** (QUOTE-GATED)
+- FETCHED: no cost is stated for a user beyond the included 1 (Starter) or 5 (Signature)
+- FETCHED: no onboarding fee, setup fee, support fee or SMS rate appears on the pricing page
+- REPORTED (https://schedulingkit.com/pricing-guides/thryv-pricing and https://tekpon.com/software/thryv/pricing/, both retrieved 2026-08-24): "$250" one-time onboarding fee on all package levels; "$9" monthly support fee; SMS "$0.015" per message; voice "$0.01" per minute; Command Center seats free/Basic, ~"$20" per seat/mo (Plus), ~"$30" per seat/mo (Professional)
+- ⛔ **NOT published on any page:** the G2 (4.2-4.6/5) vs Trustpilot (2.3/5) review-sentiment split was in the research pack but was NOT independently fetched, so it was dropped rather than published.
+- freeTier: none
+
+## 31. Tidio ✅ FETCHED — quoteGated: true (Premium; Growth/Plus quotas)
+- pricingUrl: https://www.tidio.com/pricing/ (FETCHED 2026-08-24, three times across the research and publishing passes)
+- plans (all FETCHED, verbatim price strings): Free "$0/mo." · Starter "$24.17/mo." · Growth "Starts at $49.17/mo." · Plus "Starts at $300/mo. + monthly usage" · Premium "Contact for pricing" (QUOTE-GATED)
+- included quotas (FETCHED): Free — 50 billable conversations, 50 Lyro AI conversations (one-off), 100 Flows visitors reached, 10 seats · Starter — 100 billable conversations, 50 Lyro AI conversations (one-off), 100 Flows visitors, 10 seats · Growth — up to 2,000 billable conversations, Lyro and Flows both "Custom" · Plus — custom conversations and custom seat count · Premium — Lyro "From 3,000"
+- add-ons (FETCHED, verbatim): Lyro AI Agent "Starts at $32.50/mo. From 50 Lyro AI conversations" · Flows "Starts at $24.17/mo. From 2 000 visitors reached"
+- FETCHED: annual billing advertised as "Annually (2 months free)"
+- FETCHED: the guaranteed 50% Lyro resolution rate and pay-per-resolution billing are **Premium-exclusive**
+- DERIVED: $32.50 ÷ 50 = **$0.65 per Lyro AI conversation** at the entry bundle · $24.17 ÷ 2,000 = **~$0.012 per Flows visitor** · $300 ÷ $49.17 = **~6.1x Growth→Plus step**
+- ⚠️ FETCHED but UNRESOLVED: whether $24.17 / $49.17 are true month-to-month or annual-billed-monthly. The decimals are arithmetically consistent with the annual "2 months free" discount ($29 × 10 ÷ 12 = $24.17; $59 × 10 ÷ 12 = $49.17) while the toggle read as Monthly. **The implied $29/$59 month-to-month figures are INFERRED and are NOT published anywhere.** Page copy states the ambiguity.
+- ⛔ no explicit per-conversation overage rate is published — Tidio sells bundles, not overage. Not invented.
+- freeTier: yes — $0/mo Free plan as itemised above
+
+## 32. ElevenLabs Agents ✅ FETCHED — quoteGated: false (Enterprise only)
+- pricingUrl: https://elevenlabs.io/pricing/agents (FETCHED 2026-08-24, twice)
+- secondary vendor source: https://elevenlabs.io/pricing (FETCHED 2026-08-24 — main plan ladder + the annual "pay for 10 months" 20% structure; it does NOT address agent per-minute rates)
+- plans (all FETCHED — price / included agent minutes / concurrent calls): Free "$0" / 15 / 4 · Starter "$6" / 75 / 6 · Creator "$22" (first month 50% off at "$11") / 275 / 10 · Pro "$99" / 1,238 / 20 · Scale "$299" / 3,738 / 30 · Business "$990" / 12,375 / 40 · Enterprise Custom, no figure (QUOTE-GATED)
+- rates (FETCHED, verbatim): standard overage "$0.080" per minute · burst "$0.160" per minute when exceeding the plan's concurrency limit, allowing up to 3x normal concurrency · text messages "$0.003" each
+- vendor statement quoted verbatim in page copy (FETCHED): "The LLM model and any telephony are billed separately on top, based on usage."
+- ⛔ **No LLM rate and no telephony rate is published anywhere.** All-in cost per call is therefore NOT determinable from vendor disclosures; the pages state that $0.08/min is a floor, never a total.
+- DERIVED, the strongest finding on this vendor — bundled minutes carry **zero** volume discount. Plan price ÷ included minutes at every paid tier: $6/75 = $0.0800 · $22/275 = $0.0800 · $99/1,238 = $0.0800 · $299/3,738 = $0.0800 · $990/12,375 = $0.0800. Identical to the published overage rate; the subscription is prepaid minutes at list price and a higher tier buys concurrency headroom only. Independently checkable arithmetic on the vendor's own numbers.
+- annualDiscount: FETCHED — main plan page structures annual as "pay for 10 months" (two months free, ~20%)
+- freeTier: yes — 15 agent minutes/mo, 4 concurrent calls
+- ⛔ dead URL, do not retry: https://elevenlabs.io/docs/agents-platform/pricing returns 404
+
+---
+
+## Cross-vendor notes for this wave
+
+1. **Only 3 of the 7 publish a real price book.** Bland AI, Ruby and ElevenLabs do. Tidio and Thryv publish part of one. Weave publishes exactly one number ($199 floor). Birdeye publishes nothing at all.
+2. **All the reported-only material comes from vendors' competitors.** Emitrr, iPlum, Reviewflowz, Wiserreview and NoShowCost all sell against or compare the vendors they cost out, so they have a structural incentive to inflate total cost. NoShowCost is the most defensible (it names its method and admits the vendor page is gated); Reviewflowz is the most candid about its own weakness. Where two disagree on a band, the pages publish the SHAPE of the fee, never a precise figure.
+3. **Contract lock-in is REPORTED, never vendor-published,** for both Birdeye (12-month, 90-day notice, remaining-balance ETF, ~8% renewal fee) and Weave (contract required, 15-25% renewal increases). Every mention on a page carries "reported by reviewers".
+4. **The growth-tax pattern** is structural and can be argued without quoting any unverified competitor number: Birdeye and Weave price per location with add-ons that also multiply per location; Weave layers a per-user add-on on top of that; Bland charges a platform fee that buys a discount rather than an allowance, then meters talk time, transfer time, SMS and web messages separately.
+5. **Nothing in the July 2026 block was found stale by this wave.** No fact gathered here contradicts the existing vapi / retell-ai / synthflow registry rows. Those rows still carry `verified: "July 2026"` and are due for their own re-check pass.

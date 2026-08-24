@@ -518,6 +518,165 @@ export const PRICING: CompetitorPricing[] = [
     bottomLine:
       "Smith.ai's pricing pages hide numbers behind forms, so every figure here is third-party reported, not confirmed. The pattern is clear either way: it's a per-call service, so growth in call volume grows your bill proportionally — there's no flat platform fee.",
   },
+  // 2026-08-24 wave — seven new competitors, all fetched from the vendor's own
+  // live pricing page today; see the appended 2026-08-24 section of
+  // docs/superpowers/specs/2026-07-08-competitor-pricing-facts.md for every
+  // number below with its source URL and its fetched/reported tag.
+  {
+    slug: "bland-ai",
+    pricingUrl: "https://www.bland.ai/pricing",
+    verified: "August 2026",
+    quoteGated: false,
+    freeTier: "Yes — the Start plan has a $0/mo platform fee (2 credits plus an inbound number the page calls a \"$15/mo value\"), then bills per minute; the page says no card is required",
+    plans: [
+      { name: "Start", price: "$0/mo platform fee + $0.14/min talk time", whoFor: "Trying it out or running low volume", limits: ["10 concurrent calls, 100 calls/day", "10 knowledge bases, 1 voice", "Transfer time billed separately at $0.05/min"] },
+      { name: "Build", price: "$299/mo platform fee + $0.12/min talk time", whoFor: "Teams running steady call volume", limits: ["50 concurrent calls, 2,000 calls/day", "50 knowledge bases, 5 voices", "Transfer time billed separately at $0.04/min"] },
+      { name: "Scale", price: "$499/mo platform fee + $0.11/min talk time", whoFor: "High-volume deployments", limits: ["100 concurrent calls, 5,000 calls/day", "100 knowledge bases, 15 voices", "Transfer time billed separately at $0.03/min"] },
+      { name: "Enterprise", price: "Custom — talk to sales", whoFor: "Contact-centre scale", limits: ["Platform fee contracted to your volume", "Unlimited concurrency, calls, knowledge bases and voices", "On-prem/VPC, BAA, SSO and data residency available"] },
+    ],
+    stacks: [
+      { label: "The platform fee buys a rate, not minutes", detail: "The $299 and $499 are platform fees, not minute allowances. You pay them before the first minute, and then talk time meters on top at $0.12 or $0.11 a minute." },
+      { label: "Transfer time is a second meter", detail: "Handing a call to a human bills separately at $0.05, $0.04 or $0.03 a minute by tier, on top of talk time. Bland's page says customers who bring their own Twilio pay no transfer fee, but bridging your own Twilio in carries a $0.004/min SIP termination fee per Bland's billing docs." },
+      { label: "SMS, web messages and calls that never connect", detail: "Bland's billing docs list SMS at $0.02 a message in either direction, web widget agent messages at $0.01 each, an outbound minimum of $0.015 a call, and $0.015 for failed calls. You pay for calls that never connected." },
+      { label: "Voices and knowledge bases are hard caps, not add-ons", detail: "Each tier caps you at 1, 5 or 15 voices and 10, 50 or 100 knowledge bases. Bland publishes no per-voice or per-knowledge-base price, so going past a cap is a whole tier step of $299 or $499." },
+    ],
+    bottomLine:
+      "Bland's per-minute rate is genuinely all-in on the AI side. The page says \"No token charges. No model-provider pass-throughs.\" and the rate covers the model, transcription and voice. What it does not cover is the platform fee underneath it, $299 or $499 a month before your first minute, plus transfer time as a second meter and per-message SMS. Older write-ups describing a $0.09/min base with custom-voice and knowledge-base surcharges describe a pricing model Bland no longer runs.",
+  },
+  {
+    slug: "birdeye",
+    pricingUrl: "https://birdeye.com/pricing/",
+    verified: "August 2026",
+    quoteGated: true,
+    freeTier: "None — the pricing page is a \"GET PRICING\" lead form",
+    plans: [
+      { name: "1–3 locations", price: "Quote-gated — contact sales", whoFor: "Single-location and small multi-location businesses", limits: ["Birdeye publishes no dollar figure for any band", "Third parties report an entry tier around $299–$349/mo per location — reported by reviewers, not published by Birdeye"] },
+      { name: "4–9 locations", price: "Quote-gated — contact sales", whoFor: "Small chains", limits: ["Third parties report a mid tier around $399–$599/mo per location — reported, not published by Birdeye"] },
+      { name: "10–39 locations", price: "Quote-gated — contact sales", whoFor: "Multi-location brands", limits: ["Third parties report volume pricing near $200–$250/mo per location at 10 locations — reported, not published by Birdeye"] },
+      { name: "40–249, 250–999 and 1000+ locations", price: "Quote-gated — contact sales", whoFor: "Enterprise multi-location", limits: ["Birdeye's own form segments buyers into these three bands", "No published figure at any size"] },
+    ],
+    stacks: [
+      { label: "Every price is per location, so add-ons multiply", detail: "The one hard structural fact Birdeye does publish is that buyers pick a location band, from 1–3 up to 1000+. Reviewers report add-on modules priced per location too, at $50–$200/mo each in one source and $50–$150/mo in another. The bands disagree, so treat the shape as the claim and not the figure." },
+      { label: "A renewal fee, as reviewers report it", detail: "One third-party breakdown updated July 2026 reports an \"Innovation Fee\" of roughly 8% applied at renewal. Birdeye publishes no fee schedule of any kind, so this is a reviewer report, not a documented term." },
+      { label: "Setup and integration, as reviewers report it", detail: "The same source reports integration and setup fees of $500–$2,000 depending on complexity, and SMS carrier fees passed through at $0.01–$0.03 a message. Neither number appears on any Birdeye page." },
+      { label: "The contract is the real term", detail: "Reviewers describe a 12-month contract billed monthly, auto-renewing unless you give written cancellation notice 90 days before renewal, with early termination charged at the remaining contract balance. If that is accurate, the monthly figure a rep quotes you is effectively an annual commitment. Birdeye does not publish contract terms." },
+    ],
+    bottomLine:
+      "Birdeye publishes no prices at all. The pricing page is a form, and even Birdeye's own blog post about what Birdeye costs names no number. What the page does show is that pricing is per location and banded from 1–3 up to 1000+ locations, so anything you add multiplies across your locations. Third-party reports put an entry tier near $299 to $349 a month per location, but one of those authors is explicit that the figure came from a pricing-form screenshot and past-client hearsay rather than any document.",
+  },
+  {
+    slug: "weave",
+    pricingUrl: "https://www.getweave.com/pricing/",
+    verified: "August 2026",
+    quoteGated: true,
+    freeTier: "None — every tier is a \"Get Pricing\" quote",
+    plans: [
+      { name: "Pro", price: "Quote-gated — advertised \"from $199 per month\"", whoFor: "Single-location practices", limits: ["Third parties report the real entry tier at $249–$250/mo per location, above Weave's own advertised floor", "Reported at 1,500 bulk messages/mo — not confirmed on the vendor page"] },
+      { name: "Elite (\"Most Popular\")", price: "Quote-gated — no figure published", whoFor: "Busier practices", limits: ["Reported at 3,000 bulk messages/mo — not confirmed on the vendor page"] },
+      { name: "Ultimate", price: "Quote-gated — no figure published", whoFor: "Larger or multi-location practices", limits: ["\"up to 15 phones, 1:1 personalized training, and premium analytics tools\" — the only tier detail Weave publishes", "Reported at 15,000 bulk messages/mo"] },
+    ],
+    stacks: [
+      { label: "Onboarding: advertised as included, reported as a fee", detail: "Weave lists \"Expert onboarding\" as included with every plan. Three independent third parties report a separate one-time setup fee anyway, at $400, at $500–$750, and at $750. They disagree on the amount, which is why no single figure belongs here. What they agree on is that a one-time fee exists and that Weave does not disclose one." },
+      { label: "Digital forms migration", detail: "Two sources independently report $200 up front for the initial upload of your existing digital forms, then $20 per upload after that. Classic per-item drip pricing, and none of it appears on Weave's page." },
+      { label: "Per-user and per-line add-ons", detail: "One source reports a \"Power Pack\" analytics add-on at $25 per user per month and extra phone numbers at $5 a month per line. That is per-user pricing stacked on a per-location subscription, so it scales with headcount inside each location. Reported, not published." },
+      { label: "Contract length and renewal increases", detail: "Reviewers report that a contract is usually required with possible early-termination fees, and customers report renewal increases of 15–25%. Weave publishes no contract term at all, so both are reports rather than documented terms." },
+    ],
+    bottomLine:
+      "Weave advertises plans \"starting from $199 per month\" and then puts a Get Pricing button on all three tiers, so that floor is the only number it publishes. Third parties consistently report the real entry tier higher, at $249 to $250 a month per location, and customer-reported spend at $300 to $500 a month for a small practice. The sharpest gap is not the price, it's the disclosure: Weave lists expert onboarding as included on every plan while three independent third parties report a separate one-time setup fee.",
+  },
+  {
+    slug: "ruby-receptionist",
+    pricingUrl: "https://www.ruby.com/pricing/",
+    verified: "August 2026",
+    quoteGated: false,
+    freeTier: "None",
+    plans: [
+      { name: "Virtual receptionist, 50 minutes", price: "$250/mo", whoFor: "Low-volume offices", limits: ["50 receptionist minutes included", "Works out to $5.00 a minute"] },
+      { name: "Virtual receptionist, 100 minutes", price: "$395/mo", whoFor: "Small practices", limits: ["100 receptionist minutes included", "Works out to $3.95 a minute"] },
+      { name: "Virtual receptionist, 200 minutes", price: "$720/mo", whoFor: "Busier offices", limits: ["200 receptionist minutes included", "Works out to $3.60 a minute"] },
+      { name: "Virtual receptionist, 500 minutes", price: "$1,725/mo", whoFor: "High call volume", limits: ["500 receptionist minutes included", "Works out to $3.45 a minute"] },
+      { name: "Live chat, 10 chats", price: "$143/mo", whoFor: "Adding website chat", limits: ["A separate meter from receptionist minutes", "Works out to $14.30 a chat"] },
+      { name: "Live chat, 30 chats", price: "$335/mo", whoFor: "Steady chat volume", limits: ["Works out to $11.17 a chat"] },
+      { name: "Live chat, 50 chats", price: "$520/mo", whoFor: "High chat volume", limits: ["Works out to $10.40 a chat"] },
+    ],
+    stacks: [
+      { label: "Live chat is a second subscription", detail: "Receptionist minutes do not cover chats. Ruby sells chat as its own plan at $143, $335 or $520 a month for 10, 30 or 50 chats, or bundled onto a receptionist plan at $115, $268 or $416 a month. The page states the bundle is 20% off standalone chat." },
+      { label: "The overage rate is the number Ruby doesn't publish", detail: "Ruby says there are \"no additional or hidden fees for activation, onboarding, setup, customization\" — and yet /pricing/, /plans-and-pricing/ and /faq/ all publish no per-minute charge for going past your included minutes. Third-party sources report an overage ladder running from about $5.40 down to $3.30 a minute, but every one of those figures is quoted against a legacy lineup (\"Call Ruby 50\" through \"Call Ruby 2,500\") whose tier names and tier count no longer match the four plans on the live page. Treat them as reported and stale, not as Ruby's current rate." },
+      { label: "How minutes are counted isn't disclosed", detail: "None of the three Ruby pages I checked states how partial minutes are rounded, what the contract length is, or whether annual billing carries a discount. Ruby does note that optional AI enhancements are available on all plans at no extra cost." },
+    ],
+    bottomLine:
+      "Ruby's plan prices are fully public, and dividing each one by its included minutes gives a real cost of $5.00 a minute at the bottom tier down to $3.45 at the top. The number Ruby doesn't publish anywhere is the overage rate, which is exactly the number that decides your bill in a busy month. Live chat is a separate subscription on top of that.",
+  },
+  {
+    slug: "thryv",
+    pricingUrl: "https://www.thryv.com/pricing/",
+    verified: "August 2026",
+    quoteGated: true,
+    freeTier: "None",
+    annualNote: "The page shows an \"Annual Save 15%\" and \"Monthly\" toggle but never states which basis the displayed $99 and $399 use. I fetched the page twice with different prompts and could not resolve it, so treat the billing basis as unknown.",
+    plans: [
+      { name: "Starter", price: "$99/mo", whoFor: "Solo operators", limits: ["1 user", "Posts to 60+ listing directories, AI website builder, AI review management, trackable phone numbers", "24/7 chat support"] },
+      { name: "Signature (marked \"Recommended\")", price: "$399/mo", whoFor: "Small teams", limits: ["5 users", "Adds social media management, an SEO and AEO custom website, advanced listings, competitive insights and AI lead insights", "24/7 phone and email support"] },
+      { name: "Amplify", price: "Custom — talk to sales", whoFor: "Businesses buying done-for-you marketing", limits: ["No amount displayed; the button goes to demo scheduling"] },
+    ],
+    stacks: [
+      { label: "Thryv Boosts have no price anywhere", detail: "Ads Boosts, Search Boosts, Social Boosts and Brand Boosts are described as done-for-you marketing services available on Signature and Amplify. The pricing page discloses no figure for any of them." },
+      { label: "Extra users aren't priced", detail: "Starter includes 1 user and Signature includes 5. The page never says what a sixth user costs, so team growth has no published price." },
+      { label: "Onboarding and support fees, as reviewers report them", detail: "Third-party breakdowns report a $250 one-time onboarding fee on every package level and a $9 monthly support fee. Thryv publishes neither on its pricing page, so both are reported rather than documented." },
+      { label: "Per-seat and per-message usage, as reviewers report it", detail: "The same sources report Command Center seats at roughly $20 per seat per month on Plus and $30 on Professional above a free tier, SMS at $0.015 a message and voice at $0.01 a minute. None of these rates appears on Thryv's pricing page." },
+    ],
+    bottomLine:
+      "Thryv publishes two real numbers, $99 and $399 a month, and gates everything else. Amplify is a demo call, Boosts carry no price anywhere on the page, and nothing states what a sixth user costs. Third parties report a $250 one-time onboarding fee and a $9 monthly support fee on every package plus per-seat and per-message usage, but Thryv publishes none of that, so treat those figures as reported.",
+  },
+  {
+    slug: "tidio",
+    pricingUrl: "https://www.tidio.com/pricing/",
+    verified: "August 2026",
+    quoteGated: true,
+    freeTier: "Yes — a $0/mo Free plan with 50 billable conversations, 100 Flows visitors reached, and a one-off (not monthly) 50 Lyro AI conversations",
+    annualNote: "The page advertises \"Annually (2 months free)\". The displayed $24.17 and $49.17 are arithmetically consistent with an annual-billed monthly rate, yet the toggle read as Monthly when I checked, and the page never resolves which basis those decimals use.",
+    plans: [
+      { name: "Free", price: "$0/mo", whoFor: "Trying it out", limits: ["50 billable conversations", "50 Lyro AI conversations, one-off rather than monthly", "100 Flows visitors reached", "10 seats"] },
+      { name: "Starter", price: "$24.17/mo", whoFor: "Solo operators", limits: ["100 billable conversations", "50 Lyro AI conversations, one-off rather than monthly", "100 Flows visitors reached", "10 seats"] },
+      { name: "Growth", price: "Starts at $49.17/mo", whoFor: "Small support teams", limits: ["Up to 2,000 billable conversations", "Lyro and Flows quotas both listed as Custom"] },
+      { name: "Plus", price: "Starts at $300/mo + monthly usage", whoFor: "Larger support orgs", limits: ["Custom billable conversations and custom seat count", "Usage bills on top of the $300 floor, so the real bill isn't determinable from the page"] },
+      { name: "Premium", price: "Contact for pricing — quote-gated", whoFor: "High-volume AI deflection", limits: ["Lyro from 3,000 conversations", "The guaranteed 50% Lyro resolution rate and pay-per-resolution billing are Premium-only"] },
+    ],
+    stacks: [
+      { label: "Three meters, not one", detail: "Billable conversations, Lyro AI conversations and Flows visitors reached are counted independently. The plan price covers the first one. Running out of either of the other two forces an upgrade or a paid add-on." },
+      { label: "Lyro AI is an add-on", detail: "The standalone Lyro add-on is listed at \"Starts at $32.50/mo. From 50 Lyro AI conversations\", which works out to $0.65 per AI conversation at the entry bundle. The 50 Lyro conversations on Free and Starter are labelled one-off, so they're a grant and not a monthly allowance." },
+      { label: "Flows is its own add-on", detail: "The standalone Flows add-on is listed at \"Starts at $24.17/mo. From 2 000 visitors reached\", which works out to about $0.012 per visitor reached at the entry bundle." },
+      { label: "The Growth-to-Plus cliff", detail: "Growth starts at $49.17 a month and the next tier up starts at $300 a month plus monthly usage. That's roughly a six-fold step, and the Plus bill isn't determinable from the page because usage sits on top of the floor." },
+      { label: "Resolution-based billing is top-tier only", detail: "The guaranteed 50% Lyro resolution rate and pay-per-resolution billing are Premium features. Below that you pay per conversation whether Lyro resolved it or not." },
+    ],
+    bottomLine:
+      "Tidio's entry pricing is public and cheap, but the plan price only buys one of three meters. Live-chat conversations, Lyro AI conversations and Flows visitors are counted separately, and running out of any one of them means an upgrade or a paid add-on. The step from Growth at about $49 a month to Plus at $300 a month plus usage is roughly six-fold, and Premium carries no published price at all.",
+  },
+  {
+    slug: "elevenlabs",
+    pricingUrl: "https://elevenlabs.io/pricing/agents",
+    verified: "August 2026",
+    quoteGated: false,
+    freeTier: "Yes — 15 agent minutes a month at $0, with 4 concurrent calls",
+    annualNote: "Annual billing on the main plan page is structured as paying for 10 months, which works out to two months free (about 20% off).",
+    plans: [
+      { name: "Free", price: "$0/mo", whoFor: "Trying the agent product", limits: ["15 agent minutes", "4 concurrent calls"] },
+      { name: "Starter", price: "$6/mo", whoFor: "Hobby projects", limits: ["75 agent minutes", "6 concurrent calls"] },
+      { name: "Creator", price: "$22/mo (first month 50% off at $11)", whoFor: "Solo builders", limits: ["275 agent minutes", "10 concurrent calls"] },
+      { name: "Pro", price: "$99/mo", whoFor: "Small production deployments", limits: ["1,238 agent minutes", "20 concurrent calls"] },
+      { name: "Scale", price: "$299/mo", whoFor: "Growing call volume", limits: ["3,738 agent minutes", "30 concurrent calls"] },
+      { name: "Business", price: "$990/mo", whoFor: "High-volume deployments", limits: ["12,375 agent minutes", "40 concurrent calls"] },
+      { name: "Enterprise", price: "Custom — talk to sales", whoFor: "Large orgs", limits: ["No published price"] },
+    ],
+    stacks: [
+      { label: "The model and the phone line are billed on top", detail: "ElevenLabs states it plainly: \"The LLM model and any telephony are billed separately on top, based on usage.\" No LLM rate and no telephony rate is published anywhere on the agents pricing page, so the all-in cost of a call can't be worked out from the vendor's own disclosures. The $0.08 a minute headline is a floor, not a total." },
+      { label: "Bundled minutes carry no volume discount", detail: "Divide each plan price by its included minutes and every paid tier lands on exactly $0.080 a minute: $6 over 75, $22 over 275, $99 over 1,238, $299 over 3,738 and $990 over 12,375. That's the same as the published overage rate, so the subscription is prepaid minutes at list price and a higher tier buys concurrency headroom rather than a cheaper minute." },
+      { label: "Burst pricing doubles the rate at your busiest moment", detail: "Going past your plan's concurrency limit doesn't block the call, it bills at $0.160 a minute (up to 3x normal concurrency). That's double the standard rate, and it triggers exactly when call volume spikes. Concurrency, at 4, 6, 10, 20, 30 or 40 lines, is the real gating constraint per tier." },
+      { label: "Text messages", detail: "Text messages bill at $0.003 each on top of everything above." },
+    ],
+    bottomLine:
+      "ElevenLabs publishes its agent-minute price openly, and the arithmetic is unusually clean: every paid tier divides out to exactly $0.08 a minute, the same as the overage rate, so the subscription is prepaid minutes at list price and the tier only buys concurrency. What the page doesn't price is the model. ElevenLabs says the LLM and telephony are billed separately on top and publishes no rate for either, so $0.08 a minute is a floor and not a total.",
+  },
 ];
 
 export function getCompetitorPricing(slug: string): CompetitorPricing {
