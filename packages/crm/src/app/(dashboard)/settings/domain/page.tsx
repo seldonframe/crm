@@ -73,16 +73,35 @@ export default async function DomainSettingsPage({
   // plan catalog (marketingFeatures is the single source of tier copy;
   // prices can never drift from what checkout honors), and no catalog or
   // price-id import ever reaches the client bundle.
+  // v2.1 — each card carries ONE bold capacity line (the datum that
+  // actually changes across the ladder, derived from catalog limits so
+  // it can't drift) plus one quiet qualifier condensed from the
+  // catalog's marketingFeatures. The full checklist stays on /pricing.
   const unlockPlans: DomainPlanCard[] = DOMAIN_UNLOCK_TIERS.flatMap((tier) => {
     const plan = getPlan(tier);
     if (!plan) return [];
+    const subAccounts = plan.limits.maxSubAccounts;
+    const capacity =
+      tier === "managed"
+        ? "1 workspace, zero setup"
+        : subAccounts === -1
+          ? "Unlimited client sub-accounts"
+          : `${subAccounts} client sub-accounts`;
+    const detail =
+      tier === "managed"
+        ? "Runs on SeldonFrame's keys — no API keys to bring. Custom domain included."
+        : tier === "agency_starter"
+          ? "Full white-label with branded client portals."
+          : tier === "agency_growth"
+            ? "One-click deploy to all clients, priority support."
+            : "API + MCP access, set your own resale pricing.";
     return [
       {
         tier,
         name: plan.name,
-        price: `$${plan.price}/mo`,
-        featuresHeader: plan.marketingFeatures?.header ?? null,
-        features: (plan.marketingFeatures?.items ?? []).slice(0, 4),
+        price: `$${plan.price}`,
+        capacity,
+        detail,
         recommended: tier === "managed",
       },
     ];

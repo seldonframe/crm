@@ -6,10 +6,20 @@
 // tiers (see domain-unlock-tiers.ts for the canonical tier list the
 // checkout-tier-gate spec audits).
 //
-// Cards arrive fully serialized from the server page and are sourced
-// from the plan catalog's marketingFeatures (the single source of tier
-// copy) — no price id and no PLANS import ever reaches this client
-// bundle (see pricing-shell-marketing.tsx's hydration-mismatch writeup).
+// v2.1 UX pass (same day): the first cut rendered four mini pricing
+// pages inside the modal — long wrapped bullet lists, a clipped
+// Recommended badge, buttons floating at different heights, dialog
+// taller than the viewport. A modal is a DECISION surface, not a
+// marketing surface: each card now carries name, price, ONE bold
+// capacity line (the thing that actually changes across the ladder — 1
+// own workspace, then 10 / 30 / unlimited client sub-accounts) and one
+// quiet qualifier, with buttons pinned to an equal bottom edge. The
+// full comparison stays on /pricing, linked in the footer.
+//
+// Cards arrive fully serialized from the server page and are derived
+// from the plan catalog — no price id and no PLANS import ever reaches
+// this client bundle (see pricing-shell-marketing.tsx's
+// hydration-mismatch writeup).
 //
 // MONEY-SAFE: checkout goes through the shared startCheckout helper
 // ({ tier } only); /api/stripe/checkout re-resolves the price server-side
@@ -18,7 +28,7 @@
 // frozen tier or an arbitrary price.
 
 import { useState } from "react";
-import { ArrowRight, Check } from "lucide-react";
+import { ArrowRight } from "lucide-react";
 
 import {
   Dialog,
@@ -27,7 +37,6 @@ import {
   DialogTitle,
   DialogDescription,
 } from "@/components/ui/dialog";
-import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
 import { startCheckout } from "@/lib/billing/start-checkout";
@@ -37,9 +46,11 @@ export type DomainPlanCard = {
   tier: TierId;
   name: string;
   price: string;
-  /** Optional "Everything in X, plus:" lead-in from the catalog. */
-  featuresHeader: string | null;
-  features: string[];
+  /** The one datum that changes across the ladder — "1 workspace" or
+   *  "N client sub-accounts". Rendered bold; keep it under ~30 chars. */
+  capacity: string;
+  /** One quiet qualifier sentence. */
+  detail: string;
   recommended: boolean;
 };
 
@@ -84,52 +95,62 @@ export function DomainPlanChooser({
       <p className="text-xs text-muted-foreground">Custom domains are included on every paid plan.</p>
 
       <Dialog open={open} onOpenChange={setOpen}>
-        <DialogContent className="max-w-2xl">
+        <DialogContent className="max-h-[85vh] max-w-3xl overflow-y-auto">
           <DialogHeader>
             <DialogTitle>Choose your plan</DialogTitle>
             <DialogDescription>
-              Every paid plan includes custom domains and removes SeldonFrame branding. Building
-              for clients? The agency tiers add white-label and client sub-accounts.
+              Every paid plan includes custom domains and removes SeldonFrame branding.
             </DialogDescription>
           </DialogHeader>
 
-          <div className="mt-4 grid gap-3 sm:grid-cols-2">
+          <div className="mt-2 grid gap-3 sm:grid-cols-2">
             {plans.map((plan) => (
-              <Card key={plan.tier} className={plan.recommended ? "border-primary" : undefined}>
-                <CardHeader className="space-y-1 pb-2">
-                  <div className="flex items-center justify-between gap-2">
-                    <CardTitle className="text-base">{plan.name}</CardTitle>
-                    {plan.recommended ? <Badge>Recommended</Badge> : null}
-                  </div>
-                  <p className="text-2xl font-semibold text-foreground">{plan.price}</p>
-                </CardHeader>
-                <CardContent className="space-y-3">
-                  <ul className="space-y-1.5 text-sm text-muted-foreground">
-                    {plan.featuresHeader ? (
-                      <li className="font-medium text-foreground">{plan.featuresHeader}</li>
-                    ) : null}
-                    {plan.features.map((feature) => (
-                      <li key={feature} className="flex items-start gap-2">
-                        <Check className="mt-0.5 size-3.5 shrink-0 text-primary" aria-hidden="true" />
-                        <span>{feature}</span>
-                      </li>
-                    ))}
-                  </ul>
-                  <Button
-                    className="w-full"
-                    variant={plan.recommended ? "default" : "outline"}
-                    disabled={pending !== null}
-                    onClick={() => choose(plan.tier)}
-                  >
-                    {pending === plan.tier ? "Starting checkout…" : `Choose ${plan.name}`}
-                  </Button>
-                </CardContent>
-              </Card>
+              <div
+                key={plan.tier}
+                className={
+                  plan.recommended
+                    ? "flex h-full flex-col rounded-xl border border-primary bg-primary/5 p-4"
+                    : "flex h-full flex-col rounded-xl border border-border bg-card p-4"
+                }
+              >
+                <div className="flex min-w-0 items-center justify-between gap-2">
+                  <span className="truncate text-sm font-semibold text-foreground">{plan.name}</span>
+                  {plan.recommended ? (
+                    <Badge className="shrink-0 whitespace-nowrap">Recommended</Badge>
+                  ) : null}
+                </div>
+                <p className="mt-1 text-2xl font-semibold tracking-tight text-foreground">
+                  {plan.price}
+                  <span className="text-sm font-normal text-muted-foreground">/mo</span>
+                </p>
+                <p className="mt-3 text-sm font-medium text-foreground">{plan.capacity}</p>
+                <p className="mt-1 flex-1 text-sm leading-relaxed text-muted-foreground">{plan.detail}</p>
+                <Button
+                  className="mt-4 w-full"
+                  variant={plan.recommended ? "default" : "outline"}
+                  disabled={pending !== null}
+                  onClick={() => choose(plan.tier)}
+                >
+                  {pending === plan.tier ? "Starting checkout…" : `Choose ${plan.name}`}
+                </Button>
+              </div>
             ))}
           </div>
 
+          <p className="mt-3 text-xs text-muted-foreground">
+            Cancel anytime ·{" "}
+            <a
+              href="/pricing"
+              target="_blank"
+              rel="noreferrer"
+              className="font-medium text-primary underline underline-offset-4"
+            >
+              See the full plan comparison
+            </a>
+          </p>
+
           {error ? (
-            <p role="alert" className="mt-3 text-sm text-destructive">
+            <p role="alert" className="mt-2 text-sm text-destructive">
               {error}
             </p>
           ) : null}
