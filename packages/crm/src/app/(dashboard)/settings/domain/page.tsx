@@ -30,7 +30,9 @@ import { auth } from "@/auth";
 import { getCustomDomainSettings, saveCustomDomainAction } from "@/lib/domains/actions";
 import { getOrgId } from "@/lib/auth/helpers";
 import { resolveDomainGate } from "@/lib/billing/domain-gate";
-import { DomainUpgradeButton } from "@/components/billing/domain-upgrade-button";
+import { getPlan } from "@/lib/billing/plans";
+import { DomainPlanChooser, type DomainPlanCard } from "@/components/billing/domain-plan-chooser";
+import { DOMAIN_UNLOCK_TIERS } from "@/components/billing/domain-unlock-tiers";
 
 export default async function DomainSettingsPage({
   searchParams,
@@ -62,6 +64,29 @@ export default async function DomainSettingsPage({
   }
 
   const gate = await resolveDomainGate({ userId, orgId });
+
+  // 2026-08-23 v2 (Max's first-principles call) — the upsell CTA opens a
+  // plan CHOOSER instead of direct-checkout of one guessed tier: Managed
+  // $49 first (zero-setup, runs on SF keys, custom domain included — the
+  // honest first ask for a fresh operator with no API key), then the
+  // agency tiers for client work. Cards are built server-side from the
+  // plan catalog (marketingFeatures is the single source of tier copy;
+  // prices can never drift from what checkout honors), and no catalog or
+  // price-id import ever reaches the client bundle.
+  const unlockPlans: DomainPlanCard[] = DOMAIN_UNLOCK_TIERS.flatMap((tier) => {
+    const plan = getPlan(tier);
+    if (!plan) return [];
+    return [
+      {
+        tier,
+        name: plan.name,
+        price: `$${plan.price}/mo`,
+        featuresHeader: plan.marketingFeatures?.header ?? null,
+        features: (plan.marketingFeatures?.items ?? []).slice(0, 4),
+        recommended: tier === "managed",
+      },
+    ];
+  });
 
   // Sanitize the workspace slug from query — only allow the org-slug
   // shape (lowercase alphanumerics + hyphens, max 60 chars) so a
@@ -139,7 +164,7 @@ export default async function DomainSettingsPage({
       </article>
 
       {gate?.kind === "render-upsell" ? (
-        <UpsellCard onboardingWorkspaceSlug={onboardingWorkspaceSlug} />
+        <UpsellCard onboardingWorkspaceSlug={onboardingWorkspaceSlug} plans={unlockPlans} />
       ) : (
         <article className="rounded-xl border bg-card p-5 space-y-5">
           <form action={saveCustomDomainAction} className="space-y-3">
@@ -234,8 +259,10 @@ export default async function DomainSettingsPage({
  *  bounces back to the Ready page with ?completed=1). */
 function UpsellCard({
   onboardingWorkspaceSlug,
+  plans,
 }: {
   onboardingWorkspaceSlug: string;
+  plans: DomainPlanCard[];
 }) {
   // Encode the slug into the success path so a successful checkout bounces
   // back here with the onboarding context intact, same round-trip contract
@@ -256,7 +283,7 @@ function UpsellCard({
         </p>
       </div>
 
-      <DomainUpgradeButton successPath={successPath} />
+      <DomainPlanChooser successPath={successPath} plans={plans} />
     </article>
   );
 }

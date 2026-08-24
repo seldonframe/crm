@@ -31,7 +31,13 @@ import type { TierId } from "@/lib/billing/plans";
 
 export type StartCheckoutInput = {
   tier: TierId;
-  checkoutSource?: "upgrade_modal" | "pricing" | "signup_resume";
+  checkoutSource?: "upgrade_modal" | "pricing" | "signup_resume" | "domain_settings";
+  /** 2026-08-23 — the domain-settings chooser returns to /settings/domain
+   *  (preserving the onboarding slug) instead of the dashboard. Optional;
+   *  existing callers keep the historical defaults below. The route
+   *  re-validates both paths server-side (safe-redirect allowlist). */
+  successPath?: string;
+  cancelPath?: string;
   /** Test seam — production callers omit and fall back to global `fetch`. */
   fetchImpl?: typeof fetch;
 };
@@ -48,8 +54,8 @@ export async function startCheckout(input: StartCheckoutInput): Promise<StartChe
     body: JSON.stringify({
       tier: input.tier,
       checkout_source: input.checkoutSource ?? "upgrade_modal",
-      successPath: `/dashboard?upgraded=${input.tier}`,
-      cancelPath: "/clients",
+      successPath: input.successPath ?? `/dashboard?upgraded=${input.tier}`,
+      cancelPath: input.cancelPath ?? "/clients",
     }),
   });
 
