@@ -139,7 +139,17 @@ export default function GoogleReviewLinkGeneratorPage(): ReactElement {
               <p style={{ margin: "10px 0 2px", fontSize: 14.5, lineHeight: 1.6, color: "rgba(34,29,23,0.72)" }} dangerouslySetInnerHTML={{ __html: f.a }} />
             </details>
           ))}
+          {/* 2026-08-24 — the QR generator is the print-side sibling of this
+              page: same underlying URL, but real physical sizes and PNG/SVG
+              downloads instead of an inline preview. */}
           <p style={{ margin: "22px 0 0", fontSize: 14.5, lineHeight: 1.6, color: "rgba(34,29,23,0.65)" }}>
+            Printing the code rather than texting it?{" "}
+            <Link href="/tools/google-review-qr-code-generator" className="sf-link" style={{ color: MKT.green, fontWeight: 700 }}>
+              The QR code generator
+            </Link>{" "}
+            exports the same link at table-tent, counter-card and window-decal sizes, as a 300 DPI PNG or a vector SVG.
+          </p>
+          <p style={{ margin: "14px 0 0", fontSize: 14.5, lineHeight: 1.6, color: "rgba(34,29,23,0.65)" }}>
             More free tools:{" "}
             <Link href="/tools/review-response-generator" className="sf-link" style={{ color: MKT.green, fontWeight: 700 }}>
               write a review response

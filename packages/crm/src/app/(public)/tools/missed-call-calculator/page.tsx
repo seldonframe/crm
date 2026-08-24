@@ -88,6 +88,17 @@ export default function MissedCallCalculatorPage(): ReactElement {
             to the tools you're evaluating. See the{" "}
             <Link href="/charts/missed-revenue-decay" className="sf-link" style={{ color: MKT.green, fontWeight: 700 }}>decay curve behind this math →</Link>
           </p>
+          {/* 2026-08-24 — the numbers above price ONE lost job. The lifetime
+              value calculator is what turns that into what the lost customer
+              was worth, so the two pages link both ways. */}
+          <p style={{ margin: "14px 0 0", fontSize: 14.5, lineHeight: 1.6, color: "rgba(34,29,23,0.65)" }}>
+            One caveat on the number above: it prices a single lost job. A missed call is really a shot at a customer
+            who would have come back and referred others, so{" "}
+            <Link href="/tools/customer-lifetime-value-calculator" className="sf-link" style={{ color: MKT.green, fontWeight: 700 }}>
+              work out what one customer is worth over a lifetime
+            </Link>{" "}
+            and the real cost is a multiple of this one.
+          </p>
         </section>
       </main>
       <MarketplaceFooter />

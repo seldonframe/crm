@@ -88,6 +88,21 @@ export default function NoShowCostCalculatorPage(): ReactElement {
             <Link href="/ai-agents/ai-receptionist" className="sf-link" style={{ color: MKT.green, fontWeight: 700 }}>the AI receptionist</Link>{" "}
             that confirms appointments, texts reminders and rebooks the cancellations for you.
           </p>
+          {/* 2026-08-24 — the number above prices the burnt slot. Lifetime value
+              is what a client who stops coming back actually costs, and the
+              policy generator is the fix that pairs with this diagnosis. */}
+          <p style={{ margin: "14px 0 0", fontSize: 14.5, lineHeight: 1.6, color: "rgba(34,29,23,0.65)" }}>
+            The figure above is the burnt slot. A client who no-shows twice and then stops booking costs you a whole
+            relationship, so it is worth seeing{" "}
+            <Link href="/tools/customer-lifetime-value-calculator" className="sf-link" style={{ color: MKT.green, fontWeight: 700 }}>
+              what one customer is worth over a lifetime
+            </Link>{" "}
+            before you set a fee. When you are ready to write one,{" "}
+            <Link href="/tools/cancellation-policy-generator" className="sf-link" style={{ color: MKT.green, fontWeight: 700 }}>
+              the cancellation policy generator
+            </Link>{" "}
+            produces the paste-ready wording.
+          </p>
         </section>
       </main>
       <MarketplaceFooter />

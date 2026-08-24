@@ -88,6 +88,15 @@ export default function SpeedToLeadCalculatorPage(): ReactElement {
             or <Link href="/alternatives" className="sf-link" style={{ color: MKT.green, fontWeight: 700 }}>how SeldonFrame compares</Link>. See the{" "}
             <Link href="/charts/missed-revenue-decay" className="sf-link" style={{ color: MKT.green, fontWeight: 700 }}>decay curve behind this math →</Link>
           </p>
+          {/* 2026-08-24 — this page prices one cold lead. Lifetime value turns
+              that into what the lost relationship was worth. */}
+          <p style={{ margin: "14px 0 0", fontSize: 14.5, lineHeight: 1.6, color: "rgba(34,29,23,0.65)" }}>
+            Worth remembering: a lead that goes cold is not one lost job, it is a customer who would have come back.{" "}
+            <Link href="/tools/customer-lifetime-value-calculator" className="sf-link" style={{ color: MKT.green, fontWeight: 700 }}>
+              Work out what one customer is worth over a lifetime
+            </Link>{" "}
+            and multiply the figures above by it.
+          </p>
         </section>
       </main>
       <MarketplaceFooter />

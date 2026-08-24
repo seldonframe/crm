@@ -20,6 +20,7 @@ import { allBestSlugs } from "@/lib/seo/best-pages";
 import { allGuideSlugs } from "@/lib/seo/guides";
 import { allBlogSlugs } from "@/lib/seo/blog";
 import { allPricingSlugs } from "@/lib/seo/competitor-pricing";
+import { allToolSlugs } from "@/lib/seo/tools-pages";
 import { listMarketplaceAgentsFromDb } from "@/lib/marketplace/agent-listings";
 import { MARKETPLACE_SEED } from "@/components/marketplace/marketplace-seed";
 import { GOHIGHLEVEL_COLLECTION_PATH } from "@/lib/seo/gohighlevel-discovery";
@@ -95,6 +96,17 @@ export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
     url: `${base}/sell`,
     lastModified: now,
     changeFrequency: "weekly",
+    priority: 0.8,
+  });
+
+  // The agency landing page — live, indexable, and missing from this map until
+  // 2026-08-24. (/try is deliberately NOT here: it sets robots noindex and
+  // 404s unless SF_WEB_UNGATED_BUILD is on, and a noindex/404-able route must
+  // never be sitemapped — same rule as /record above.)
+  entries.push({
+    url: `${base}/agencies`,
+    lastModified: now,
+    changeFrequency: "monthly",
     priority: 0.8,
   });
 
@@ -177,32 +189,12 @@ export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
     });
   }
 
-  // Free tools.
+  // Free tools — driven by the registry (2026-08-24), so a new tool can never
+  // ship visible-on-the-hub but absent from the crawl map again.
   entries.push({ url: `${base}/tools`, lastModified: now, changeFrequency: "monthly", priority: 0.7 });
-  for (const tool of [
-    "speed-to-lead-calculator",
-    "no-show-cost-calculator",
-    "ai-receptionist-script-generator",
-    "service-business-faq-generator",
-    "booking-friction-grader",
-    "ai-visibility-checker",
-    "missed-call-calculator",
-    "google-review-link-generator",
-    "ai-receptionist-cost-calculator",
-    "a2p-10dlc-checker",
-    "review-response-generator",
-    "claude-project-brief-generator",
-    "hubspot-pricing-calculator",
-    "gohighlevel-cost-calculator",
-    "voice-ai-cost-calculator",
-    "klaviyo-cost-calculator",
-    "agency-margin-calculator",
-    "ai-website-generator",
-    "free-booking-page",
-    "website-grader",
-  ]) {
+  for (const slug of allToolSlugs()) {
     entries.push({
-      url: `${base}/tools/${tool}`,
+      url: `${base}/tools/${slug}`,
       lastModified: now,
       changeFrequency: "monthly",
       priority: 0.7,
