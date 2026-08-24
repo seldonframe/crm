@@ -20,11 +20,16 @@ export async function generateMetadata({ params }: RouteParams): Promise<Metadat
   } catch {
     return { title: "Not found — SeldonFrame" };
   }
-  const { category, audience } = resolved;
+  const { page, category, audience } = resolved;
   const total = category.contenders.length + 1;
   const topNames = category.contenders.slice(0, 3).map((c) => c.name).join(", ");
-  const title = `The ${total} Best ${category.nounPlural} for ${audience.label} (2026) — honest comparison`;
-  const description = `SeldonFrame vs ${topNames} and more: an honest, ranked comparison of the best ${category.nounPlural.toLowerCase()} for ${audience.label.toLowerCase()} — pricing, strengths and the real catch for each.`;
+  // 2026-08-24 — the registry may override title/description for CTR on combos
+  // with proven impressions and no clicks (see BestPage.metaTitle). The H1 in
+  // best-page.tsx deliberately stays on the template either way.
+  const title = page.metaTitle ?? `The ${total} Best ${category.nounPlural} for ${audience.label} (2026) — honest comparison`;
+  const description =
+    page.metaDescription ??
+    `SeldonFrame vs ${topNames} and more: an honest, ranked comparison of the best ${category.nounPlural.toLowerCase()} for ${audience.label.toLowerCase()} — pricing, strengths and the real catch for each.`;
   const canonical = `/best/${slug}`;
   const ogUrl = buildOgUrl({ kind: "best", title: `Best ${category.nounPlural}`, aud: `for ${audience.label}`, n: total });
   return {

@@ -6,6 +6,8 @@
 
 import { describe, test } from "node:test";
 import assert from "node:assert/strict";
+import { existsSync } from "node:fs";
+import { join } from "node:path";
 
 import {
   BEST_CATEGORIES,
@@ -21,7 +23,16 @@ import {
 import { renderBestMarkdown } from "../../../src/lib/seo/best-markdown";
 import { monthYearToIso, composeCheapestOption } from "../../../src/components/seo/best-page";
 
-const AUDIENCE_GROUPS: ReadonlySet<AudienceGroup> = new Set(["trades", "beauty", "medical", "construction", "general"]);
+const AUDIENCE_GROUPS: ReadonlySet<AudienceGroup> = new Set([
+  "trades",
+  "beauty",
+  "medical",
+  "construction",
+  "general",
+  "professional",
+  "wellness",
+  "pets",
+]);
 
 // ─── registry shape ─────────────────────────────────────────────────────────
 
@@ -154,8 +165,69 @@ test("all must-ship slugs are present", () => {
   }
 });
 
-test("total combo count is roughly the curated matrix (~30-40)", () => {
-  assert.ok(BEST_PAGES.length >= 30 && BEST_PAGES.length <= 40, `expected 30-40 combos, got ${BEST_PAGES.length}`);
+// Bound raised 2026-08-24 with the vertical wave (39 → 48 combos). The point of
+// the bound is to notice an accidental combinatorial explosion (categories ×
+// audiences is 8 × 18 = 144), not to pin an exact number.
+test("total combo count is roughly the curated matrix (~40-60)", () => {
+  assert.ok(BEST_PAGES.length >= 40 && BEST_PAGES.length <= 60, `expected 40-60 combos, got ${BEST_PAGES.length}`);
+});
+
+// ─── 2026-08-24 vertical wave ───────────────────────────────────────────────
+
+test("the vertical-wave slugs are present", () => {
+  const expected = [
+    "ai-receptionist-for-cleaning",
+    "crm-for-med-spas",
+    "ai-receptionist-for-law-firms",
+    "intake-form-builder-for-law-firms",
+    "crm-for-painters",
+    "website-builder-for-pest-control",
+    "booking-system-for-massage-therapists",
+    "booking-system-for-pet-groomers",
+    "booking-system-for-auto-detailers",
+  ];
+  const have = new Set(allBestSlugs());
+  for (const slug of expected) {
+    assert.ok(have.has(slug), `missing vertical-wave slug: ${slug}`);
+  }
+});
+
+// The two law-firm pages must find each other: the template's cross-links pull
+// same-audience pages, so shipping one without the other strands it.
+test("both law-firm pages ship, so the same-audience cross-link resolves", () => {
+  const lawFirmPages = BEST_PAGES.filter((p) => p.audience === "law-firms");
+  assert.ok(lawFirmPages.length >= 2, `law-firms needs ≥2 pages to cross-link, got ${lawFirmPages.length}`);
+});
+
+// A /best page links its own .md twin (MarkdownPointer + the metadata
+// alternates entry), so a missing static route folder is a linked 404. Mirrors
+// the same guardrail in guides.spec.ts.
+test("every /best page has its Markdown twin route on disk", () => {
+  for (const slug of allBestSlugs()) {
+    assert.ok(
+      existsSync(join(process.cwd(), "src", "app", "best", `${slug}.md`, "route.ts")),
+      `${slug}: missing static Markdown route (src/app/best/${slug}.md/route.ts)`,
+    );
+  }
+});
+
+// CTR overrides are deliberate exceptions, not the default — keep them honest
+// and short enough that Google shows the differentiator instead of cutting it.
+test("metaTitle/metaDescription overrides, where set, are non-empty and search-length sane", () => {
+  for (const page of BEST_PAGES) {
+    const slug = bestSlug(page);
+    if (page.metaTitle !== undefined) {
+      assert.ok(page.metaTitle.trim().length > 0, `${slug}: empty metaTitle`);
+      assert.ok(page.metaTitle.length <= 70, `${slug}: metaTitle is ${page.metaTitle.length} chars, will truncate in results`);
+    }
+    if (page.metaDescription !== undefined) {
+      assert.ok(page.metaDescription.trim().length > 0, `${slug}: empty metaDescription`);
+      assert.ok(
+        page.metaDescription.length <= 170,
+        `${slug}: metaDescription is ${page.metaDescription.length} chars, will truncate in results`,
+      );
+    }
+  }
 });
 
 // ─── markdown twin ──────────────────────────────────────────────────────────
