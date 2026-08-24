@@ -26,7 +26,20 @@ import { LAST_UPDATED } from "./alternative-pages";
 
 export { LAST_UPDATED };
 
-export type AudienceGroup = "trades" | "beauty" | "medical" | "construction" | "general";
+// 2026-08-24 — "professional", "wellness" and "pets" joined the union with the
+// vertical wave. A group exists so a contender fit note can be written once per
+// buying pattern; a note written for a hair salon reads wrong on a law-firm or
+// pet-grooming page, so those buyers get their own bucket rather than borrowing
+// "beauty".
+export type AudienceGroup =
+  | "trades"
+  | "beauty"
+  | "medical"
+  | "construction"
+  | "general"
+  | "professional"
+  | "wellness"
+  | "pets";
 
 export type BestFaqItem = { q: string; a: string };
 
@@ -86,6 +99,13 @@ export type BestCategory = {
 export type BestPage = {
   category: string;
   audience: string;
+  /** 2026-08-24 — CTR override for the <title> tag only; the on-page H1 stays
+   *  the template's "The N Best …" line so the page still reads as one of the
+   *  family. Set ONLY on combos where Search Console shows real impressions and
+   *  near-zero clicks, so a rewrite can be measured against untouched pages. */
+  metaTitle?: string;
+  /** Companion override for the meta description — same evidence-first rule. */
+  metaDescription?: string;
   /** YouTube video ID to embed under the H1 intro (lite-youtube.tsx) — a seam
    *  only, never set until a real video exists for that combo. */
   videoId?: string;
@@ -181,6 +201,53 @@ export const BEST_AUDIENCES: BestAudience[] = [
     painHook: "a missed call is a new patient who books with the practice down the street instead",
     exampleService: "a new-patient cleaning booking",
   },
+
+  // 2026-08-24 vertical wave. Picked off the Search Console read rather than
+  // guessed: Google already shows this site for trade-qualified variants of the
+  // /best queries, so these are the next verticals with demonstrated volume
+  // behind them. Every hook below names the specific moment the lead is lost.
+  {
+    slug: "law-firms",
+    label: "Law Firms",
+    group: "professional",
+    painHook: "someone with a legal problem calls three firms in one afternoon and retains the first one that actually picks up and takes the details",
+    exampleService: "a new-client consultation booking",
+  },
+  {
+    slug: "painters",
+    label: "Painters",
+    group: "trades",
+    painHook: "the repaint quote goes to whoever gets in front of the homeowner first, and the crew is up a ladder all day with the phone left in the van",
+    exampleService: "an interior repaint estimate",
+  },
+  {
+    slug: "pest-control",
+    label: "Pest Control Companies",
+    group: "trades",
+    painHook: "a wasp nest or a roach sighting is a same-day emergency, and the customer keeps calling down the list until somebody answers",
+    exampleService: "a same-day treatment booking",
+  },
+  {
+    slug: "massage-therapists",
+    label: "Massage Therapists",
+    group: "wellness",
+    painHook: "a therapist with their hands on a client cannot take the booking call, so the caller books the next studio on the map instead",
+    exampleService: "a 60-minute deep tissue booking",
+  },
+  {
+    slug: "pet-groomers",
+    label: "Pet Groomers",
+    group: "pets",
+    painHook: "grooming slots fill weeks ahead, so a client who cannot book online at 9pm just calls the next groomer in town",
+    exampleService: "a full-groom appointment booking",
+  },
+  {
+    slug: "auto-detailers",
+    label: "Auto Detailers",
+    group: "trades",
+    painHook: "a ceramic coating job is worth four figures, and the customer judges the whole shop by how hard it was to get a price and a slot",
+    exampleService: "a full detail booking",
+  },
 ];
 
 export function getBestAudience(slug: string): BestAudience {
@@ -210,7 +277,10 @@ const BOOKING_CONTENDERS: BestContender[] = [
     bestFor: "Service businesses needing intake forms + package pricing at booking time",
     strengths: ["Forms built right into booking", "Handles classes and package deals", "Works closely with Squarespace"],
     watchOut: "It has no website or CRM of its own — you have to connect it to whatever site and contact system you already use.",
-    fitNotes: { beauty: "A common choice for solo stylists, but it's just a booking box, not a full salon system." },
+    fitNotes: {
+      beauty: "A common choice for solo stylists, but it's just a booking box, not a full salon system.",
+      wellness: "One of the most common picks for solo massage therapists, but it's a booking box bolted onto whatever site you already have.",
+    },
     sourceUrl: "https://acuityscheduling.com/pricing.php",
   },
   {
@@ -231,7 +301,11 @@ const BOOKING_CONTENDERS: BestContender[] = [
     bestFor: "Salons, spas and fitness studios wanting an industry-specific booking suite",
     strengths: ["Built for the industry (memberships, retail, staff pay)", "Listed in its own marketplace so new clients can find you", "Tracks client history and sells retail products at checkout"],
     watchOut: "The design feels older next to newer tools, and the price climbs fast once you add staff and marketing extras.",
-    fitNotes: { beauty: "Made for this industry, but your booking box will always look like Vagaro's, not your own site." },
+    fitNotes: {
+      beauty: "Made for this industry, but your booking box will always look like Vagaro's, not your own site.",
+      wellness: "Built for spas and wellness studios, so packages and memberships fit, but the booking box will always look like Vagaro's, not your own site.",
+      pets: "Vagaro sells a pet-grooming version, so the grooming features fit, but the booking box will always look like Vagaro's, not your own site.",
+    },
     sourceUrl: "https://www.vagaro.com/pro/pricing",
   },
   {
@@ -521,6 +595,9 @@ export const BEST_CATEGORIES: BestCategory[] = [
         bestFor: "Professional services wanting a human voice on complex or sensitive calls",
         strengths: ["Genuinely smooth conversations with a human in the loop", "A good fit for sensitive calls (legal, medical)", "24/7 coverage without hiring staff"],
         watchOut: "The bill grows with your call volume forever, and the pricing page is just a contact-sales form, not a price list.",
+        fitNotes: {
+          professional: "The pick on this list built around legal intake, with a human taking the calls that matter — but you pay per call, so the busier the firm gets, the bigger the bill.",
+        },
         sourceUrl: "https://smith.ai/pricing/ai-receptionist",
       },
       {
@@ -607,6 +684,9 @@ export const BEST_CATEGORIES: BestCategory[] = [
         bestFor: "Larger teams needing forms tied into approval workflows and documents",
         strengths: ["Strong approval-workflow automation", "Add-ons that generate documents", "Plans built to meet HIPAA rules"],
         watchOut: "It's priced and built for bigger operations — too much, and too expensive, for a single intake form.",
+        fitNotes: {
+          professional: "The approval workflows and document add-ons fit engagement letters and retainer paperwork, but the price assumes a bigger firm than a two-lawyer practice.",
+        },
         sourceUrl: "https://www.formstack.com/pricing",
       },
     ],
@@ -813,7 +893,18 @@ export function getBestCategory(slug: string): BestCategory {
 export const BEST_PAGES: BestPage[] = [
   // Max's exact-match YouTube targets.
   { category: "crm", audience: "small-business" },
-  { category: "website-builder", audience: "small-business" },
+  {
+    category: "website-builder",
+    audience: "small-business",
+    // 2026-08-24 — the family's biggest impression pool (439 impressions, 2
+    // clicks, hovering around position 30). The generated title buried the year
+    // behind "The 6 Best …" and promised nothing but "honest comparison"; this
+    // one leads with the exact query, then names the thing no other builder on
+    // the list includes.
+    metaTitle: "Best Website Builder for Small Business 2026: booking built in",
+    metaDescription:
+      "Six website builders compared for 2026, with real prices and the honest catch on each. One of them includes booking, a CRM and an AI receptionist at $29/mo flat.",
+  },
   { category: "website-builder", audience: "construction-companies" },
   { category: "booking-system", audience: "small-business" },
   { category: "booking-app", audience: "small-business" },
@@ -838,7 +929,16 @@ export const BEST_PAGES: BestPage[] = [
   { category: "website-builder", audience: "electricians" },
   { category: "website-builder", audience: "roofers" },
   { category: "website-builder", audience: "landscapers" },
-  { category: "website-builder", audience: "cleaning" },
+  {
+    category: "website-builder",
+    audience: "cleaning",
+    // 2026-08-24 — 46 impressions, effectively no clicks. Searchers type "for
+    // cleaning business" (singular); the template renders the "Cleaning
+    // Businesses" label, so the title never matched the query back.
+    metaTitle: "Best Website Builder for Cleaning Business 2026: booking built in",
+    metaDescription:
+      "Six website builders compared for a cleaning business, with real 2026 prices and the honest catch on each. One of them takes the booking and answers the phone too.",
+  },
   { category: "website-builder", audience: "salons" },
   { category: "website-builder", audience: "med-spas" },
   { category: "website-builder", audience: "dentists" },
@@ -859,6 +959,21 @@ export const BEST_PAGES: BestPage[] = [
 
   // LLM-listicle intercept: "what AI agents do SMBs need every day" (2026-07-12).
   { category: "everyday-ai-agent", audience: "small-business" },
+
+  // 2026-08-24 vertical wave, ordered by the evidence behind each pick.
+  // Cleaning is the proven family (Google already serves us for cleaning-
+  // qualified /best queries) and this completes it — crm, website-builder and
+  // booking-system for cleaning already ship. Med spas is a pure combo gap:
+  // both halves were already in the registry. The rest open six new verticals.
+  { category: "ai-receptionist", audience: "cleaning" },
+  { category: "crm", audience: "med-spas" },
+  { category: "ai-receptionist", audience: "law-firms" },
+  { category: "intake-form-builder", audience: "law-firms" },
+  { category: "crm", audience: "painters" },
+  { category: "website-builder", audience: "pest-control" },
+  { category: "booking-system", audience: "massage-therapists" },
+  { category: "booking-system", audience: "pet-groomers" },
+  { category: "booking-system", audience: "auto-detailers" },
 ];
 
 /** URL slug for a category+audience combo: `<category>-for-<audience>`. */
