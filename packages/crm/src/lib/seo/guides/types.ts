@@ -33,6 +33,10 @@ export type GuideCallout = { kind: "analogy" | "tip" | "warning"; text: string }
  *  renders a small favicon logo next to the label. */
 export type GuideDiagramItem = { label: string; sub?: string; domain?: string };
 
+/** One row of a `table` diagram. `cells` must be the same length as the
+ *  table's `columns`; `domain` renders a favicon beside the first cell. */
+export type GuideTableRow = { cells: string[]; domain?: string };
+
 /** A typed, hand-authored SVG diagram rendered by <GuideDiagramView>. */
 export type GuideDiagram =
   | { type: "flow"; title?: string; steps: GuideDiagramItem[] } // left→right workflow
@@ -50,7 +54,18 @@ export type GuideDiagram =
       items: { label: string; value: number; display: string; domain?: string }[];
       note?: string;
     }
-  | { type: "stack"; title?: string; layers: GuideDiagramItem[] }; // top-down layers
+  | { type: "stack"; title?: string; layers: GuideDiagramItem[] } // top-down layers
+  // 2026-08-24 — added for AEO: answer engines lift real <table>/pipe-table
+  // matrices into their answers, and a fee matrix trapped in prose does not
+  // get lifted. The HTML template renders a semantic <table>, the Markdown
+  // twin a pipe table, so both surfaces stay extractable.
+  | {
+      type: "table";
+      title?: string;
+      columns: string[];
+      rows: GuideTableRow[];
+      note?: string;
+    };
 
 /** One <h2> section. `body` is markdown-lite paragraphs separated by blank
  *  lines (supports **bold**, *italic*, [label](/internal-path)); the HTML

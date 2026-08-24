@@ -243,6 +243,17 @@ for (const g of GUIDES) {
           assert.ok(item.display.trim().length > 0, `${s.h2}: bar '${item.label}' has empty display`);
         }
       }
+      // A ragged row renders a broken pipe table (cells shift into the wrong
+      // column), which is exactly the failure an answer engine would quote.
+      if (d.type === "table") {
+        assert.ok(d.columns.length >= 2, `${s.h2}: table needs >=2 columns`);
+        assert.ok(d.rows.length > 0, `${s.h2}: table has no rows`);
+        for (const col of d.columns) assert.ok(col.trim().length > 0, `${s.h2}: table has an empty column header`);
+        for (const [i, row] of d.rows.entries()) {
+          assert.equal(row.cells.length, d.columns.length, `${s.h2}: table row ${i} has ${row.cells.length} cells for ${d.columns.length} columns`);
+          for (const cell of row.cells) assert.ok(cell.trim().length > 0, `${s.h2}: table row ${i} has an empty cell`);
+        }
+      }
     }
   });
 

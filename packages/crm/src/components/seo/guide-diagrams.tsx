@@ -273,6 +273,77 @@ function StackDiagram({ d }: { d: Extract<GuideDiagram, { type: "stack" }> }): R
   );
 }
 
+// ─── table ────────────────────────────────────────────────────────────────
+
+// 2026-08-24 — a REAL <table>, not a grid of divs: answer engines lift
+// table rows into their answers, and a fee matrix written as prose never
+// gets lifted. Wrapped in an overflow-x:auto box so a wide matrix scrolls
+// inside itself instead of making the whole article scroll sideways.
+function TableDiagram({ d }: { d: Extract<GuideDiagram, { type: "table" }> }): ReactElement {
+  return (
+    <div style={wrapperStyle()}>
+      <DiagramTitle title={d.title} />
+      <div style={{ overflowX: "auto", WebkitOverflowScrolling: "touch" }}>
+        <table style={{ width: "100%", borderCollapse: "collapse", fontSize: 13.5, minWidth: Math.max(d.columns.length * 150, 320) }}>
+          <thead>
+            <tr>
+              {d.columns.map((col, i) => (
+                <th
+                  key={i}
+                  scope="col"
+                  style={{
+                    textAlign: "left",
+                    padding: "10px 12px",
+                    borderBottom: `1.5px solid ${MKT.ink10}`,
+                    background: MKT.ink05,
+                    fontSize: 12.5,
+                    fontWeight: 800,
+                    color: "rgba(34,29,23,0.6)",
+                    textTransform: "uppercase",
+                    letterSpacing: "0.03em",
+                    whiteSpace: "nowrap",
+                  }}
+                >
+                  {col}
+                </th>
+              ))}
+            </tr>
+          </thead>
+          <tbody>
+            {d.rows.map((row, i) => (
+              <tr key={i}>
+                {row.cells.map((cell, j) => (
+                  <td
+                    key={j}
+                    style={{
+                      padding: "11px 12px",
+                      borderBottom: `1px solid ${MKT.ink10}`,
+                      verticalAlign: "top",
+                      lineHeight: 1.5,
+                      color: j === 0 ? MKT.ink : "rgba(34,29,23,0.78)",
+                      fontWeight: j === 0 ? 700 : 400,
+                    }}
+                  >
+                    {j === 0 && row.domain ? (
+                      <span style={{ display: "flex", alignItems: "center", gap: 6 }}>
+                        <Logo domain={row.domain} />
+                        <span>{cell}</span>
+                      </span>
+                    ) : (
+                      cell
+                    )}
+                  </td>
+                ))}
+              </tr>
+            ))}
+          </tbody>
+        </table>
+      </div>
+      {d.note && <div style={{ marginTop: 12, fontSize: 12.5, color: "rgba(34,29,23,0.55)" }}>{d.note}</div>}
+    </div>
+  );
+}
+
 // ─── dispatch ─────────────────────────────────────────────────────────────
 
 export function GuideDiagramView({ d }: { d: GuideDiagram }): ReactElement {
@@ -287,5 +358,7 @@ export function GuideDiagramView({ d }: { d: GuideDiagram }): ReactElement {
       return <BarsDiagram d={d} />;
     case "stack":
       return <StackDiagram d={d} />;
+    case "table":
+      return <TableDiagram d={d} />;
   }
 }
