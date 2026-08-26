@@ -108,7 +108,13 @@ describe("extractBusinessFactsFromUrl (markdown-extractor)", () => {
     assert.ok(userMsg.includes("URL: https://acme.com"), "URL in user message");
   });
 
-  test("Firecrawl throws -> WebFetchError(extraction_failed) with 'Firecrawl fetch failed' prefix", async () => {
+  // 2026-08-26 — persona-loop finding: a Firecrawl-level failure means the
+  // site was NEVER actually read, which is a different condition from
+  // "read it, but required fields are missing" (extraction_failed below).
+  // Collapsing both into "extraction_failed" made run-create-from-url.ts's
+  // "We read that site but couldn't find..." copy false for this case (e.g.
+  // a Facebook-only business page blocking the scraper). See "fetch_blocked".
+  test("Firecrawl throws -> WebFetchError(fetch_blocked) with 'Firecrawl fetch failed' prefix", async () => {
     const firecrawl = makeFakeFirecrawl(async () => {
       throw new Error("Cloudflare challenge: status 403");
     });
@@ -123,14 +129,16 @@ describe("extractBusinessFactsFromUrl (markdown-extractor)", () => {
         }),
       (err: unknown) =>
         err instanceof WebFetchError &&
-        err.reason === "extraction_failed" &&
+        err.reason === "fetch_blocked" &&
         err.message.includes("Firecrawl fetch failed: fetch_failed"),
     );
   });
 
-  test("near-empty markdown (< 200 chars) -> WebFetchError(extraction_failed)", async () => {
+  test("near-empty markdown (< 200 chars) -> WebFetchError(fetch_blocked)", async () => {
     // JS-only SPA shell / anti-bot challenge / blank doc — Firecrawl
-    // returns markdown but well below the MIN_MARKDOWN_CHARS floor.
+    // returns markdown but well below the MIN_MARKDOWN_CHARS floor. The site
+    // was never actually read, so this must NOT surface as extraction_failed
+    // (which means "read it, fields missing") — see fetch_blocked above.
     const firecrawl = makeFakeFirecrawl(async () => ({
       markdown: "# Loading\n\nEnable JavaScript.",
       metadata: { sourceURL: "https://spa.example/", statusCode: 200 },
@@ -146,7 +154,7 @@ describe("extractBusinessFactsFromUrl (markdown-extractor)", () => {
         }),
       (err: unknown) =>
         err instanceof WebFetchError &&
-        err.reason === "extraction_failed" &&
+        err.reason === "fetch_blocked" &&
         err.message.includes("empty_content"),
     );
   });

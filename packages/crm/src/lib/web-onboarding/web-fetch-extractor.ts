@@ -40,6 +40,7 @@ import { parseExtraction } from "./extraction-parser";
 
 export type WebFetchErrorReason =
   | "extraction_failed"
+  | "fetch_blocked"
   | "credits_exhausted"
   | "anthropic_unauthorized"
   | "internal_error";

@@ -236,8 +236,16 @@ export async function extractBusinessFactsFromUrl(params: {
         "FIRECRAWL_API_KEY not set on this deployment",
       );
     }
+    // 2026-08-26 — persona-loop finding: this used to throw "extraction_failed"
+    // (the SAME reason as "we read the page but it's missing a business
+    // name/location/phone"), which made run-create-from-url.ts's honesty-fix
+    // copy ("We read that site but couldn't find the basics we need...")
+    // literally false here — Firecrawl never got real content back (blocked
+    // by anti-bot/login-wall, e.g. a Facebook-only business page; timed out;
+    // rate-limited; or returned a blank/JS-shell doc). Distinct reason so the
+    // caller can tell "never read it" apart from "read it, fields missing."
     throw new WebFetchError(
-      "extraction_failed",
+      "fetch_blocked",
       `Firecrawl fetch failed: ${scrape.reason}${
         scrape.detail ? `: ${scrape.detail}` : ""
       }`,

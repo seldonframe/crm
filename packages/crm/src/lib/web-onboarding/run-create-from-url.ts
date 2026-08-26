@@ -282,6 +282,14 @@ export async function runCreateFromUrl(input: RunInput): Promise<RunResult> {
         // succeed until credits are added. Remaining reasons
         // (anthropic_unauthorized, internal_error) are untouched — those ARE
         // sometimes transient.
+        // 2026-08-26 — persona-loop finding: "fetch_blocked" (Firecrawl never
+        // got real content — anti-bot/login-wall, timeout, rate-limit, or a
+        // blank/JS-shell doc; e.g. a Facebook-only business page) used to be
+        // folded into extraction_failed and inherited the "We read that
+        // site..." copy above, which is false when the site was never read.
+        // Distinct, honest copy — and unlike extraction_failed this genuinely
+        // can succeed on retry (Firecrawl's proxy strategy varies per call),
+        // so the UI's default "Try again" affordance is left in place.
         sse.error(
           422,
           reason === "extraction_failed"
@@ -292,7 +300,13 @@ export async function runCreateFromUrl(input: RunInput): Promise<RunResult> {
               }
             : reason === "credits_exhausted"
               ? { reason, message: CREDITS_EXHAUSTED_UI_MESSAGE }
-              : { reason },
+              : reason === "fetch_blocked"
+                ? {
+                    reason,
+                    message:
+                      "We couldn't load that page to read it — it may be blocking automated visits (common for Facebook-only business pages) or briefly unreachable. Try again in a moment, paste a different URL, or describe your business instead.",
+                  }
+                : { reason },
         );
         sse.close();
         return;

@@ -235,6 +235,21 @@ describe("runCreateFromUrl", () => {
     assert.match(text, /event: error\n.*"code":422.*"reason":"anthropic_unauthorized"/);
     assert.ok(!text.includes('"message"'), "non-extraction_failed reasons must not carry a message");
   });
+
+  // 2026-08-26 — persona-loop finding: fetch_blocked is what Firecrawl
+  // throws when it never got real page content (anti-bot/login-wall,
+  // timeout, rate-limit, blank/JS-shell doc — e.g. a Facebook-only business
+  // page). Unlike extraction_failed, the site was never read, so the 422
+  // payload must NOT claim "We read that site..." — and unlike
+  // extraction_failed this genuinely can succeed on retry, so it must not
+  // be worded as a dead end.
+  test("fetch_blocked 422 carries an honest message that never claims the site was read", async () => {
+    const deps = { ...baseDeps(), extractBusinessFactsFromUrl: async () => { const e = new Error("Cloudflare challenge: status 403"); (e as any).reason = "fetch_blocked"; (e as any).name = "WebFetchError"; throw e; } };
+    const sse = await runCreateFromUrl({ deps, body: { url: "https://x.com" }, sessionUser: { id: "u1", primaryOrgId: "o1" } });
+    const text = await readAll(sse.stream);
+    assert.match(text, /event: error\n.*"code":422.*"reason":"fetch_blocked".*"message":"/);
+    assert.ok(!text.includes("We read that site"), "must not claim to have read a site it never fetched");
+  });
 });
 
 // 2026-06-23 — Deploy-CTA → instantiate-the-clicked-agent wiring. The
