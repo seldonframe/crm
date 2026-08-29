@@ -35,11 +35,19 @@ class FakeEventSource {
     if (!list) return;
     this.listeners[event] = list.filter((l) => l !== fn);
   }
+  onerror: (() => void) | null = null;
   close() {
     this.closed = true;
   }
   fire(event: string, data: unknown) {
     for (const fn of this.listeners[event] ?? []) fn({ data: JSON.stringify(data) });
+  }
+  /** Simulates a native EventSource connection-level failure (dropped
+   *  network, backgrounded tab) — distinct from a named "error" SSE event
+   *  fired via `fire("error", ...)`, which requires the server to still be
+   *  connected and able to emit it. */
+  fireNativeError() {
+    this.onerror?.();
   }
 }
 
@@ -104,6 +112,24 @@ describe("TryClient — SSE error honesty", () => {
     assert.ok(
       screen.queryAllByText("Try again").length > 0,
       "transient errors keep the retry affordance",
+    );
+  });
+
+  test("native connection drop closes the stream and shows a retryable error instead of silently reconnecting", async () => {
+    render(<TryClient initialUrl="" />);
+    await act(async () => {
+      submitUrl("https://acme.com");
+    });
+
+    const es = FakeEventSource.last!;
+    await act(async () => {
+      es.fireNativeError();
+    });
+
+    assert.ok(es.closed, "EventSource must be closed so the browser doesn't auto-reconnect and restart the build");
+    assert.ok(
+      screen.queryAllByText("Lost connection while building. Check your connection and try again.").length > 0,
+      "connection-level failure must surface an honest, retryable error instead of leaving the build animation stuck",
     );
   });
 });

@@ -167,6 +167,23 @@ export function TryClient({ initialUrl }: { initialUrl: string }) {
       );
       setPhase("error");
     });
+
+    // Native connection-level failure (dropped mobile network, backgrounded
+    // tab, etc.) — distinct from the named "error" SSE event above, which
+    // only fires when the SERVER is still connected and explicitly reports a
+    // failure. Left unhandled, the browser's default EventSource behavior is
+    // to silently auto-reconnect by re-issuing this same GET, which restarts
+    // runAnonymousBuild from scratch — a second full (uncached, unguarded)
+    // workspace build with no idempotency check server-side — while the UI
+    // keeps showing "building" with no indication anything went wrong. Close
+    // instead of letting the platform retry, and surface an honest, retryable
+    // error state.
+    es.onerror = () => {
+      es.close();
+      setEventSource(null);
+      setError("Lost connection while building. Check your connection and try again.");
+      setPhase("error");
+    };
   }
 
   // Auto-submit when the hero passed ?url= directly (mirrors clients-new-form's
