@@ -99,6 +99,16 @@ export function TryClient({ initialUrl }: { initialUrl: string }) {
   // anthropic-error-map.ts) — a "Try again" button would be a lie. The
   // server's `message` explains it; we just suppress the retry affordance.
   const [creditsExhausted, setCreditsExhausted] = useState(false);
+  // 2026-08-31 — invalid-url dead-end fix. code:"invalid_url" (route.ts's
+  // assertPublicHttpUrl catch — unresolvable domain, blocked scheme/port,
+  // etc.) is exactly as non-retryable as extraction_failed/credits_exhausted
+  // above: the same URL will fail identically forever. Unlike those two,
+  // this one fell into the default "Try again" branch below, which
+  // resubmits the UNEDITABLE broken string (the idle-only <form> is
+  // unmounted once phase is "error") — so a visitor who typo'd their own
+  // domain saw "double-check it and try again" with no way to actually
+  // edit it. See reset()'s "Edit URL" affordance below.
+  const [invalidUrl, setInvalidUrl] = useState(false);
   const esRef = useRef<EventSource | null>(null);
   const autoSubmittedRef = useRef(false);
 
@@ -159,6 +169,7 @@ export function TryClient({ initialUrl }: { initialUrl: string }) {
       setRateLimited(data.code === "rate_limited");
       setExtractionFailed(isExtractionFailed);
       setCreditsExhausted(data.reason === "credits_exhausted");
+      setInvalidUrl(data.code === "invalid_url" || data.reason === "invalid_url");
       setError(
         data.message ??
           (isExtractionFailed
@@ -190,6 +201,7 @@ export function TryClient({ initialUrl }: { initialUrl: string }) {
     setRateLimited(false);
     setExtractionFailed(false);
     setCreditsExhausted(false);
+    setInvalidUrl(false);
     setBuildInput(null);
   }
 
@@ -376,6 +388,19 @@ export function TryClient({ initialUrl }: { initialUrl: string }) {
                     className="mt-3 rounded-[11px] border border-[rgba(34,29,23,.16)] bg-[#FFFDFA] px-4 py-2 text-[13.5px] font-[500] text-[#221D17]"
                   >
                     Back
+                  </button>
+                ) : invalidUrl ? (
+                  // invalid_url (unresolvable domain, blocked scheme/port, etc.)
+                  // is a property of the URL itself — retrying it verbatim can't
+                  // succeed. reset() brings the idle <form> back with the same
+                  // value still in the input so the visitor can actually fix it,
+                  // instead of a "Try again" that resubmits the identical string.
+                  <button
+                    type="button"
+                    onClick={reset}
+                    className="mt-3 rounded-[11px] border border-[rgba(34,29,23,.16)] bg-[#FFFDFA] px-4 py-2 text-[13.5px] font-[500] text-[#221D17]"
+                  >
+                    Edit URL
                   </button>
                 ) : (
                   <button

@@ -87,6 +87,33 @@ describe("TryClient — SSE error honesty", () => {
     );
   });
 
+  test("invalid_url error shows an 'Edit URL' button (not 'Try again') and returns to an editable form", async () => {
+    render(<TryClient initialUrl="" />);
+    await act(async () => {
+      submitUrl("https://typo-domain-that-does-not-resolve.example");
+    });
+
+    const message = "That URL can't be reached — double-check it and try again.";
+    await act(async () => {
+      FakeEventSource.last!.fire("error", { code: "invalid_url", message });
+    });
+
+    assert.ok(screen.queryAllByText(message).length > 0, "honest server message must be shown");
+    assert.equal(
+      screen.queryAllByText("Try again").length,
+      0,
+      "invalid_url is non-retryable for the same string — no Try again button",
+    );
+    const editButton = screen.getByText("Edit URL");
+    await act(async () => {
+      fireEvent.click(editButton);
+    });
+    assert.ok(
+      screen.getByLabelText("Your website URL"),
+      "clicking Edit URL must bring back the editable input, not a dead end",
+    );
+  });
+
   test("internal_error still shows the generic copy WITH a 'Try again' button", async () => {
     render(<TryClient initialUrl="" />);
     await act(async () => {
