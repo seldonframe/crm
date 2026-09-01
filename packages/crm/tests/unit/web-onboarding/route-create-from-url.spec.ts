@@ -235,6 +235,23 @@ describe("runCreateFromUrl", () => {
     assert.match(text, /event: error\n.*"code":422.*"reason":"anthropic_unauthorized"/);
     assert.ok(!text.includes('"message"'), "non-extraction_failed reasons must not carry a message");
   });
+
+  // 2026-09-01 — persona-loop finding. fetch_blocked means the scrape never
+  // reached the page (network error, timeout, anti-bot block — e.g. a
+  // facebook.com business page, a common "website" for a solo trade
+  // business). Unlike extraction_failed/credits_exhausted, this is often
+  // transient, so the message must stay honest ("didn't load", not "we
+  // read that site") AND must NOT be tagged extraction_failed/
+  // credits_exhausted (both of which suppress the retry affordance on the
+  // /try client — see try-client.tsx's error branch).
+  test("fetch_blocked 422 carries an honest, retryable `message`", async () => {
+    const deps = { ...baseDeps(), extractBusinessFactsFromUrl: async () => { const e = new Error("Cloudflare challenge: status 403"); (e as any).reason = "fetch_blocked"; (e as any).name = "WebFetchError"; throw e; } };
+    const sse = await runCreateFromUrl({ deps, body: { url: "https://x.com" }, sessionUser: { id: "u1", primaryOrgId: "o1" } });
+    const text = await readAll(sse.stream);
+    assert.match(text, /event: error\n.*"code":422.*"reason":"fetch_blocked".*"message":"/);
+    assert.match(text, /didn't load/i, "the message must say the site didn't load, not that it lacked info");
+    assert.doesNotMatch(text, /we read that site/i, "must not falsely claim the site was read");
+  });
 });
 
 // 2026-06-23 — Deploy-CTA → instantiate-the-clicked-agent wiring. The
