@@ -15,7 +15,7 @@ export function EmbeddableWidget({
       <div className="overflow-hidden rounded-xl border border-[hsl(var(--border))] bg-[hsl(var(--card))]">
         <iframe src={iframeSrc} title={title ?? "Embeddable widget"} className="h-[640px] w-full" loading="lazy" />
       </div>
-      <PoweredByBadge removeBranding={removeBranding} />
+      <PoweredByBadge removeBranding={removeBranding} source="embed_widget" />
     </section>
   );
 }

@@ -124,10 +124,10 @@ function renderFooter(req: OperatorMagicLinkEmailRequest): string {
     const safeBrand = escapeHtml(req.brandName);
     const supportUrl = req.supportUrl
       ? escapeHtml(req.supportUrl)
-      : "https://seldonframe.com";
+      : "https://seldonframe.com?utm_source=email&utm_medium=magic_link_footer";
     return `<p style="margin:16px 0 0;color:#999;font-size:12px;">${safeWorkspace} on ${safeBrand} · <a href="${supportUrl}" style="color:#666;">${escapeHtml(req.supportUrl ?? "")}</a></p>`;
   }
-  return `<p style="margin:16px 0 0;color:#999;font-size:12px;">${safeWorkspace} on SeldonFrame · <a href="https://seldonframe.com" style="color:#666;">seldonframe.com</a></p>`;
+  return `<p style="margin:16px 0 0;color:#999;font-size:12px;">${safeWorkspace} on SeldonFrame · <a href="https://seldonframe.com?utm_source=email&utm_medium=magic_link_footer" style="color:#666;">seldonframe.com</a></p>`;
 }
 
 export function renderOperatorMagicLinkEmailText(

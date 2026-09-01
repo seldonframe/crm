@@ -93,7 +93,7 @@ export default async function CustomerApprovalPage({
           {(showBadge || isTestMode) ? (
             <div className="flex flex-col items-center gap-2 pt-4">
               {isTestMode ? <TestModePublicBadge testMode={true} /> : null}
-              {showBadge ? <PoweredByBadge /> : null}
+              {showBadge ? <PoweredByBadge source="client_portal" /> : null}
             </div>
           ) : null}
         </div>
@@ -222,7 +222,7 @@ function DisabledShell() {
           you&apos;re expecting to act on a request, please contact the sender.
         </p>
         <div className="pt-4">
-          <PoweredByBadge />
+          <PoweredByBadge source="client_portal" />
         </div>
       </section>
     </main>

@@ -20,9 +20,12 @@ export type FunnelPropertyValue = string | number | boolean | null;
 export type FunnelEvent = {
   event: string;
   distinctId: string;
-  /** Flat properties, plus PostHog's nested $set for person-property writes. */
+  /** Flat properties, plus PostHog's nested $set / $set_once for
+   *  person-property writes ($set_once = first-touch attribution that a
+   *  later value must never overwrite). */
   properties: Record<string, FunnelPropertyValue> & {
     $set?: Record<string, FunnelPropertyValue>;
+    $set_once?: Record<string, FunnelPropertyValue>;
   };
 };
 
@@ -43,6 +46,16 @@ export type BuildSignedUpEventInput = {
    *  null, when unknown — keeps the property absent rather than noisy. */
   method?: string | null;
   email?: string | null;
+  /** 2026-08-23 — first-touch attribution parsed from the posthog-js
+   *  cookie by events.createUser (see lib/analytics/signup-attribution).
+   *  utm keys land BOTH flat on the event (event-level breakdowns) and
+   *  as $initial_* under $set_once (person-level first-touch that later
+   *  sessions can't overwrite). Absent/empty → no properties added. */
+  attribution?: {
+    initialUrl?: string | null;
+    initialReferrer?: string | null;
+    utm?: Record<string, string>;
+  } | null;
 };
 
 /**
@@ -70,6 +83,23 @@ export function buildSignedUpEvent(input: BuildSignedUpEventInput): FunnelEvent 
 
   if (input.email) {
     properties.$set = { email: input.email };
+  }
+
+  if (input.attribution) {
+    const setOnce: Record<string, FunnelPropertyValue> = {};
+    for (const [key, value] of Object.entries(input.attribution.utm ?? {})) {
+      properties[key] = value;
+      setOnce[`$initial_${key}`] = value;
+    }
+    if (input.attribution.initialReferrer) {
+      setOnce.$initial_referrer = input.attribution.initialReferrer;
+    }
+    if (input.attribution.initialUrl) {
+      setOnce.$initial_current_url = input.attribution.initialUrl;
+    }
+    if (Object.keys(setOnce).length > 0) {
+      properties.$set_once = setOnce;
+    }
   }
 
   return { event: "signed_up", distinctId, properties };
@@ -203,6 +233,34 @@ export function aliasOrgToUser(userId: string | null | undefined, orgId: string 
 
     void ph
       .aliasImmediate({ distinctId: trimmedUserId, alias: trimmedOrgId })
+      .catch(() => {
+        // Swallow — an alias failure must be invisible to the caller.
+      });
+  } catch {
+    // Never let an alias-construction bug reach the caller's request path.
+  }
+}
+
+/**
+ * 2026-08-23 — alias the ANONYMOUS browser distinct id (from the
+ * posthog-js cookie) to the new user id at signup time. The client-side
+ * identity bridge already merges these two persons — but only if the user
+ * survives to a bridge-mounted page (/clients/new, /dashboard, /pricing).
+ * Users who open the magic link elsewhere or drop before first paint stay
+ * split forever, which is exactly how the Aug-22 surge stayed
+ * unattributable. Same fire-and-forget posture as aliasOrgToUser.
+ */
+export function aliasAnonToUser(userId: string | null | undefined, anonDistinctId: string | null | undefined): void {
+  const trimmedUserId = userId?.trim();
+  const trimmedAnonId = anonDistinctId?.trim();
+  if (!trimmedUserId || !trimmedAnonId || trimmedUserId === trimmedAnonId) return;
+
+  try {
+    const ph = getPosthogClient();
+    if (!ph) return;
+
+    void ph
+      .aliasImmediate({ distinctId: trimmedUserId, alias: trimmedAnonId })
       .catch(() => {
         // Swallow — an alias failure must be invisible to the caller.
       });

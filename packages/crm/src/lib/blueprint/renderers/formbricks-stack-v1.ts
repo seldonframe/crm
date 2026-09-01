@@ -459,7 +459,7 @@ function renderFooter(
     </div>
   </div>
   <div class="sf-footer__bottom">
-    ${opts.removePoweredBy ? "" : `<p class="sf-footer__poweredby">Powered by <a href="https://seldonframe.com" target="_blank" rel="noopener noreferrer">SeldonFrame</a></p>`}
+    ${opts.removePoweredBy ? "" : `<p class="sf-footer__poweredby">Powered by <a href="https://seldonframe.com?utm_source=workspace_footer&utm_medium=badge" target="_blank" rel="noopener noreferrer">SeldonFrame</a></p>`}
   </div>
 </footer>`;
 }

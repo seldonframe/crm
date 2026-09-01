@@ -251,7 +251,7 @@ function renderSellBlock(): string {
         <div style="font-size:14px;color:#374151;line-height:1.55;margin-bottom:8px;">
           You didn't just get a workspace — you built an AI agent. List it on the SeldonFrame marketplace and earn on every install or rental. You keep 95%; we take a sliver only when it sells.
         </div>
-        <a href="https://seldonframe.com/marketplace" style="color:#1a73e8;text-decoration:none;font-size:13px;font-weight:600;">Browse the marketplace →</a>
+        <a href="https://seldonframe.com/marketplace?utm_source=email&utm_medium=welcome&utm_campaign=marketplace" style="color:#1a73e8;text-decoration:none;font-size:13px;font-weight:600;">Browse the marketplace →</a>
       </td></tr>
     </table>
   </td></tr>`;
@@ -443,7 +443,7 @@ Next steps:
 Sell what you just built:
   You didn't just get a workspace — you built an AI agent. List it on the SeldonFrame
   marketplace and earn on every install or rental. You keep 95%; we take a sliver only
-  when it sells. https://seldonframe.com/marketplace
+  when it sells. https://seldonframe.com/marketplace?utm_source=email&utm_medium=welcome&utm_campaign=marketplace
 ${renderUpgradeBlockText(req)}
 ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 Join the SeldonFrame builder community on Discord:
