@@ -108,7 +108,14 @@ describe("extractBusinessFactsFromUrl (markdown-extractor)", () => {
     assert.ok(userMsg.includes("URL: https://acme.com"), "URL in user message");
   });
 
-  test("Firecrawl throws -> WebFetchError(extraction_failed) with 'Firecrawl fetch failed' prefix", async () => {
+  // 2026-09-01 — persona-loop finding. A Firecrawl throw means the scrape
+  // never reached the page at all (network error, anti-bot block — e.g. a
+  // facebook.com business page, a common "website" for a solo trade
+  // business with no real site). That must NOT collapse into
+  // extraction_failed: the UI's extraction_failed copy claims "we read
+  // that site" (false here) and hides the retry button on what is often a
+  // transient failure. See markdown-extractor.ts's `!scrape.ok` branch.
+  test("Firecrawl throws -> WebFetchError(fetch_blocked) with 'Firecrawl fetch failed' prefix", async () => {
     const firecrawl = makeFakeFirecrawl(async () => {
       throw new Error("Cloudflare challenge: status 403");
     });
@@ -123,8 +130,25 @@ describe("extractBusinessFactsFromUrl (markdown-extractor)", () => {
         }),
       (err: unknown) =>
         err instanceof WebFetchError &&
-        err.reason === "extraction_failed" &&
+        err.reason === "fetch_blocked" &&
         err.message.includes("Firecrawl fetch failed: fetch_failed"),
+    );
+  });
+
+  test("Firecrawl times out -> WebFetchError(fetch_blocked), same branch as fetch_failed", async () => {
+    const firecrawl = makeFakeFirecrawl(async () => {
+      throw new Error("Request timed out after 45000ms");
+    });
+    const { client } = makeFakeAnthropic({ content: [{ type: "text", text: "{}" }] });
+    await assert.rejects(
+      () =>
+        extractBusinessFactsFromUrl({
+          url: "https://acme.com/slow",
+          byokKey: "sk-ant-test",
+          firecrawlClient: firecrawl,
+          anthropicClient: client,
+        }),
+      (err: unknown) => err instanceof WebFetchError && err.reason === "fetch_blocked",
     );
   });
 

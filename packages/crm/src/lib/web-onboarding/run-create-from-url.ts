@@ -282,6 +282,13 @@ export async function runCreateFromUrl(input: RunInput): Promise<RunResult> {
         // succeed until credits are added. Remaining reasons
         // (anthropic_unauthorized, internal_error) are untouched — those ARE
         // sometimes transient.
+        // 2026-09-01 — persona-loop finding. fetch_blocked means the scraper
+        // never reached the page (network error, timeout, anti-bot block —
+        // e.g. facebook.com business pages, a common "website" for a solo
+        // trade business). Unlike extraction_failed it's often transient, so
+        // this message stays retryable (falls through to the default `Try
+        // again` UI) instead of borrowing the "couldn't find the basics"
+        // copy, which would falsely claim we read a page we never reached.
         sse.error(
           422,
           reason === "extraction_failed"
@@ -292,7 +299,13 @@ export async function runCreateFromUrl(input: RunInput): Promise<RunResult> {
               }
             : reason === "credits_exhausted"
               ? { reason, message: CREDITS_EXHAUSTED_UI_MESSAGE }
-              : { reason },
+              : reason === "fetch_blocked"
+                ? {
+                    reason,
+                    message:
+                      "That site didn't load for us just now — it may be blocking automated visits, or it timed out. Try again in a moment.",
+                  }
+                : { reason },
         );
         sse.close();
         return;

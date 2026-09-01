@@ -236,6 +236,28 @@ export async function extractBusinessFactsFromUrl(params: {
         "FIRECRAWL_API_KEY not set on this deployment",
       );
     }
+    // 2026-09-01 — persona-loop finding. fetch_failed/timeout/rate_limited
+    // mean the scrape never reached the page (network error, anti-bot
+    // block, upstream timeout) — most commonly hit on facebook.com
+    // business pages, a common "website" for a solo trade business with
+    // no real site of their own. That's a different failure than
+    // empty_content (page loaded, had nothing on it): here we never read
+    // the page, so it must NOT be reported as "we read that site but
+    // couldn't find X" (a false claim) or treated as permanent (a
+    // network hiccup or a temporary anti-bot challenge can succeed on
+    // retry, unlike a genuinely info-less site).
+    if (
+      scrape.reason === "fetch_failed" ||
+      scrape.reason === "timeout" ||
+      scrape.reason === "rate_limited"
+    ) {
+      throw new WebFetchError(
+        "fetch_blocked",
+        `Firecrawl fetch failed: ${scrape.reason}${
+          scrape.detail ? `: ${scrape.detail}` : ""
+        }`,
+      );
+    }
     throw new WebFetchError(
       "extraction_failed",
       `Firecrawl fetch failed: ${scrape.reason}${

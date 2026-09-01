@@ -40,6 +40,15 @@ import { parseExtraction } from "./extraction-parser";
 
 export type WebFetchErrorReason =
   | "extraction_failed"
+  // 2026-09-01 — persona-loop finding. The scraper never reached the page
+  // at all (network error, timeout, rate-limited, anti-bot block — e.g.
+  // facebook.com business pages, which is a common "website" for a solo
+  // trade business with no real site). Was previously collapsed into
+  // extraction_failed, so the UI told the visitor "we read that site but
+  // couldn't find [it]" for a site we never actually read, and hid the
+  // retry button on a transient failure that might well succeed on a
+  // second try. See markdown-extractor.ts's `!scrape.ok` branch.
+  | "fetch_blocked"
   | "credits_exhausted"
   | "anthropic_unauthorized"
   | "internal_error";
