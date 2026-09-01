@@ -205,7 +205,7 @@ export default async function PublicBookingPage({
         {(showBadge || isTestMode) ? (
           <div className="flex flex-col items-center gap-2 py-3">
             {isTestMode ? <TestModePublicBadge testMode={true} /> : null}
-            {showBadge ? <PoweredByBadge /> : null}
+            {showBadge ? <PoweredByBadge source="booking_page" /> : null}
           </div>
         ) : null}
       </div>

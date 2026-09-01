@@ -20,6 +20,7 @@ export function buildPoweredByHref(workspaceId: string): string {
   const url = new URL("https://www.seldonframe.com/build");
   url.searchParams.set("ref", workspaceId);
   url.searchParams.set("utm_source", "powered_by");
+  url.searchParams.set("utm_medium", "workspace_badge");
   return url.toString();
 }
 
