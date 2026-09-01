@@ -406,6 +406,18 @@ export function MarketingHero({
             aria-label="Describe the business"
             className="block max-h-60 min-h-[110px] w-full resize-none border-0 bg-transparent font-sans text-[15px] leading-[1.55] tracking-[-0.005em] text-[#221D17] caret-[#1F2B24] outline-none placeholder:text-[#9A9183]"
           />
+          {/* persona-loop 2026-08-24: the url tab builds instantly with no
+              account (routes to /try); this tab silently lands on /signup
+              instead (hero-submit-target.ts — description builds aren't
+              wired to a public anonymous route). Without this line the
+              visitor sees an identical "Build workspace" button on both
+              tabs, then gets dropped on a generic signup screen with no
+              context — reads as a bait-and-switch paywall, not the free
+              account it actually is. Root-cause note, not a route change. */}
+          <p className="pb-1 text-[12px] text-[#9A9183]">
+            No website? We&apos;ll ask you to create a free account (no card) first — or switch to
+            &ldquo;Paste a URL&rdquo; for an instant preview with no signup.
+          </p>
         </div>
 
         {/* Bottom action row */}
