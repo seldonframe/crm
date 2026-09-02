@@ -39,6 +39,7 @@
 // safety line (a standard Stripe subscription, cancelable from the
 // billing portal).
 
+import type { Metadata } from "next";
 import {
   Accordion,
   AccordionContent,
@@ -55,6 +56,25 @@ import { MarketingFooter } from "@/components/landing/marketing-footer";
 import { normalizePaidPlan } from "@/lib/auth/pricing-continuity";
 import { AnalyticsIdentityBridge } from "@/components/analytics/analytics-identity-bridge";
 import { AGENCY_PRICING_CLAIM, BUILDER_PRICING_CLAIM } from "@/lib/marketing/public-claims";
+
+// persona-loop finding (2026-09-02): this route had no metadata export, so
+// Next.js fell back to the root layout's <title>/OG tags — SeldonFrame's own
+// homepage copy ("Sell AI front offices. Deploy them in minutes.") — on the
+// one page whose entire purpose is answering "what does this cost me." Same
+// root cause already fixed for the booking and intake-form pages
+// (app/book/[orgSlug]/[bookingSlug]/page.tsx, app/forms/[id]/[formSlug]/
+// page.tsx) — mirrored here. Static export (not generateMetadata): this
+// page has no per-org dynamic content, so a fixed title/description covers
+// both SF_TIER_LADDER branches.
+export const metadata: Metadata = {
+  title: "Pricing — SeldonFrame",
+  description: `${BUILDER_PRICING_CLAIM} ${AGENCY_PRICING_CLAIM}`,
+  openGraph: {
+    title: "Pricing — SeldonFrame",
+    description: `${BUILDER_PRICING_CLAIM} ${AGENCY_PRICING_CLAIM}`,
+    type: "website",
+  },
+};
 
 // 2026-07-08 hydration-mismatch fix — "No price id lives in the client"
 // (the rule the legacy single card in pricing-shell.tsx already followed).
